@@ -1,0 +1,5 @@
+accessWidener v1 named
+
+extendable method net/minecraft/client/particle/ParticleManager registerDefaultFactories ()V
+mutable field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;
+accessible field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;

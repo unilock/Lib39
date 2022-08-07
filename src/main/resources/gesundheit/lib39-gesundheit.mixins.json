@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.gesundheit.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-gesundheit-refmap.json",
+	"plugin": "com.unascribed.lib39.gesundheit.Lib39GesundheitMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

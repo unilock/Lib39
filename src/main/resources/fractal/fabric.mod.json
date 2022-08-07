@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "lib39-fractal",
+	"version": "${version}",
+	"name": "Lib39 (Fractal)",
+	"description": "Adds item subgroups.",
+	"authors": [ "unascribed" ],
+	"contact": {
+		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Fractal",
+		"sources": "https://git.sleeping.town/unascribed/Lib39",
+		"issues": "https://git.sleeping.town/unascribed/Lib39/issues",
+		"discord": "https://discord.gg/8WBauq2eYK",
+		"matrix": "https://matrix.to/#/#unascribed:sleeping.town"
+	},
+	"license": "MIT",
+	"icon": "lib39.png",
+	"environment": "*",
+	"entrypoints": {
+		"emi": [ "com.unascribed.lib39.fractal.Lib39FractalEMIPlugin" ],
+		"rei_client": [ "com.unascribed.lib39.fractal.Lib39FractalREIPlugin" ],
+		"jei_mod_plugin": [ "com.unascribed.lib39.fractal.Lib39FractalJEIPlugin" ]
+	},
+	"mixins": [ "lib39-fractal.mixins.json" ],
+	"depends": {
+		"fabricloader": ">=0.7.4",
+		"fabric-resource-loader-v0": "*",
+		"minecraft": "^1.19",
+		"lib39": "^${version}"
+	},
+	"custom": {
+		"modmenu": {
+			"badges": ["library"],
+			"parent": "lib39"
+		}
+	}
+}

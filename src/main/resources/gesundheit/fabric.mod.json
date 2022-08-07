@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "lib39-gesundheit",
+	"version": "${version}",
+	"name": "Lib39 (Gesundheit)",
+	"description": "Adds a GUI particle system.",
+	"authors": [ "unascribed" ],
+	"contact": {
+		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Gesundheit",
+		"sources": "https://git.sleeping.town/unascribed/Lib39",
+		"issues": "https://git.sleeping.town/unascribed/Lib39/issues",
+		"discord": "https://discord.gg/8WBauq2eYK",
+		"matrix": "https://matrix.to/#/#unascribed:sleeping.town"
+	},
+	"license": "MIT",
+	"icon": "lib39.png",
+	"environment": "*",
+	"mixins": [ "lib39-gesundheit.mixins.json" ],
+	"depends": {
+		"fabricloader": ">=0.7.4",
+		"minecraft": "^1.19",
+		"lib39": "^${version}"
+	},
+	"custom": {
+		"modmenu": {
+			"badges": ["library"],
+			"parent": "lib39"
+		}
+	}
+}
