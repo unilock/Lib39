@@ -2,9 +2,13 @@ package com.unascribed.lib39.core.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -75,37 +79,60 @@ public class AutoMixin implements IMixinConfigPlugin {
 	public List<String> getMixins() {
 		List<String> rtrn = Lists.newArrayList();
 		int skipped = 0;
-		try (ZipFile zip = new ZipFile(new File(getJarURL(getClass().getProtectionDomain().getCodeSource().getLocation()).toURI()))) {
-			outer: for (var en : Collections.list(zip.entries())) {
-				if (en.getName().endsWith(".class") && en.getName().startsWith(pkg.replace('.', '/')+"/")) {
-					String name = en.getName().replace('/', '.').replace(".class", "");
-					// we want nothing to do with inner classes and the like
-					if (name.contains("$")) continue;
-					try {
-						ClassReader cr = new ClassReader(zip.getInputStream(en));
-						ClassNode cn = new ClassNode();
-						cr.accept(cn, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-						if (cn.invisibleAnnotations != null) {
-							for (AnnotationNode an : cn.invisibleAnnotations) {
-								if (shouldAnnotationSkipMixin(name, an)) {
-									skipped++;
-									continue outer;
-								}
-							}
+		try {
+			URI uri = getJarURL(getClass().getProtectionDomain().getCodeSource().getLocation()).toURI();
+			File f = new File(uri);
+			if (f.isDirectory()) {
+				Path base = f.toPath();
+				for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
+					if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+						skipped++;
+					}
+				}
+			} else {
+				try (ZipFile zip = new ZipFile(f)) {
+					for (var en : Collections.list(zip.entries())) {
+						if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
+							skipped++;
 						}
-						rtrn.add(name.substring(pkg.length()+1));
-					} catch (IOException e) {
-						Lib39Log.warn("Exception while trying to read {}", name, e);
 					}
 				}
 			}
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot autodiscover mixins for "+pkg, e);
 		} catch (URISyntaxException e) {
 			throw new AssertionError(e);
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot autodiscover mixins for "+pkg, e);
 		}
 		Lib39Log.info("Discovered {} mixins in {} (skipped {})", rtrn.size(), pkg, skipped);
 		return rtrn;
+	}
+
+	private interface StreamOpener {
+		InputStream openStream() throws IOException;
+	}
+	
+	private boolean discover(List<String> li, String path, StreamOpener opener) throws IOException {
+		if (path.endsWith(".class") && path.startsWith(pkg.replace('.', '/')+"/")) {
+			String name = path.replace('/', '.').replace(".class", "");
+			// we want nothing to do with inner classes and the like
+			if (name.contains("$")) return false;
+			try {
+				ClassReader cr = new ClassReader(opener.openStream());
+				ClassNode cn = new ClassNode();
+				cr.accept(cn, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+				if (cn.invisibleAnnotations != null) {
+					for (AnnotationNode an : cn.invisibleAnnotations) {
+						if (shouldAnnotationSkipMixin(name, an)) {
+							return true;
+						}
+					}
+				}
+				li.add(name.substring(pkg.length()+1));
+			} catch (IOException e) {
+				Lib39Log.warn("Exception while trying to read {}", name, e);
+			}
+		}
+		return false;
 	}
 
 	@Override

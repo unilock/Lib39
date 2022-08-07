@@ -19,12 +19,18 @@
 	"depends": {
 		"fabricloader": ">=0.7.4",
 		"minecraft": "^1.19",
-		"lib39": "^${version}"
+		"lib39-core": "^${version}"
 	},
 	"custom": {
 		"modmenu": {
 			"badges": ["library"],
-			"parent": "lib39"
+			"parent": {
+				"id": "lib39",
+				"name": "Lib39",
+				"description": "A library of useful tidbits originating in Yttr.",
+				"badges": ["library"],
+				"icon": "lib39.png"
+			}
 		}
 	}
 }

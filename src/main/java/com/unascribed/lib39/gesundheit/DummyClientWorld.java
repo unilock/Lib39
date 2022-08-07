@@ -6,12 +6,10 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.ParticleEffect;
-import net.minecraft.util.Holder;
-import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionTypes;
 
 public class DummyClientWorld extends ClientWorld {
 
@@ -20,7 +18,9 @@ public class DummyClientWorld extends ClientWorld {
 	private DummyClientWorld() throws Exception {
 		super(UnsafeAllocator.create().newInstance(ClientPlayNetworkHandler.class),
 				new Properties(Difficulty.PEACEFUL, false, false), World.NETHER,
-				Holder.Reference.create(BuiltinRegistries.DIMENSION_TYPE, DimensionTypes.THE_NETHER), 0, 0, MinecraftClient.getInstance()::getProfiler,
+				MinecraftClient.getInstance().world.getRegistryManager().get(Registry.DIMENSION_TYPE_KEY)
+					.getHolderOrThrow(MinecraftClient.getInstance().world.method_44013()),
+				0, 0, MinecraftClient.getInstance()::getProfiler,
 				MinecraftClient.getInstance().worldRenderer,
 				false, 133742069);
 	}

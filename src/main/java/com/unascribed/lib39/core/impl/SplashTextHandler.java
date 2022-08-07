@@ -2,7 +2,9 @@ package com.unascribed.lib39.core.impl;
 
 import java.time.MonthDay;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -18,6 +20,7 @@ public class SplashTextHandler {
 	private static final ListMultimap<MonthDay, String> temporals = ArrayListMultimap.create();
 	private static final List<Supplier<String>> dynamics = new ArrayList<>();
 	private static final List<String> removals = new ArrayList<>();
+	private static final Map<String, String> replacements = new HashMap<>();
 	
 	private static final Set<String> necessarySplashes = Set.of(
 			"4876b3073f7da15ac4a688e9a9f9fcb5f1e29f1e701376f32faa49510115f1a8",
@@ -44,14 +47,22 @@ public class SplashTextHandler {
 
 	public static void remove(String text) {
 		if (necessarySplashes.contains(Hashing.sha256().hashString(text+"2ab4850e297d889e", Charsets.UTF_8).toString())) {
-			throw new IllegalArgumentException("lib39 will not help you remove this splash.");
+			throw new IllegalArgumentException("Lib39 will not help you remove this splash.");
+		}
+		removals.add(text);
+	}
+
+	public static void replace(String text, String replacement) {
+		if (necessarySplashes.contains(Hashing.sha256().hashString(text+"2ab4850e297d889e", Charsets.UTF_8).toString())) {
+			throw new IllegalArgumentException("Lib39 will not help you remove this splash.");
 		}
 		removals.add(text);
 	}
 	
 	public static void modifyNormalSplashes(List<String> list) {
-		list.addAll(statics);
+		list.replaceAll(s -> replacements.getOrDefault(s, s));
 		list.removeAll(removals);
+		list.addAll(statics);
 	}
 	
 	public static String replaceSplash(int staticCount, String splash) {
@@ -60,9 +71,11 @@ public class SplashTextHandler {
 		if (!eligibleTemporals.isEmpty()) {
 			return eligibleTemporals.get(ThreadLocalRandom.current().nextInt(eligibleTemporals.size()));
 		}
-		int idx = ThreadLocalRandom.current().nextInt(staticCount+dynamics.size());
-		if (idx < dynamics.size()) {
-			return dynamics.get(idx).get();
+		if (!dynamics.isEmpty()) {
+			int idx = ThreadLocalRandom.current().nextInt(staticCount+dynamics.size());
+			if (idx < dynamics.size()) {
+				return dynamics.get(idx).get();
+			}
 		}
 		return splash;
 	}

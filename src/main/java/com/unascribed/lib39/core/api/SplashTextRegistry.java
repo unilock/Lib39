@@ -14,7 +14,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public final class SplashTextRegistry {
 	/**
-	 * Register a splash text that will always show up.
+	 * Register a splash text to add to the normal splash text pool.
 	 * <p>
 	 * You don't need an example for this one.
 	 *
@@ -22,6 +22,17 @@ public final class SplashTextRegistry {
 	 */
 	public static void registerStatic(String text) {
 		SplashTextHandler.registerStatic(text);
+	}
+	
+	/**
+	 * Register multiple splash texts to add to the normal splash text pool.
+	 * <p>
+	 * You don't need an example for this one.
+	 *
+	 * @param texts the splash texts to register
+	 */
+	public static void registerStatic(String... texts) {
+		for (String text : texts) registerStatic(text);
 	}
 	
 	/**
@@ -60,13 +71,24 @@ public final class SplashTextRegistry {
 	}
 	
 	/**
-	 * Remove a <b>vanilla</b> splash text from the game. Useful if you're adding a variant or
-	 * corrected version.
+	 * Remove a <b>vanilla</b> splash text from the game.
 	 * 
 	 * @param text the splash text to remove
 	 */
 	public static void remove(String text) {
 		SplashTextHandler.remove(text);
+	}
+	
+	/**
+	 * Replace a <b>vanilla</b> splash text with another one. Useful if you're adding a variant or
+	 * corrected version. Will not change the splash texts if the given splash does not exist, such
+	 * as if the splashes have been completely replaced by a resource pack.
+	 * 
+	 * @param text the splash text to replace
+	 * @param replacement the new splash text to add
+	 */
+	public static void replace(String text, String replacement) {
+		SplashTextHandler.replace(text, replacement);
 	}
 
 	private SplashTextRegistry() {}

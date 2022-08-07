@@ -11,6 +11,7 @@ plugins {
 	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.3'
 	id 'org.quiltmc.quilt-mappings-on-loom' version '4.2.0'
+	id 'maven-publish'
 }
 
 sourceCompatibility = JavaVersion.toVersion(17)
@@ -63,10 +64,10 @@ dependencies {
 		addLayer quiltMappings.mappings("org.quiltmc:quilt-mappings:${minecraft_version}+build.${mappings_version}:v2")
 	})
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
-	
+
 	modCompileOnly "dev.emi:emi:0.3.1+1.19"
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:9.1.520"
-	// the API jar doesn't remap properly
+	// the API jar doesn't get remapped by Loom because it doesn't have a fabric.mod.json
 	modCompileOnly("mezz.jei:jei-1.19.1-fabric:11.2.0.244") { transitive = false }
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
@@ -77,12 +78,35 @@ loom {
 	accessWidenerPath = file("src/main/resources/lib39.accesswidener")
 }
 
+java {
+	withSourcesJar()
+}
+
+tasks.validateAccessWidener {
+	enabled = false
+}
+
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
+	filesMatching("**/fabric.mod.json") {
 		expand "version": project.version
 	}
+}
+
+tasks.jar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all'
+}
+
+tasks.remapJar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all-remapped'
+}
+
+tasks.remapSourcesJar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all-sources-remapped'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -98,13 +122,101 @@ tasks.withType(AbstractArchiveTask) {
 	reproducibleFileOrder = true
 }
 
-task amendJar {
-	def amender = evaluate(file("JarAmender.groovy"))
+def amender = evaluate(file("JarAmender.groovy"))
+
+task splitRefmap {
 	dependsOn remapJar
 	doFirst {
 		amender(remapJar.archivePath)
 	}
 }
 
-tasks.remapJar.finalizedBy amendJar
+tasks.remapJar.finalizedBy splitRefmap
 
+def defineModule = { name, depModules ->
+	def Name = name.substring(0, 1).toUpperCase(Locale.ROOT)+name.substring(1)
+	def t = tasks.create(name+'Jar', Jar) {
+		dependsOn remapJar
+		classifier name
+		from(zipTree(remapJar.archivePath)) {
+			include 'META-INF/**'
+			include 'com/unascribed/lib39/'+name+'/**'
+			include name+'/**'
+			include 'lib39.png'
+			includeEmptyDirs = false
+			eachFile {
+				if (it.path.startsWith(name+"/")) {
+					it.path = it.path.substring(name.length()+1)
+				}
+			}
+		}
+	}
+	tasks.build.dependsOn t
+	t.finalizedBy(tasks.create('amend'+Name+'Jar') {
+		dependsOn t
+		doFirst {
+			amender(t.archivePath)
+		}
+	})
+	def srcT = tasks.create(name+'SourcesJar', Jar) {
+		dependsOn remapSourcesJar
+		classifier name+'-sources'
+		from(zipTree(remapSourcesJar.archivePath)) {
+			include 'META-INF/**'
+			include 'com/unascribed/lib39/'+name+'/**'
+			include name+'/**'
+			include 'lib39.png'
+			includeEmptyDirs = false
+			eachFile {
+				if (it.path.startsWith(name+"/")) {
+					it.path = it.path.substring(name.length()+1)
+				}
+			}
+		}
+	}
+
+	loom.disableDeprecatedPomGeneration(publishing.publications.create(name, MavenPublication) {
+		groupId 'com.unascribed'
+		artifactId 'lib39-'+name
+		version project.version
+		artifact(t.archivePath) {
+			classifier ''
+			builtBy t
+		}
+		artifact(srcT.archivePath) {
+			classifier 'sources'
+			builtBy srcT
+		}
+
+		pom.withXml { xml ->
+			def deps = xml.asNode().appendNode('dependencies')
+			depModules.each {
+				def dep = deps.appendNode('dependency')
+				def spec = ['com.unascribed', 'lib39-'+it, project.version]
+				if (it.contains(':')) {
+					spec = it.split(":")
+				}
+				if (spec[0] == 'fapi') {
+					spec[0] = 'net.fabricmc.fabric-api'
+					spec[2] = fabricApi.moduleVersion(spec[1], spec[2])
+				}
+				dep.appendNode('groupId', spec[0])
+				dep.appendNode('artifactId', spec[1])
+				dep.appendNode('version', spec[2])
+			}
+		}
+	})
+}
+
+defineModule 'core', []
+defineModule 'lockpick', ['core']
+defineModule 'gesundheit', ['core']
+defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+
+publishing {
+	repositories {
+		maven {
+			url 'file:build/tmp/testRepo'
+		}
+	}
+}

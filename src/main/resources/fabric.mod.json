@@ -1,0 +1,8 @@
+{
+	"schemaVersion": 1,
+	"id": "lib39-dummy",
+	"version": "${version}",
+	"name": "Lib39 Dummy",
+	"description": "A dummy FMJ so that Loom doesn't complain.",
+	"accessWidener": "lib39.accesswidener"
+}
