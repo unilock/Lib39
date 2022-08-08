@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "lib39-keygen",
+	"version": "${version}",
+	"name": "Lib39 (Keygen)",
+	"description": "Adds support for playing back tracker music in the XM, S3M, and MOD formats via IBXM2.",
+	"authors": [ "unascribed" ],
+	"contact": {
+		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Keygen",
+		"sources": "https://git.sleeping.town/unascribed/Lib39",
+		"issues": "https://git.sleeping.town/unascribed/Lib39/issues",
+		"discord": "https://discord.gg/8WBauq2eYK",
+		"matrix": "https://matrix.to/#/#unascribed:sleeping.town"
+	},
+	"license": "MIT",
+	"icon": "lib39.png",
+	"environment": "client",
+	"mixins": [ "lib39-keygen.mixins.json" ],
+	"depends": {
+		"fabricloader": ">=0.7.4",
+		"minecraft": "^1.19",
+		"lib39-core": "^${version}"
+	},
+	"custom": {
+		"modmenu": {
+			"badges": ["library"],
+			"parent": {
+				"id": "lib39",
+				"name": "Lib39",
+				"description": "A library of useful tidbits originating in Yttr.",
+				"badges": ["library"],
+				"icon": "lib39.png"
+			}
+		}
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.dessicant.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-dessicant-refmap.json",
+	"plugin": "com.unascribed.lib39.dessicant.Lib39DessicantMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

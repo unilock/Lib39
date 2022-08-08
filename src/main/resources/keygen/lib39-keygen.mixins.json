@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.keygen.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-keygen-refmap.json",
+	"plugin": "com.unascribed.lib39.keygen.Lib39KeygenMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
