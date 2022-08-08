@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.unascribed.lib39.core.api.util.DelegatingVertexConsumer;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticle;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticleManager;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
@@ -37,13 +36,6 @@ public class GuiParticleManager extends ParticleManager {
 	public GuiParticleManager(ClientWorld world, TextureManager textureManager) {
 		super(world, new UnregisterableTextureManager(textureManager));
 		this.particleAtlasTexture = MinecraftClient.getInstance().particleManager.particleAtlasTexture;
-	}
-	
-	@Override
-	protected void registerDefaultFactories() {
-		var pm = MinecraftClient.getInstance().particleManager;
-		((AccessorParticleManager)this).lib39Gesundheit$getFactories().putAll(((AccessorParticleManager)pm).lib39Gesundheit$getFactories());
-		((AccessorParticleManager)this).lib39Gesundheit$getSpriteAwareFactories().putAll(((AccessorParticleManager)pm).lib39Gesundheit$getSpriteAwareFactories());
 	}
 	
 	@Override

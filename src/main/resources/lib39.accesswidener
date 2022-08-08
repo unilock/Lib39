@@ -1,8 +1,7 @@
-accessWidener v1 named
+accessWidener v2 named
 
 accessible method lib39/DummyEntry gesundheit ()V
 
-extendable method net/minecraft/client/particle/ParticleManager registerDefaultFactories ()V
 mutable field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;
 accessible field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;
 

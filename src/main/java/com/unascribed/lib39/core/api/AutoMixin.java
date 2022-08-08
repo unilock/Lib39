@@ -103,7 +103,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot autodiscover mixins for "+pkg, e);
 		}
-		Lib39Log.info("Discovered {} mixins in {} (skipped {})", rtrn.size(), pkg, skipped);
+		Lib39Log.debug("Discovered {} mixins in {} (skipped {})", rtrn.size(), pkg, skipped);
 		return rtrn;
 	}
 

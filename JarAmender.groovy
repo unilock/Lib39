@@ -93,7 +93,7 @@ return {
 			while (m.find()) {
 				def mod = m.group(1)
 				def out = fs.getPath(mod+'/lib39-'+mod+'.accesswidener')
-				Files.write(out, ("accessWidener v1 intermediary\n"+m.group(2)).getBytes(StandardCharsets.UTF_8))
+				Files.write(out, ("accessWidener\tv2\tintermediary\n"+m.group(2)).getBytes(StandardCharsets.UTF_8))
 			}
 		}
 	} finally {

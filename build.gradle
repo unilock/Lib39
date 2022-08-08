@@ -212,6 +212,8 @@ defineModule 'core', []
 defineModule 'lockpick', ['core']
 defineModule 'gesundheit', ['core']
 defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+defineModule 'tunnel', ['core']
+defineModule 'phantom', ['core']
 
 publishing {
 	repositories {
