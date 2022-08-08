@@ -214,6 +214,12 @@ defineModule 'gesundheit', ['core']
 defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
 defineModule 'tunnel', ['core']
 defineModule 'phantom', ['core']
+defineModule 'waypoint', ['core',
+	"fapi:fabric-transitive-access-wideners-v1:${fabric_version}",
+	"fapi:fabric-lifecycle-events-v1:${fabric_version}",
+	"fapi:fabric-rendering-v1:${fabric_version}",
+	"fapi:fabric-resource-loader-v0:${fabric_version}"
+]
 
 publishing {
 	repositories {
