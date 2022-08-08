@@ -7,10 +7,18 @@ accessible field net/minecraft/client/particle/ParticleManager particleAtlasText
 
 accessible method lib39/DummyEntry end ()V
 
+
 accessible method lib39/DummyEntry waypoint ()V
 
 accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$DrawMode;IZZLnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;
+
+accessible method lib39/DummyEntry end ()V
+
+
+accessible method lib39/DummyEntry crowbar ()V
+
+accessible class net/minecraft/world/gen/surfacebuilder/SurfaceRules$SequenceMaterialRule
 
 accessible method lib39/DummyEntry end ()V

@@ -221,6 +221,8 @@ defineModule 'waypoint', ['core',
 	"fapi:fabric-resource-loader-v0:${fabric_version}"
 ]
 defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
+defineModule 'crowbar', ['core']
 
 publishing {
 	repositories {

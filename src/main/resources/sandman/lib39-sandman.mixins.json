@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.sandman.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-sandman-refmap.json",
+	"plugin": "com.unascribed.lib39.sandman.Lib39SandmanMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

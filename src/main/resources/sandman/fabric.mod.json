@@ -1,12 +1,12 @@
 {
 	"schemaVersion": 1,
-	"id": "lib39-weld",
+	"id": "lib39-sandman",
 	"version": "${version}",
-	"name": "Lib39 (Weld)",
-	"description": "Adds a \"big blocks\" system.",
+	"name": "Lib39 (Sandman)",
+	"description": "Allows making items that \"always tick\", even in inventories or on the ground.",
 	"authors": [ "unascribed" ],
 	"contact": {
-		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Weld",
+		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Sandman",
 		"sources": "https://git.sleeping.town/unascribed/Lib39",
 		"issues": "https://git.sleeping.town/unascribed/Lib39/issues",
 		"discord": "https://discord.gg/8WBauq2eYK",
@@ -15,15 +15,13 @@
 	"license": "MIT",
 	"icon": "lib39.png",
 	"environment": "*",
-	"mixins": [ "lib39-weld.mixins.json" ],
+	"mixins": [ "lib39-sandman.mixins.json" ],
 	"entrypoints": {
-		"main": ["com.unascribed.lib39.weld.Lib39Weld"],
-		"client": ["com.unascribed.lib39.weld.Lib39WeldClient"]
+		"main": ["com.unascribed.lib39.sandman.Lib39Sandman"]
 	},
 	"depends": {
 		"fabricloader": ">=0.7.4",
 		"minecraft": "^1.19",
-		"fabric-resource-loader-v0": "*",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

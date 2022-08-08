@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.crowbar.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-crowbar-refmap.json",
+	"plugin": "com.unascribed.lib39.crowbar.Lib39CrowbarMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
