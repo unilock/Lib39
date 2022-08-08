@@ -228,8 +228,17 @@ defineModule 'dessicant', ['core']
 
 publishing {
 	repositories {
+		if (project.hasProperty("publish-username")) {
+			maven {
+				url "https://repo-api.sleeping.town/"
+				credentials {
+					username project.getProperty("publish-username")
+					password project.getProperty("publish-password")
+				}
+			}
+		}
 		maven {
-			url 'file:build/tmp/testRepo'
+			url file('build/maven').toURI().toString()
 		}
 	}
 }
