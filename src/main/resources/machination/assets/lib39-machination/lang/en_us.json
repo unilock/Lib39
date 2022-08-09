@@ -1,0 +1,7 @@
+{
+	"emi.category.lib39.piston_smashing": "Piston Smashing",
+	"emi.category.lib39.soaking": "Soaking",
+	
+	"emi.category.lib39.piston_smashing.cloud_output_hint": "Use a Glass Bottle on the resulting cloud",
+	"emi.category.lib39.soaking.consumes_catalyst": "Consumes fluid"
+}

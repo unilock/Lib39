@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.machination.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-machination-refmap.json",
+	"plugin": "com.unascribed.lib39.machination.Lib39MachinationMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

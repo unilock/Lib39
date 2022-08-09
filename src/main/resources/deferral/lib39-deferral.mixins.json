@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.deferral.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-deferral-refmap.json",
+	"client": [
+		"AccessorRenderSystem",
+		"MixinWindow"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

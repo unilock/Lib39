@@ -225,6 +225,11 @@ defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_versi
 defineModule 'crowbar', ['core']
 defineModule 'keygen', ['core']
 defineModule 'dessicant', ['core']
+defineModule 'deferral', []
+defineModule 'machination', ['core',
+	"fapi:fabric-lifecycle-events-v1:${fabric_version}",
+	"fapi:fabric-resource-loader-v0:${fabric_version}"
+]
 
 publishing {
 	repositories {
