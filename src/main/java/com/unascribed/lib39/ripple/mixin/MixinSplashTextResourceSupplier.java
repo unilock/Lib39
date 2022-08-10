@@ -1,4 +1,4 @@
-package com.unascribed.lib39.core.mixin;
+package com.unascribed.lib39.ripple.mixin;
 
 import java.util.List;
 import org.spongepowered.asm.mixin.Final;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.unascribed.lib39.core.impl.SplashTextHandler;
+import com.unascribed.lib39.ripple.impl.SplashTextHandler;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

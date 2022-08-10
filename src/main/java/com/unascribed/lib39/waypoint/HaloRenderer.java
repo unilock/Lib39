@@ -12,8 +12,8 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormats;
-import com.unascribed.lib39.core.api.util.DelegatingVertexConsumer;
-import com.unascribed.lib39.core.api.util.MysticSet;
+import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
+import com.unascribed.lib39.util.api.MysticSet;
 import com.unascribed.lib39.waypoint.api.HaloBlockEntity;
 
 import com.google.common.collect.Multimap;

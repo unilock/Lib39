@@ -12,9 +12,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 
+/**
+ * A LatchReference and a Holder in one.
+ */
 public class LatchHolder<T> extends AbstractLatchReference<Holder<T>> implements Holder<T> {
 
-	private LatchHolder() {}
+	protected LatchHolder() {}
 	
 	@Override
 	public T value() {

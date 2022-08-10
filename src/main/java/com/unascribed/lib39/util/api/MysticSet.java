@@ -1,4 +1,4 @@
-package com.unascribed.lib39.core.api.util;
+package com.unascribed.lib39.util.api;
 
 import java.util.Collections;
 import java.util.Set;

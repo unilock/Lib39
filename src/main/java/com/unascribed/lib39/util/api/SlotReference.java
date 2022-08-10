@@ -1,4 +1,4 @@
-package com.unascribed.lib39.core.api.util;
+package com.unascribed.lib39.util.api;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;

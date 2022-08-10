@@ -9,9 +9,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tessellator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.unascribed.lib39.core.api.util.DelegatingVertexConsumer;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticle;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticleManager;
+import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;

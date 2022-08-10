@@ -1,9 +1,9 @@
-package com.unascribed.lib39.core.api;
+package com.unascribed.lib39.ripple.api;
 
 import java.time.MonthDay;
 import java.util.function.Supplier;
 
-import com.unascribed.lib39.core.impl.SplashTextHandler;
+import com.unascribed.lib39.ripple.impl.SplashTextHandler;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

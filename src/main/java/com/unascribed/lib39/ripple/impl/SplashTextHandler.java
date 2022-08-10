@@ -1,8 +1,9 @@
-package com.unascribed.lib39.core.impl;
+package com.unascribed.lib39.ripple.impl;
 
 import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ public class SplashTextHandler {
 	private static final List<String> statics = new ArrayList<>();
 	private static final ListMultimap<MonthDay, String> temporals = ArrayListMultimap.create();
 	private static final List<Supplier<String>> dynamics = new ArrayList<>();
-	private static final List<String> removals = new ArrayList<>();
+	private static final Set<String> removals = new HashSet<>();
 	private static final Map<String, String> replacements = new HashMap<>();
 	
 	private static final Set<String> necessarySplashes = Set.of(
@@ -56,12 +57,20 @@ public class SplashTextHandler {
 		if (necessarySplashes.contains(Hashing.sha256().hashString(text+"2ab4850e297d889e", Charsets.UTF_8).toString())) {
 			throw new IllegalArgumentException("Lib39 will not help you remove this splash.");
 		}
-		removals.add(text);
+		replacements.put(text, replacement);
 	}
 	
 	public static void modifyNormalSplashes(List<String> list) {
-		list.replaceAll(s -> replacements.getOrDefault(s, s));
-		list.removeAll(removals);
+		var iter = list.listIterator();
+		while (iter.hasNext()) {
+			String s = iter.next();
+			String repl = replacements.get(s);
+			if (repl != null) {
+				iter.set(repl);
+			} else if (removals.contains(s)) {
+				iter.remove();
+			}
+		}
 		list.addAll(statics);
 	}
 	

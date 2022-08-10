@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import com.unascribed.lib39.core.api.util.LatchHolder;
+import com.unascribed.lib39.core.api.util.LatchRegistryEntry;
 
 import com.google.common.base.Ascii;
 
@@ -53,8 +54,8 @@ public final class AutoRegistry {
 	 * holder classes for additional information in later passes.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T, A extends Annotation> void eachRegisterableField(Class<?> holder, Class<T> type, Class<A> anno, TriConsumer<Field, T, A> cb) {
-		for (Field f : holder.getDeclaredFields()) {
+	public <T, A extends Annotation> void eachRegisterableField(Class<?> holdingClass, Class<T> type, Class<A> anno, TriConsumer<Field, T, A> cb) {
+		for (Field f : holdingClass.getDeclaredFields()) {
 			if (type.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())) {
 				try {
 					f.setAccessible(true);
@@ -67,50 +68,48 @@ public final class AutoRegistry {
 	}
 
 	/**
-	 * Scan a class {@code holder} for static final fields of type {@code type}, and register them
+	 * Scan a class {@code holdingClass} for static final fields of type {@code type}, and register them
 	 * in the configured namespace with a path equal to the field's name as lower case in the given
 	 * registry.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> void autoRegister(Registry<T> registry, Class<?> holder, Class<? super T> type) {
-		eachRegisterableField(holder, type, RegisteredAs.class, (f, v, ann) -> {
+	public <T> void autoRegister(Registry<T> registry, Class<?> holdingClass, Class<? super T> type) {
+		eachRegisterableField(holdingClass, type, RegisteredAs.class, (f, v, ann) -> {
 			Identifier id = deriveId(f, ann);
 			Registry.register(registry, id, (T)v);
-			try {
-				Field holderField = holder.getDeclaredField(f.getName()+"_HOLDER");
-				if (holderField.getType() == LatchHolder.class
-						&& Modifier.isStatic(holderField.getModifiers()) && !Modifier.isTransient(holderField.getModifiers())) {
-					((LatchHolder)holderField.get(null)).set(registry.getOrCreateHolder(RegistryKey.of(registry.getKey(), id)).getOrThrow(false, s -> {}));
-				}
-			} catch (Exception e) {}
-			try {
-				// for Yarn users (they call this RegistryEntry)
-				Field entryField = holder.getDeclaredField(f.getName()+"_ENTRY");
-				if (entryField.getType() == LatchHolder.class
-						&& Modifier.isStatic(entryField.getModifiers()) && !Modifier.isTransient(entryField.getModifiers())) {
-					((LatchHolder)entryField.get(null)).set(registry.getOrCreateHolder(RegistryKey.of(registry.getKey(), id)).getOrThrow(false, s -> {}));
-				}
-			} catch (Exception e) {}
+			assignHolder(registry, holdingClass, f.getName()+"_HOLDER", id, LatchHolder.class);
+			assignHolder(registry, holdingClass, f.getName()+"_ENTRY", id, LatchRegistryEntry.class);
 		});
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private <T> void assignHolder(Registry<T> registry, Class<?> holdingClass, String field, Identifier id, Class<? extends LatchHolder> type) {
+		try {
+			Field holderField = holdingClass.getDeclaredField(field);
+			if (holderField.getType() == LatchHolder.class
+					&& Modifier.isStatic(holderField.getModifiers()) && !Modifier.isTransient(holderField.getModifiers())) {
+				((LatchHolder)holderField.get(null)).set(registry.getOrCreateHolder(RegistryKey.of(registry.getKey(), id)).getOrThrow(false, s -> {}));
+			}
+		} catch (Exception e) {}
+	}
+
 	/**
-	 * Scan a class {@code holder} for static final fields of type {@code type}, and register them
+	 * Scan a class {@code holdingClass} for static final fields of type {@code type}, and register them
 	 * in the given ad-hoc registry.
 	 */
-	public <T> void autoRegister(Consumer<T> adhocRegistry, Class<?> holder, Class<T> type) {
-		eachRegisterableField(holder, type, null, (f, v, na) -> {
+	public <T> void autoRegister(Consumer<T> adhocRegistry, Class<?> holdingClass, Class<T> type) {
+		eachRegisterableField(holdingClass, type, null, (f, v, na) -> {
 			adhocRegistry.accept(v);
 		});
 	}
 
 	/**
-	 * Scan a class {@code holder} for static final fields of type {@code type}, and register them
+	 * Scan a class {@code holdingClass} for static final fields of type {@code type}, and register them
 	 * in the configured namespace with a path equal to the field's name as lower case in the given
 	 * registry.
 	 */
-	public <T> void autoRegister(BiConsumer<Identifier, T> registry, Class<?> holder, Class<T> type) {
-		eachRegisterableField(holder, type, RegisteredAs.class, (f, v, ann) -> {
+	public <T> void autoRegister(BiConsumer<Identifier, T> registry, Class<?> holdingClass, Class<T> type) {
+		eachRegisterableField(holdingClass, type, RegisteredAs.class, (f, v, ann) -> {
 			registry.accept(deriveId(f, ann), v);
 		});
 	}
