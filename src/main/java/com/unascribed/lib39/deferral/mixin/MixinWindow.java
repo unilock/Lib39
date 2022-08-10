@@ -15,11 +15,11 @@ import java.util.Set;
 
 import org.lwjgl.system.Platform;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.blaze3d.glfw.Window;
-import com.unascribed.lib39.core.Lib39Log;
 import com.unascribed.lib39.deferral.Lib39Deferral;
 import com.unascribed.lib39.deferral.api.GLCompatVoter;
 
@@ -36,19 +36,24 @@ public class MixinWindow {
 
 	@Inject(at=@At(value="INVOKE", target="org/lwjgl/glfw/GLFW.glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"),
 			method="<init>")
-	private void modifyGlfwHints(CallbackInfo ci) {
+	private void lib39Deferral$modifyGlfwHints(CallbackInfo ci) {
 		if (Platform.get() == Platform.MACOSX) {
-			Lib39Log.info("Not enabling OpenGL compat profile as we are on macOS.");
+			Lib39Deferral.log.info("Not enabling OpenGL compat profile as we are on macOS.");
 			return;
 		}
 		Set<String> whoWantsIt = new LinkedHashSet<>();
 		for (var en : FabricLoader.getInstance().getEntrypointContainers("lib39:gl_compat_voter", GLCompatVoter.class)) {
 			if (en.getEntrypoint().wantsCompatibilityProfile()) {
-				whoWantsIt.add(en.getProvider().getMetadata().getId());
+				whoWantsIt.add(en.getProvider().getMetadata().getName());
 			}
 		}
-		if (whoWantsIt.isEmpty()) {
-			Lib39Log.info("Not enabling OpenGL compat profile as no mods want it.");
+		if (Boolean.getBoolean("lib39.forceCoreProfile") && !whoWantsIt.isEmpty()) {
+			Lib39Deferral.log.warn("Not enabling OpenGL compat profile by your request (-Dlib39.forceCoreProfile=true), but some mods want it: {}", describe(whoWantsIt));
+			return;
+		}
+		boolean forcedOn = Boolean.getBoolean("lib39.forceCompatProfile");
+		if (!forcedOn && whoWantsIt.isEmpty()) {
+			Lib39Deferral.log.info("Not enabling OpenGL compat profile as no mods want it.");
 			return;
 		}
 		
@@ -63,17 +68,24 @@ public class MixinWindow {
 		
 		Lib39Deferral.didLoadCompatMode = true;
 		
-		String str;
+		if (forcedOn && whoWantsIt.isEmpty()) {
+			Lib39Deferral.log.info("Enabling OpenGL compat profile on your request. (-Dlib39.forceCompatProfile=true)");
+		} else {
+			Lib39Deferral.log.info("Enabling OpenGL compat profile on the request of {}.", describe(whoWantsIt));
+		}
+	}
+
+	@Unique
+	private static String describe(Set<String> whoWantsIt) {
 		if (whoWantsIt.size() == 1) {
-			str = Iterables.getOnlyElement(whoWantsIt);
+			return Iterables.getOnlyElement(whoWantsIt);
 		} else if (whoWantsIt.size() == 2) {
-			str = Joiner.on(" and ").join(whoWantsIt);
+			return Joiner.on(" and ").join(whoWantsIt);
 		} else {
 			List<String> values = new ArrayList<>(whoWantsIt);
 			values.set(values.size()-1, "and "+values.get(values.size()-1));
-			str = Joiner.on(", ").join(values);
+			return Joiner.on(", ").join(values);
 		}
-		Lib39Log.info("Enabling OpenGL compat profile on the request of {}.", str);
 	}
 	
 }

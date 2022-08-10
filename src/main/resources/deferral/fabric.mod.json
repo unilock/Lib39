@@ -3,7 +3,7 @@
 	"id": "lib39-deferral",
 	"version": "${version}",
 	"name": "Lib39 (Deferral)",
-	"description": "Allows bypassing artificial vanilla limits.",
+	"description": "Allows re-enabling the OpenGL Compatibility Profile.",
 	"authors": [ "unascribed" ],
 	"contact": {
 		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Deferral",
@@ -18,8 +18,7 @@
 	"mixins": [ "lib39-deferral.mixins.json" ],
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
-		"lib39-core": "^${version}"
+		"minecraft": ">=1.17"
 	},
 	"custom": {
 		"modmenu": {
