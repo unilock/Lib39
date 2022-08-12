@@ -1,12 +1,12 @@
 {
 	"schemaVersion": 1,
-	"id": "lib39-crowbar",
+	"id": "lib39-recoil",
 	"version": "${version}",
-	"name": "Lib39 (Crowbar)",
-	"description": "Adds low-level worldgen hooks.",
+	"name": "Lib39 (Recoil)",
+	"description": "Events to let you mess with the camera and FOV, and some others. Everything you need to make a satisfying gun mod, basically.",
 	"authors": [ "unascribed" ],
 	"contact": {
-		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Crowbar",
+		"homepage": "https://git.sleeping.town/unascribed/Lib39/wiki/Recoil",
 		"sources": "https://git.sleeping.town/unascribed/Lib39",
 		"issues": "https://git.sleeping.town/unascribed/Lib39/issues",
 		"discord": "https://discord.gg/8WBauq2eYK",
@@ -14,13 +14,17 @@
 	},
 	"license": "MIT",
 	"icon": "lib39.png",
-	"environment": "*",
-	"mixins": [ "lib39-crowbar.mixins.json" ],
+	"environment": "client",
+	"mixins": [ "lib39-recoil.mixins.json" ],
+	"entrypoints": {
+		"main": ["com.unascribed.lib39.recoil.Lib39Recoil"]
+	},
 	"depends": {
 		"fabricloader": ">=0.7.4",
 		"minecraft": "^1.19",
 		"lib39-core": "^${version}",
-		"fabric-api-base": "*"
+		"fabric-api-base": "*",
+		"fabric-networking-api-v1": "*"
 	},
 	"custom": {
 		"modmenu": {

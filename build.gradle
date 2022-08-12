@@ -222,7 +222,7 @@ defineModule 'waypoint', ['core',
 ]
 defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
 defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
-defineModule 'crowbar', ['core']
+defineModule 'crowbar', ['core', "fapi:fabric-api-base:${fabric_version}"]
 defineModule 'keygen', ['core']
 defineModule 'dessicant', ['core']
 defineModule 'deferral', []
@@ -232,6 +232,7 @@ defineModule 'machination', ['core',
 ]
 defineModule 'util', ['core']
 defineModule 'ripple', ['core']
+defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
 
 publishing {
 	repositories {

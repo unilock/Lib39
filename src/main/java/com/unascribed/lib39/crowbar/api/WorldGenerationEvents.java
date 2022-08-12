@@ -39,7 +39,7 @@ public final class WorldGenerationEvents {
 	public static final Event<BuildSurface> AFTER_GENERATE_FEATURES = EventFactory.createArrayBacked(BuildSurface.class, callbacks -> ctx -> {
 		if (EventFactory.isProfilingEnabled()) {
 			Profiler profiler = ctx.region.toServerWorld().getProfiler();
-			profiler.push("lib39-crowbar:build_surface");
+			profiler.push("lib39-crowbar:generate_features");
 
 			for (BuildSurface event : callbacks) {
 				profiler.push(EventFactory.getHandlerName(event));
