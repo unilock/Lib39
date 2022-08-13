@@ -19,7 +19,7 @@ public class MixinGameRenderer {
 
 	@Inject(at=@At("RETURN"), method="getFov", cancellable=true)
 	private void getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> ci) {
-		float orig = ci.getReturnValueF();
+		float orig = (float)ci.getReturnValueD();
 		Vec1f val = new Vec1f(orig);
 		RecoilEvents.UPDATE_FOV.invoker().onUpdateFOV(val, tickDelta);
 		if (val.get() != orig) {
