@@ -15,8 +15,8 @@ import net.minecraft.util.JsonHelper;
 @Mixin(targets="net/minecraft/client/render/model/json/ModelElement$Deserializer")
 public class MixinModelElementDeserializer {
 
-	@Inject(at=@At("HEAD"), method="deserializeRotation", cancellable=true)
-	private void lib39Lockpick$deserializeRotation(JsonObject object, CallbackInfoReturnable<Float> ci) {
+	@Inject(at=@At("HEAD"), method="deserializeRotationAngle", cancellable=true)
+	private void lib39Lockpick$deserializeRotationAngle(JsonObject object, CallbackInfoReturnable<Float> ci) {
 		if (object.has("lib39:unlock_angle") && object.get("lib39:unlock_angle").getAsBoolean()) {
 			ci.setReturnValue(JsonHelper.getFloat(object, "angle"));
 		}

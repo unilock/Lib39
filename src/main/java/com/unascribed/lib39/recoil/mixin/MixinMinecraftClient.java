@@ -17,6 +17,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 
 @Environment(EnvType.CLIENT)
 @Mixin(MinecraftClient.class)
@@ -34,6 +35,19 @@ public class MixinMinecraftClient {
 				}
 			}
 			ci.setReturnValue(false);
+		}
+	}
+	
+	@Inject(at=@At("HEAD"), method="handleBlockBreaking", cancellable=true)
+	private void handleBlockBreaking(boolean bl, CallbackInfo ci) {
+		if (player != null && player.getMainHandStack().getItem() instanceof DirectClickItem) {
+			MinecraftClient self = (MinecraftClient)(Object)this;
+			if (self.crosshairTarget instanceof BlockHitResult bhr) {
+				var i = player.getMainHandStack().getItem();
+				if (!i.canMine(self.world.getBlockState(bhr.getBlockPos()), self.world, bhr.getBlockPos(), player)) {
+					ci.cancel();
+				}
+			}
 		}
 	}
 	
