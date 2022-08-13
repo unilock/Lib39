@@ -31,15 +31,15 @@ public abstract class MixinBlockRenderManager {
 		if (lib39Weld$reentering) return;
 		if (bs.getBlock() instanceof BigBlock) {
 			BigBlock b = (BigBlock)bs.getBlock();
-			int bX = bs.get(b.xProp);
-			int bY = bs.get(b.yProp);
-			int bZ = bs.get(b.zProp);
+			int bX = b.getX(bs);
+			int bY = b.getY(bs);
+			int bZ = b.getZ(bs);
 			BlockPos origin = pos.add(-bX, -bY, -bZ);
 			lib39Weld$reentering = true;
 			try {
-				for (int x = 0; x < b.xSize; x++) {
-					for (int y = 0; y < b.ySize; y++) {
-						for (int z = 0; z < b.zSize; z++) {
+				for (int x = 0; x < b.getXSize(); x++) {
+					for (int y = 0; y < b.getYSize(); y++) {
+						for (int z = 0; z < b.getZSize(); z++) {
 							BlockPos bp = origin.add(x, y, z);
 							matrix.push();
 								matrix.translate(bp.getX()-pos.getX(), bp.getY()-pos.getY(), bp.getZ()-pos.getZ());

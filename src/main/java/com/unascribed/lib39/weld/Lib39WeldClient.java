@@ -17,15 +17,15 @@ public class Lib39WeldClient implements ClientModInitializer {
 			if (boc.blockState().getBlock() instanceof BigBlock) {
 				BlockState bs = boc.blockState();
 				BigBlock b = (BigBlock)boc.blockState().getBlock();
-				double minX = boc.blockPos().getX()-bs.get(b.xProp);
-				double minY = boc.blockPos().getY()-bs.get(b.yProp);
-				double minZ = boc.blockPos().getZ()-bs.get(b.zProp);
+				double minX = boc.blockPos().getX()-b.getX(bs);
+				double minY = boc.blockPos().getY()-b.getY(bs);
+				double minZ = boc.blockPos().getZ()-b.getZ(bs);
 				minX -= wrc.camera().getPos().x;
 				minY -= wrc.camera().getPos().y;
 				minZ -= wrc.camera().getPos().z;
-				double maxX = minX+b.xSize;
-				double maxY = minY+b.ySize;
-				double maxZ = minZ+b.zSize;
+				double maxX = minX+b.getXSize();
+				double maxY = minY+b.getYSize();
+				double maxZ = minZ+b.getZSize();
 				VertexConsumer vc = wrc.consumers().getBuffer(RenderLayer.getLines());
 				WorldRenderer.drawBox(wrc.matrixStack(), vc, minX, minY, minZ, maxX, maxY, maxZ, 0, 0, 0, 0.4f);
 				return false;

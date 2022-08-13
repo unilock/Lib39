@@ -36,29 +36,29 @@ public abstract class MixinParticleManager {
 		BlockState bs = world.getBlockState(pos);
 		if (bs.getBlock() instanceof BigBlock) {
 			BigBlock b = (BigBlock)bs.getBlock();
-			int bX = bs.get(b.xProp);
-			int bY = bs.get(b.yProp);
-			int bZ = bs.get(b.zProp);
+			int bX = b.getX(bs);
+			int bY = b.getY(bs);
+			int bZ = b.getZ(bs);
 			lib39Weld$reentering = true;
 			try {
 				// there's probably a better way to do this, but whatever
 				if (dir.getAxis() == Axis.X) {
-					for (int y = -bY; y < b.ySize-bY; y++) {
-						for (int z = -bZ; z < b.zSize-bZ; z++) {
+					for (int y = -bY; y < b.getYSize()-bY; y++) {
+						for (int z = -bZ; z < b.getZSize()-bZ; z++) {
 							if (y == 0 && z == 0) continue;
 							addBlockBreakingParticles(pos.add(0, y, z), dir);
 						}
 					}
 				} else if (dir.getAxis() == Axis.Z) {
-					for (int y = -bY; y < b.ySize-bY; y++) {
-						for (int x = -bX; x < b.xSize-bX; x++) {
+					for (int y = -bY; y < b.getYSize()-bY; y++) {
+						for (int x = -bX; x < b.getXSize()-bX; x++) {
 							if (y == 0 && x == 0) continue;
 							addBlockBreakingParticles(pos.add(x, y, 0), dir);
 						}
 					}
 				} else if (dir.getAxis() == Axis.Y) {
-					for (int x = -bX; x < b.xSize-bX; x++) {
-						for (int z = -bZ; z < b.zSize-bZ; z++) {
+					for (int x = -bX; x < b.getXSize()-bX; x++) {
+						for (int z = -bZ; z < b.getZSize()-bZ; z++) {
 							if (x == 0 && z == 0) continue;
 							addBlockBreakingParticles(pos.add(x, 0, z), dir);
 						}

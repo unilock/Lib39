@@ -33,16 +33,16 @@ public class BigBlockItem extends BlockItem {
 		}
 		BlockPos origin = new BlockPos(Ints.min(front.getX(), back.getX()), front.getY(), Ints.min(front.getZ(), back.getZ()));
 		if (context.getSide() == Direction.DOWN) {
-			origin = origin.down(b.ySize-1);
+			origin = origin.down(b.getYSize()-1);
 		}
-		Box box = new Box(origin, origin.add(b.xSize-1, b.ySize-1, b.zSize-1));
+		Box box = new Box(origin, origin.add(b.getXSize()-1, b.getYSize()-1, b.getZSize()-1));
 		if (!w.getEntityCollisions(null, box).isEmpty()) {
 			return false;
 		}
 		for (int p = 0; p < 2; p++) {
-			for (int y = 0; y < b.ySize; y++) {
-				for (int x = 0; x < b.xSize; x++) {
-					for (int z = 0; z < b.zSize; z++) {
+			for (int y = 0; y < b.getYSize(); y++) {
+				for (int x = 0; x < b.getXSize(); x++) {
+					for (int z = 0; z < b.getZSize(); z++) {
 						BlockPos bp = origin.add(x, y, z);
 						ItemPlacementContext ctx = new ItemPlacementContext(context.getPlayer(), context.getHand(), context.getStack(),
 								new BlockHitResult(context.getHitPos().add(x, y, z), context.getSide(), bp, context.hitsInsideBlock()));
@@ -52,7 +52,7 @@ public class BigBlockItem extends BlockItem {
 								return false;
 							}
 						} else if (p == 1) {
-							if (!super.place(ctx, state.with(b.xProp, x).with(b.yProp, y).with(b.zProp, z))) {
+							if (!super.place(ctx, b.set(state, x, y, z))) {
 								return false;
 							}
 						}
