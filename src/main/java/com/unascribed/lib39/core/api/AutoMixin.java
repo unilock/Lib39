@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -12,7 +11,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -80,21 +81,32 @@ public class AutoMixin implements IMixinConfigPlugin {
 		List<String> rtrn = Lists.newArrayList();
 		int skipped = 0;
 		try {
-			URI uri = getJarURL(getClass().getProtectionDomain().getCodeSource().getLocation()).toURI();
-			File f = new File(uri);
-			if (f.isDirectory()) {
-				Path base = f.toPath();
-				try (var stream = Files.walk(base)) {
-					for (Path p : (Iterable<Path>)stream::iterator) {
-						if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
-							skipped++;
+			URL url = getJarURL(getClass().getProtectionDomain().getCodeSource().getLocation());
+			if ("file".equals(url.getProtocol())) {
+				File f = new File(url.toURI());
+				if (f.isDirectory()) {
+					Path base = f.toPath();
+					try (var stream = Files.walk(base)) {
+						for (Path p : (Iterable<Path>)stream::iterator) {
+							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+								skipped++;
+							}
+						}
+					}
+				} else {
+					try (ZipFile zip = new ZipFile(f)) {
+						for (var en : Collections.list(zip.entries())) {
+							if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
+								skipped++;
+							}
 						}
 					}
 				}
 			} else {
-				try (ZipFile zip = new ZipFile(f)) {
-					for (var en : Collections.list(zip.entries())) {
-						if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
+				try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
+					ZipEntry en;
+					while ((en = zip.getNextEntry()) != null) {
+						if (discover(rtrn, en.getName(), () -> zip)) {
 							skipped++;
 						}
 					}
