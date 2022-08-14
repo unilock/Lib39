@@ -84,9 +84,11 @@ public class AutoMixin implements IMixinConfigPlugin {
 			File f = new File(uri);
 			if (f.isDirectory()) {
 				Path base = f.toPath();
-				for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
-					if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
-						skipped++;
+				try (var stream = Files.walk(base)) {
+					for (Path p : (Iterable<Path>)stream::iterator) {
+						if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+							skipped++;
+						}
 					}
 				}
 			} else {
@@ -112,6 +114,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 	}
 	
 	private boolean discover(List<String> li, String path, StreamOpener opener) throws IOException {
+		path = path.replace('\\', '/'); // fuck windows
 		if (path.endsWith(".class") && path.startsWith(pkg.replace('.', '/')+"/")) {
 			String name = path.replace('/', '.').replace(".class", "");
 			// we want nothing to do with inner classes and the like
