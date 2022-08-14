@@ -32,9 +32,9 @@ public class MixinMinecraftClient {
 			if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack().getItem())) {
 				if (dci.onDirectAttack(player, Hand.MAIN_HAND).isAccepted()) {
 					ClientPlayNetworking.send(new Identifier("lib39-recoil", "direct_attack"), PacketByteBufs.empty());
+					ci.setReturnValue(false);
 				}
 			}
-			ci.setReturnValue(false);
 		}
 	}
 	
@@ -57,9 +57,9 @@ public class MixinMinecraftClient {
 			if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack().getItem())) {
 				if (dci.onDirectUse(player, Hand.MAIN_HAND).isAccepted()) {
 					ClientPlayNetworking.send(new Identifier("lib39-recoil", "direct_use"), PacketByteBufs.empty());
+					ci.cancel();
 				}
 			}
-			ci.cancel();
 		}
 	}
 }
