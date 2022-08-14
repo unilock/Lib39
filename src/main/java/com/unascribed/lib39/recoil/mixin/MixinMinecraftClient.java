@@ -34,6 +34,8 @@ public class MixinMinecraftClient {
 					ClientPlayNetworking.send(new Identifier("lib39-recoil", "direct_attack"), PacketByteBufs.empty());
 					ci.setReturnValue(false);
 				}
+			} else {
+				ci.setReturnValue(false);
 			}
 		}
 	}
@@ -59,6 +61,8 @@ public class MixinMinecraftClient {
 					ClientPlayNetworking.send(new Identifier("lib39-recoil", "direct_use"), PacketByteBufs.empty());
 					ci.cancel();
 				}
+			} else {
+				ci.cancel();
 			}
 		}
 	}

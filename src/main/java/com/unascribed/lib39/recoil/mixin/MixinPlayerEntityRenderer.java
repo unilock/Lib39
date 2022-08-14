@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 public class MixinPlayerEntityRenderer {
 	
 	@Inject(at=@At("HEAD"), method="getArmPose", cancellable=true)
-	private static void getArmPose(AbstractClientPlayerEntity player, Hand hand, CallbackInfoReturnable<ArmPose> ci) {
+	private static void lib39Recoil$getArmPose(AbstractClientPlayerEntity player, Hand hand, CallbackInfoReturnable<ArmPose> ci) {
 		if (player.getStackInHand(hand).getItem() instanceof DefaultPoseItem dpi) {
 			ci.setReturnValue(dpi.getDefaultPose(player, hand));
 		}
