@@ -11,6 +11,6 @@ import net.minecraft.server.world.ThreadedAnvilChunkStorage;
 public interface AccessorThreadedAnvilChunkStorage {
 
 	@Accessor("chunkHolders")
-	Long2ObjectLinkedOpenHashMap<ChunkHolder> yttr$getChunkHolders();
+	Long2ObjectLinkedOpenHashMap<ChunkHolder> lib39Sandman$getChunkHolders();
 	
 }

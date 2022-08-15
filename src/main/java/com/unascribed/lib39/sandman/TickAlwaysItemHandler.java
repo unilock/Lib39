@@ -28,7 +28,7 @@ import net.minecraft.util.TypeFilter;
 public class TickAlwaysItemHandler {
 
 	public static void startServerWorldTick(ServerWorld world) {
-		for (ChunkHolder ch : ((AccessorThreadedAnvilChunkStorage)world.getChunkManager().threadedAnvilChunkStorage).yttr$getChunkHolders().values()) {
+		for (ChunkHolder ch : ((AccessorThreadedAnvilChunkStorage)world.getChunkManager().threadedAnvilChunkStorage).lib39Sandman$getChunkHolders().values()) {
 			if (world.random.nextInt(40) == 0) {
 				var wc = ch.getWorldChunk();
 				if (wc != null) {
@@ -85,7 +85,7 @@ public class TickAlwaysItemHandler {
 			if (world.random.nextInt(40) == 0) {
 				Set<ItemStack> seen = Sets.newIdentityHashSet();
 				if (e instanceof HorseBaseEntity) {
-					SimpleInventory inv = ((AccessorHorseBaseEntity)e).yttr$getItems();
+					SimpleInventory inv = ((AccessorHorseBaseEntity)e).lib39Sandman$getItems();
 					for (int i = 0; i < inv.size(); i++) {
 						ItemStack is = inv.getStack(i);
 						if (is.getItem() instanceof TicksAlwaysItem && seen.add(is)) {

@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.unascribed.lib39.dessicant.DessicantData;
 import com.unascribed.lib39.dessicant.api.SimpleLootBlock;
 
 import com.google.common.collect.ImmutableList;
@@ -37,7 +38,7 @@ public class MixinAbstractBlock {
 			LootContext lootContext = builder.parameter(LootContextParameters.BLOCK_STATE, state).build(LootContextTypes.BLOCK);
 			ServerWorld serverWorld = lootContext.getWorld();
 			LootTable lootTable = serverWorld.getServer().getLootManager().getTable(id);
-			if (lootTable == LootTable.EMPTY && "yttr".equals(id.getNamespace()) && (self instanceof SimpleLootBlock || self.asItem() != Items.AIR)) {
+			if (lootTable == LootTable.EMPTY && DessicantData.optedInNamespaces.contains(id.getNamespace()) && (self instanceof SimpleLootBlock || self.asItem() != Items.AIR)) {
 				ItemStack loot;
 				if (self instanceof SimpleLootBlock slb) {
 					loot = slb.getLoot(state);

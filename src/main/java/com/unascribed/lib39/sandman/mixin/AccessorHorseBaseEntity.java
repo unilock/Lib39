@@ -10,6 +10,6 @@ import net.minecraft.inventory.SimpleInventory;
 public interface AccessorHorseBaseEntity {
 
 	@Accessor("items")
-	SimpleInventory yttr$getItems();
+	SimpleInventory lib39Sandman$getItems();
 	
 }
