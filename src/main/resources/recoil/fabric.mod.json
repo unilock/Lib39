@@ -14,7 +14,7 @@
 	},
 	"license": "MIT",
 	"icon": "lib39.png",
-	"environment": "client",
+	"environment": "*",
 	"mixins": [ "lib39-recoil.mixins.json" ],
 	"entrypoints": {
 		"main": ["com.unascribed.lib39.recoil.Lib39Recoil"]
