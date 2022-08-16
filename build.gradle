@@ -5,6 +5,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'com.google.code.gson:gson:2.8.7'
+		classpath 'com.modrinth.minotaur:Minotaur:2.4.3'
 	}
 }
 plugins {
@@ -12,6 +13,10 @@ plugins {
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.3'
 	id 'org.quiltmc.quilt-mappings-on-loom' version '4.2.0'
 	id 'maven-publish'
+}
+
+if (System.getenv("MODRINTH_TOKEN")) {
+	apply plugin: "com.modrinth.minotaur"
 }
 
 sourceCompatibility = JavaVersion.toVersion(17)
@@ -131,6 +136,35 @@ task splitRefmap {
 	}
 }
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+
+def gson = new GsonBuilder().setPrettyPrinting().create()
+
+def fatJarFmj = new JsonObject()
+fatJarFmj.addProperty("schemaVersion", 1)
+fatJarFmj.addProperty("id", "lib39")
+fatJarFmj.addProperty("name", "Lib39")
+fatJarFmj.addProperty("version", project.version)
+fatJarFmj.addProperty("description", "A library of useful tidbits originating in Yttr.")
+fatJarFmj.addProperty("icon", "lib39.png")
+fatJarFmj.addProperty("license", "MIT")
+fatJarFmj.addProperty("environment", "*")
+def fatJarJars = new JsonArray()
+fatJarFmj.add("jars", fatJarJars)
+
+
+task fatJar(type: Jar) {
+	doFirst {
+		file('build/tmp/fatjar').mkdirs()
+		file('build/tmp/fatjar/fabric.mod.json').text = gson.toJson(fatJarFmj)
+	}
+	classifier 'bundle'
+	from 'src/main/resources/lib39.png'
+	from 'build/tmp/fatjar/fabric.mod.json'
+}
+
 tasks.remapJar.finalizedBy splitRefmap
 
 def defineModule = { name, depModules ->
@@ -158,6 +192,15 @@ def defineModule = { name, depModules ->
 			amender(t.archivePath)
 		}
 	})
+
+	tasks.fatJar.dependsOn(t)
+	tasks.fatJar.from(t.archivePath) {
+		into 'META-INF/jars'
+	}
+	def jarObj = new JsonObject()
+	jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
+	fatJarJars.add(jarObj)
+
 	def srcT = tasks.create(name+'SourcesJar', Jar) {
 		dependsOn remapSourcesJar
 		classifier name+'-sources'
@@ -233,6 +276,20 @@ defineModule 'machination', ['core',
 defineModule 'util', ['core']
 defineModule 'ripple', ['core']
 defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
+
+if (System.getenv("MODRINTH_TOKEN")) {
+	modrinth {
+		token = System.getenv("MODRINTH_TOKEN")
+		projectId = 'lib39'
+		versionNumber = project.version
+		versionName = 'v'+project.version
+		versionType = 'release'
+		uploadFile = fatJar
+		gameVersions = ['1.19.1', '1.19.2']
+		loaders = ['fabric', 'quilt']
+		detectLoaders = false
+	}
+}
 
 publishing {
 	repositories {
