@@ -315,7 +315,7 @@ if (System.getenv("CURSE_TOKEN")) {
 				displayName = 'v'+project.version
 			}
 
-			uploadAdditionalFiles.asReversed().each { task ->
+			uploadAdditionalFiles.reverse().each { task ->
 				addArtifact(task) {
 					displayName = 'Single Module: '+task.classifier.substring(0, 1).toUpperCase()+task.classifier.substring(1)
 				}
