@@ -6,6 +6,7 @@ buildscript {
 	dependencies {
 		classpath 'com.google.code.gson:gson:2.8.7'
 		classpath 'com.modrinth.minotaur:Minotaur:2.4.3'
+		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
 	}
 }
 plugins {
@@ -17,6 +18,9 @@ plugins {
 
 if (System.getenv("MODRINTH_TOKEN")) {
 	apply plugin: "com.modrinth.minotaur"
+}
+if (System.getenv("CURSE_TOKEN")) {
+	apply plugin: "com.matthewprenger.cursegradle"
 }
 
 sourceCompatibility = JavaVersion.toVersion(17)
@@ -165,6 +169,8 @@ task fatJar(type: Jar) {
 	from 'build/tmp/fatjar/fabric.mod.json'
 }
 
+def uploadAdditionalFiles = []
+
 tasks.remapJar.finalizedBy splitRefmap
 
 def defineModule = { name, depModules ->
@@ -197,6 +203,7 @@ def defineModule = { name, depModules ->
 	tasks.fatJar.from(t.archivePath) {
 		into 'META-INF/jars'
 	}
+	uploadAdditionalFiles.add(t)
 	def jarObj = new JsonObject()
 	jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
 	fatJarJars.add(jarObj)
@@ -285,9 +292,40 @@ if (System.getenv("MODRINTH_TOKEN")) {
 		versionName = 'v'+project.version
 		versionType = 'release'
 		uploadFile = fatJar
+		additionalFiles = uploadAdditionalFiles
 		gameVersions = ['1.19.1', '1.19.2']
 		loaders = ['fabric', 'quilt']
 		detectLoaders = false
+	}
+}
+
+if (System.getenv("CURSE_TOKEN")) {
+	curseforge {
+		apiKey = System.getenv("CURSE_TOKEN")
+		project {
+			id = '661690'
+			releaseType = 'beta'
+
+			addGameVersion '1.19.1'
+			addGameVersion '1.19.2'
+			addGameVersion 'Fabric'
+			addGameVersion 'Quilt'
+
+			mainArtifact(remapJar) {
+				displayName = 'v'+project.version
+			}
+
+			uploadAdditionalFiles.each { task ->
+				addArtifact(task) {
+					displayName = 'Single Module: '+task.classifier.substring(0, 1).toUpperCase()+task.classifier.substring(1)
+				}
+			}
+		}
+		options {
+			javaIntegration = false
+			forgeGradleIntegration = false
+			javaVersionAutoDetect = false
+		}
 	}
 }
 
