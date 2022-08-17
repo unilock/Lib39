@@ -160,7 +160,7 @@ task fatJar(type: Jar) {
 		file('build/tmp/fatjar').mkdirs()
 		file('build/tmp/fatjar/fabric.mod.json').text = gson.toJson(fatJarFmj)
 	}
-	classifier 'bundle'
+	classifier ''
 	from 'src/main/resources/lib39.png'
 	from 'build/tmp/fatjar/fabric.mod.json'
 }
