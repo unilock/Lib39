@@ -14,7 +14,7 @@
 	},
 	"license": "MIT",
 	"icon": "lib39.png",
-	"environment": "client",
+	"environment": "*",
 	"entrypoints": {
 		"client": ["com.unascribed.lib39.waypoint.Lib39Waypoint"]
 	},

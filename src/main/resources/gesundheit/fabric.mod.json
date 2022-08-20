@@ -14,7 +14,7 @@
 	},
 	"license": "MIT",
 	"icon": "lib39.png",
-	"environment": "client",
+	"environment": "*",
 	"mixins": [ "lib39-gesundheit.mixins.json" ],
 	"accessWidener": "lib39-gesundheit.accesswidener",
 	"depends": {
