@@ -304,14 +304,14 @@ if (System.getenv("CURSE_TOKEN")) {
 		apiKey = System.getenv("CURSE_TOKEN")
 		project {
 			id = '661690'
-			releaseType = 'beta'
+			releaseType = 'release'
 
 			addGameVersion '1.19.1'
 			addGameVersion '1.19.2'
 			addGameVersion 'Fabric'
 			addGameVersion 'Quilt'
 
-			mainArtifact(remapJar) {
+			mainArtifact(fatJar) {
 				displayName = 'v'+project.version
 			}
 
