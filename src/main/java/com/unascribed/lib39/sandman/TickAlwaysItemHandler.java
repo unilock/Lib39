@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
+import net.minecraft.world.chunk.ChunkStatus;
 
 public class TickAlwaysItemHandler {
 
@@ -31,12 +32,12 @@ public class TickAlwaysItemHandler {
 		for (ChunkHolder ch : ((AccessorThreadedAnvilChunkStorage)world.getChunkManager().threadedAnvilChunkStorage).lib39Sandman$getChunkHolders().values()) {
 			if (world.random.nextInt(40) == 0) {
 				var wc = ch.getWorldChunk();
-				if (wc != null) {
+				if (wc != null && wc.getStatus().isAtLeast(ChunkStatus.FULL)) {
 					var bes = wc.getBlockEntities();
 					if (bes != null) {
 						for (BlockEntity be : bes.values()) {
 							if (world.random.nextInt(3) == 0) {
-								if (be instanceof Inventory && world.random.nextInt(40) == 0) {
+								if (be instanceof Inventory) {
 									Inventory inv = (Inventory)be;
 									for (int i = 0; i < inv.size(); i++) {
 										ItemStack is = inv.getStack(i);
@@ -45,6 +46,7 @@ public class TickAlwaysItemHandler {
 											inv.setStack(i, is);
 										}
 									}
+									break;
 								}
 							}
 						}
