@@ -14,8 +14,10 @@ public class Lib39Recoil implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier("lib39-recoil", "direct_attack"), (server, player, handler, buf, sender) -> {
 			server.execute(() -> {
 				if (player.getMainHandStack().getItem() instanceof DirectClickItem dci) {
-					if (dci.onDirectAttack(player, Hand.MAIN_HAND).shouldSwingHand()) {
-						player.swingHand(Hand.MAIN_HAND, true);
+					if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack().getItem())) {
+						if (dci.onDirectAttack(player, Hand.MAIN_HAND).shouldSwingHand()) {
+							player.swingHand(Hand.MAIN_HAND, true);
+						}
 					}
 				}
 			});
@@ -24,8 +26,10 @@ public class Lib39Recoil implements ModInitializer {
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier("lib39-recoil", "direct_use"), (server, player, handler, buf, sender) -> {
 			server.execute(() -> {
 				if (player.getMainHandStack().getItem() instanceof DirectClickItem dci) {
-					if (dci.onDirectUse(player, Hand.MAIN_HAND).shouldSwingHand()) {
-						player.swingHand(Hand.MAIN_HAND, true);
+					if (!player.getItemCooldownManager().isCoolingDown(player.getMainHandStack().getItem())) {
+						if (dci.onDirectUse(player, Hand.MAIN_HAND).shouldSwingHand()) {
+							player.swingHand(Hand.MAIN_HAND, true);
+						}
 					}
 				}
 			});
