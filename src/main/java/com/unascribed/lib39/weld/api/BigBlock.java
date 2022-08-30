@@ -63,15 +63,25 @@ public abstract class BigBlock extends Block {
 		return zProp.map(state::get).orElse(0);
 	}
 	
-	public int getXSize() {
+	/** @deprecated Use the {@link #getXSize(BlockState) state aware overload} */
+	@Deprecated
+	public int getXSize() { return getXSize(getDefaultState()); }
+	/** @deprecated Use the {@link #getYSize(BlockState) state aware overload} */
+	@Deprecated
+	public int getYSize() { return getYSize(getDefaultState()); }
+	/** @deprecated Use the {@link #getZSize(BlockState) state aware overload} */
+	@Deprecated
+	public int getZSize() { return getZSize(getDefaultState()); }
+	
+	public int getXSize(BlockState state) {
 		return xSize;
 	}
 
-	public int getYSize() {
+	public int getYSize(BlockState state) {
 		return ySize;
 	}
 
-	public int getZSize() {
+	public int getZSize(BlockState state) {
 		return zSize;
 	}
 
@@ -96,7 +106,7 @@ public abstract class BigBlock extends Block {
 		int y = getY(state)+dir.getOffsetY();
 		int z = getZ(state)+dir.getOffsetZ();
 		if (x < 0 || y < 0 || z < 0) return null;
-		if (x >= getXSize() || y >= getYSize() || z >= getZSize()) return null;
+		if (x >= getXSize(state) || y >= getYSize(state) || z >= getZSize(state)) return null;
 		return set(state, x, y, z);
 	}
 	
@@ -132,9 +142,9 @@ public abstract class BigBlock extends Block {
 	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		if (player.isCreative()) {
 			BlockPos origin = pos.add(-getX(state), -getY(state), -getZ(state));
-			for (int y = 0; y < getYSize(); y++) {
-				for (int x = 0; x < getXSize(); x++) {
-					for (int z = 0; z < getZSize(); z++) {
+			for (int y = 0; y < getYSize(state); y++) {
+				for (int x = 0; x < getXSize(state); x++) {
+					for (int z = 0; z < getZSize(state); z++) {
 						world.breakBlock(origin.add(x, y, z), false, player);
 					}
 				}
@@ -181,9 +191,9 @@ public abstract class BigBlock extends Block {
 	}
 	
 	public void alterDroppedEntity(BlockPos pos, BlockState state, ItemEntity entity) {
-		double x = pos.getX()-getX(state)+(entity.world.random.nextFloat() * (getXSize()/2D) + (getXSize()/4D));
-		double y = pos.getY()-getY(state)+(entity.world.random.nextFloat() * (getYSize()/2D) + (getYSize()/4D));
-		double z = pos.getZ()-getZ(state)+(entity.world.random.nextFloat() * (getZSize()/2D) + (getZSize()/4D));
+		double x = pos.getX()-getX(state)+(entity.world.random.nextFloat() * (getXSize(state)/2D) + (getXSize(state)/4D));
+		double y = pos.getY()-getY(state)+(entity.world.random.nextFloat() * (getYSize(state)/2D) + (getYSize(state)/4D));
+		double z = pos.getZ()-getZ(state)+(entity.world.random.nextFloat() * (getZSize(state)/2D) + (getZSize(state)/4D));
 		entity.setPosition(x, y, z);
 	}
 
@@ -193,9 +203,9 @@ public abstract class BigBlock extends Block {
 			return;
 		}
 		BigBlock b = (BigBlock)state.getBlock();
-		double x = (pos.getX()-b.getX(state))+(b.getXSize()/2D);
-		double y = (pos.getY()-b.getY(state))+(b.getYSize()/2D);
-		double z = (pos.getZ()-b.getZ(state))+(b.getZSize()/2D);
+		double x = (pos.getX()-b.getX(state))+(b.getXSize(state)/2D);
+		double y = (pos.getY()-b.getY(state))+(b.getYSize(state)/2D);
+		double z = (pos.getZ()-b.getZ(state))+(b.getZSize(state)/2D);
 		world.playSound(player, x, y, z, event, cat, vol, pitch);
 	}
 
@@ -208,9 +218,9 @@ public abstract class BigBlock extends Block {
 		int oY = pos.getY()-b.getY(state);
 		int oZ = pos.getZ()-b.getZ(state);
 		BlockPos.Mutable bp = new BlockPos.Mutable();
-		for (int x = 0; x < b.getXSize(); x++) {
-			for (int y = 0; y < b.getYSize(); y++) {
-				for (int z = 0; z < b.getZSize(); z++) {
+		for (int x = 0; x < b.getXSize(state); x++) {
+			for (int y = 0; y < b.getYSize(state); y++) {
+				for (int z = 0; z < b.getZSize(state); z++) {
 					bp.set(oX+x, oY+y, oZ+z);
 					if (world.isReceivingRedstonePower(bp)) {
 						return true;
@@ -233,9 +243,9 @@ public abstract class BigBlock extends Block {
 			int nX = x+d.getOffsetX();
 			int nY = y+d.getOffsetY();
 			int nZ = z+d.getOffsetZ();
-			if (nX < 0 || nX >= b.getXSize()) continue;
-			if (nY < 0 || nY >= b.getYSize()) continue;
-			if (nZ < 0 || nZ >= b.getZSize()) continue;
+			if (nX < 0 || nX >= b.getXSize(state)) continue;
+			if (nY < 0 || nY >= b.getYSize(state)) continue;
+			if (nZ < 0 || nZ >= b.getZSize(state)) continue;
 			BlockPos bp = pos.offset(d);
 			if (!w.getBlockState(bp).isOf(state.getBlock())) continue;
 			if (pred.test(w.getBlockState(bp))) {

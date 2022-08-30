@@ -37,9 +37,9 @@ public abstract class MixinBlockRenderManager {
 			BlockPos origin = pos.add(-bX, -bY, -bZ);
 			lib39Weld$reentering = true;
 			try {
-				for (int x = 0; x < b.getXSize(); x++) {
-					for (int y = 0; y < b.getYSize(); y++) {
-						for (int z = 0; z < b.getZSize(); z++) {
+				for (int x = 0; x < b.getXSize(bs); x++) {
+					for (int y = 0; y < b.getYSize(bs); y++) {
+						for (int z = 0; z < b.getZSize(bs); z++) {
 							BlockPos bp = origin.add(x, y, z);
 							matrix.push();
 								matrix.translate(bp.getX()-pos.getX(), bp.getY()-pos.getY(), bp.getZ()-pos.getZ());

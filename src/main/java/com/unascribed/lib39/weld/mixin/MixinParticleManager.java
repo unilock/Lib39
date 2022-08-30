@@ -43,22 +43,22 @@ public abstract class MixinParticleManager {
 			try {
 				// there's probably a better way to do this, but whatever
 				if (dir.getAxis() == Axis.X) {
-					for (int y = -bY; y < b.getYSize()-bY; y++) {
-						for (int z = -bZ; z < b.getZSize()-bZ; z++) {
+					for (int y = -bY; y < b.getYSize(bs)-bY; y++) {
+						for (int z = -bZ; z < b.getZSize(bs)-bZ; z++) {
 							if (y == 0 && z == 0) continue;
 							addBlockBreakingParticles(pos.add(0, y, z), dir);
 						}
 					}
 				} else if (dir.getAxis() == Axis.Z) {
-					for (int y = -bY; y < b.getYSize()-bY; y++) {
-						for (int x = -bX; x < b.getXSize()-bX; x++) {
+					for (int y = -bY; y < b.getYSize(bs)-bY; y++) {
+						for (int x = -bX; x < b.getXSize(bs)-bX; x++) {
 							if (y == 0 && x == 0) continue;
 							addBlockBreakingParticles(pos.add(x, y, 0), dir);
 						}
 					}
 				} else if (dir.getAxis() == Axis.Y) {
-					for (int x = -bX; x < b.getXSize()-bX; x++) {
-						for (int z = -bZ; z < b.getZSize()-bZ; z++) {
+					for (int x = -bX; x < b.getXSize(bs)-bX; x++) {
+						for (int z = -bZ; z < b.getZSize(bs)-bZ; z++) {
 							if (x == 0 && z == 0) continue;
 							addBlockBreakingParticles(pos.add(x, 0, z), dir);
 						}
