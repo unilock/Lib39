@@ -27,10 +27,10 @@ public class BigBlockItem extends BlockItem {
 		// TODO this is bad and only really works for 1x*x1 and 2x*x2 blocks
 		if (context.getSide().getAxis() == Direction.Axis.Y) {
 			front = context.getBlockPos();
-			back = front.offset(context.getPlayerFacing(), b.getXSize(state));
+			back = front.offset(context.getPlayerFacing(), b.getXSize(state)-1);
 		} else {
 			back = context.getBlockPos();
-			front = back.offset(context.getSide(), b.getZSize(state));
+			front = back.offset(context.getSide(), b.getZSize(state)-1);
 		}
 		BlockPos origin = new BlockPos(Ints.min(front.getX(), back.getX()), front.getY(), Ints.min(front.getZ(), back.getZ()));
 		if (context.getSide() == Direction.DOWN) {
