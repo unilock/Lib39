@@ -23,12 +23,13 @@ class WireField<T> {
 	private final boolean optional;
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public WireField(Field f) {
+	public WireField(Field f, boolean settable) {
 		f.setAccessible(true);
 		this.f = f;
 		try {
 			getter = MethodHandles.lookup().unreflectGetter(f);
-			setter = MethodHandles.lookup().unreflectSetter(f);
+			// attempting to look up the setter of a record field fails, since they cannot be set by reflection (like static finals)
+			setter = settable ? MethodHandles.lookup().unreflectSetter(f) : null;
 			type = (Class<T>) f.getType();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -86,6 +87,9 @@ class WireField<T> {
 	}
 	
 	public void set(Object owner, T value) {
+		if (setter == null) {
+			throw new IllegalArgumentException("Attempting to set using a WireField created with settable=false!");
+		}
 		try {
 			setter.invoke(owner, value);
 		} catch (Throwable e) {
@@ -114,5 +118,11 @@ class WireField<T> {
 	
 	public Class<? extends T> getType() {
 		return type;
+	}
+	
+	
+	// used by DefaultMarshallers.RecordMarshaller to get record components without trying to modify record fields
+	public Marshaller<T> getMarshaller(){
+		return marshaller;
 	}
 }

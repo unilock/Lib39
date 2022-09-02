@@ -2,10 +2,8 @@ package com.unascribed.lib39.tunnel.api;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.lang.reflect.RecordComponent;
+import java.util.*;
 import java.util.function.Function;
 
 import com.unascribed.lib39.tunnel.api.exception.BadMessageException;
@@ -18,6 +16,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -154,6 +153,11 @@ public final class DefaultMarshallers {
 	 */
 	public static final Marshaller<UUID> UUID = weld(PacketByteBuf::writeUuid, PacketByteBuf::readUuid);
 	
+	/**
+	 * Namespaced identifier.
+	 */
+	public static final Marshaller<Identifier> IDENTIFIER = weld(PacketByteBuf::writeIdentifier, PacketByteBuf::readIdentifier);
+	
 	
 	
 	private static final Map<String, Marshaller<?>> byName = Maps.newHashMap();
@@ -189,6 +193,8 @@ public final class DefaultMarshallers {
 		put(ITEMSTACK, "item", "stack", "itemstack");
 		
 		put(UUID, "uuid");
+		
+		put(IDENTIFIER, "identifier");
 	}
 	
 	private static void put(Marshaller<?> m, String... names) {
@@ -295,6 +301,87 @@ public final class DefaultMarshallers {
 		
 	}
 	
+	private static class RecordMarshaller<T extends Record> implements Marshaller<T> {
+		// supporting recursive records requires caching marshallers to break the loop
+		private static final Map<Class<? extends Record>, RecordMarshaller<?>> MARSHALLERS = new HashMap<>();
+		
+		private final List<? extends WireField<?>> fields;
+		private final Constructor<T> constructor;
+		
+		private RecordMarshaller(Class<T> clazz) {
+			MARSHALLERS.put(clazz, this);
+			
+			RecordComponent[] recComponents = clazz.getRecordComponents();
+			fields = Arrays.stream(recComponents)
+					.map(RecordMarshaller::backingField)
+					.map(f -> new WireField<>(f, false))
+					.toList();
+			// from Class::getRecordComponents javadoc
+			try {
+				constructor = clazz.getDeclaredConstructor(
+						Arrays.stream(recComponents)
+							.map(RecordComponent::getType)
+							.toArray(Class[]::new)
+				);
+			} catch(NoSuchMethodException e) {
+				MARSHALLERS.remove(clazz);
+				throw new IllegalStateException("'Record' class missing canonical constructor", e);
+			}
+		}
+		
+		// TODO: bit packing for record marshallers
+		
+		public T unmarshal(PacketByteBuf in) {
+			Object[] args = new Object[fields.size()];
+			for(int i = 0; i < fields.size(); i++) {
+				WireField<?> field = fields.get(i);
+				if (field.isOptional() && in.readBoolean()) {
+					args[i] = null;
+				} else if (field.getType() == boolean.class) {
+					args[i] = in.readBoolean();
+				} else {
+					args[i] = field.getMarshaller().unmarshal(in);
+				}
+			}
+			try {
+				return constructor.newInstance(args);
+			} catch(Exception e) {
+				throw new RuntimeException("Could not unmarshall record class", e);
+			}
+		}
+		
+		public void marshal(PacketByteBuf out, T t) {
+			for (WireField<?> field : fields) {
+				if (field.isOptional()) {
+					out.writeBoolean(field.get(t) == null);
+				}
+				if (field.getType() == boolean.class) {
+					if (field.get(t) == Boolean.TRUE) {
+						out.writeBoolean(true);
+					}
+				} else {
+					field.marshal(t, out);
+				}
+			}
+		}
+		
+		private static Field backingField(RecordComponent component) {
+			try {
+				return component.getDeclaringRecord().getDeclaredField(component.getName());
+			} catch(NoSuchFieldException e) {
+				throw new IllegalStateException("'Record' class missing component backing field for " + component.getName(), e);
+			}
+		}
+		
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public static RecordMarshaller getForClass(Class clazz) {
+			if (MARSHALLERS.containsKey(clazz))
+				return MARSHALLERS.get(clazz);
+			// is added to the map in the constructor
+			return new RecordMarshaller(clazz);
+		}
+	}
+	
 	private static class ByteBufMarshaller implements Marshaller<ByteBuf> {
 		
 		@Override
@@ -394,13 +481,18 @@ public final class DefaultMarshallers {
 								Constructor<?> cons = clazz.getConstructor();
 								marshaller = (Marshaller<T>) cons.newInstance();
 							} catch (Exception e) {
-								throw new BadMessageException("Cannot instanciate marshaller class " + clazz.getName());
+								throw new BadMessageException("Cannot instantiate marshaller class " + clazz.getName());
 							}
 						}
 					} else if (Marshallable.class.isAssignableFrom(clazz)) {
 						return new MarshallableMarshaller(clazz);
 					} else if (ImmutableMarshallable.class.isAssignableFrom(clazz)) {
 						return new ImmutableMarshallableMarshaller(clazz);
+						// explicitly specified enum/record (for lists)
+					} else if (Enum.class.isAssignableFrom(clazz)) {
+						return new EnumMarshaller(clazz);
+					} else if (Record.class.isAssignableFrom(clazz)) {
+						return RecordMarshaller.getForClass(clazz);
 					}
 				} catch (Exception e) {
 					return null;
@@ -424,14 +516,18 @@ public final class DefaultMarshallers {
 			return (Marshaller<T>) BLOCKPOS;
 		} else if (NbtCompound.class.isAssignableFrom(type)) {
 			return (Marshaller<T>) NBT;
-		} else if (type.isEnum()) {
+		} else if (type.isEnum()){
 			return new EnumMarshaller(type);
+		} else if (type.isRecord()) {
+			return RecordMarshaller.getForClass(type);
 		} else if (ItemStack.class.isAssignableFrom(type)) {
 			return (Marshaller<T>) ITEMSTACK;
 		} else if (ByteBuf.class.isAssignableFrom(type)) {
 			return (Marshaller<T>) BYTEBUF;
 		} else if (UUID.class.isAssignableFrom(type)) {
 			return (Marshaller<T>) UUID;
+		} else if (Identifier.class.isAssignableFrom(type)) {
+			return (Marshaller<T>) IDENTIFIER;
 		}
 		return null;
 	}
