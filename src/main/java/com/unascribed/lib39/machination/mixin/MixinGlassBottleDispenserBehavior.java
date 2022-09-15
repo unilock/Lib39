@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,6 +25,7 @@ import net.minecraft.util.math.Box;
 	"net/minecraft/block/dispenser/DispenserBehavior$C_tfeacyls",
 	"net/minecraft/block/dispenser/DispenserBehavior$17"
 })
+@Pseudo // silence warnings about missing classes
 public abstract class MixinGlassBottleDispenserBehavior extends FallibleItemDispenserBehavior {
 
 	// Mixin has an absolute *fit* about this class due to weirdness with QMoL and anonymous inner classes.

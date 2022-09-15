@@ -283,6 +283,7 @@ defineModule 'machination', ['core',
 defineModule 'util', ['core']
 defineModule 'ripple', ['core']
 defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
+defineModule 'mesh', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
 
 if (System.getenv("MODRINTH_TOKEN")) {
 	modrinth {
