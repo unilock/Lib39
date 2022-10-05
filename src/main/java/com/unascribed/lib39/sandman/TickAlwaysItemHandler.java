@@ -60,7 +60,7 @@ public class TickAlwaysItemHandler {
 				for (int i = 0; i < inv.size(); i++) {
 					ItemStack is = inv.getStack(i);
 					if (is.getItem() instanceof TicksAlwaysItem) {
-						((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, i, false);
+						((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, i, false);
 						inv.setStack(i, is);
 					}
 				}
@@ -69,7 +69,7 @@ public class TickAlwaysItemHandler {
 			if (e instanceof ItemEntity) {
 				ItemStack is = ((ItemEntity) e).getStack();
 				if (is.getItem() instanceof TicksAlwaysItem) {
-					((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, 0, false);
+					((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, 0, false);
 					if (is.isEmpty()) e.discard();
 				}
 				continue;
@@ -77,7 +77,7 @@ public class TickAlwaysItemHandler {
 			if (e instanceof ItemFrameEntity) {
 				ItemStack is = ((ItemFrameEntity) e).getHeldItemStack();
 				if (is.getItem() instanceof TicksAlwaysItem) {
-					((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, 0, false);
+					((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, 0, false);
 					if (is.isEmpty()) {
 						((ItemFrameEntity) e).setHeldItemStack(ItemStack.EMPTY, true);
 					}
@@ -91,7 +91,7 @@ public class TickAlwaysItemHandler {
 					for (int i = 0; i < inv.size(); i++) {
 						ItemStack is = inv.getStack(i);
 						if (is.getItem() instanceof TicksAlwaysItem && seen.add(is)) {
-							((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, i, false);
+							((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, i, false);
 							inv.setStack(i, is);
 						}
 					}
@@ -100,7 +100,7 @@ public class TickAlwaysItemHandler {
 					for (EquipmentSlot slot : EquipmentSlot.values()) {
 						ItemStack is = ((LivingEntity) e).getEquippedStack(slot);
 						if (is.getItem() instanceof TicksAlwaysItem && seen.add(is)) {
-							((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, slot.getEntitySlotId(), false);
+							((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, slot.getEntitySlotId(), false);
 							e.equipStack(slot, is);
 						}
 					}
@@ -110,7 +110,7 @@ public class TickAlwaysItemHandler {
 					for (int i = 0; i < inv.size(); i++) {
 						ItemStack is = inv.getStack(i);
 						if (is.getItem() instanceof TicksAlwaysItem && seen.add(is)) {
-							((TicksAlwaysItem)is.getItem()).inventoryTick(is, world, e, i, false);
+							((TicksAlwaysItem)is.getItem()).entityInventoryTick(is, world, e, i, false);
 							inv.setStack(i, is);
 						}
 					}

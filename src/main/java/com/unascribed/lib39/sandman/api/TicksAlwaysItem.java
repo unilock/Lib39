@@ -1,6 +1,7 @@
 package com.unascribed.lib39.sandman.api;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,5 +23,7 @@ public interface TicksAlwaysItem {
 	 * @param slot the slot of the entity's inventory the item is in
 	 * @param selected {@code true} if the item is currently held in one of the entity's hands
 	 */
-	void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected);
+	default void entityInventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+		if (this instanceof Item i) i.inventoryTick(stack, world, entity, slot, selected);
+	}
 }
