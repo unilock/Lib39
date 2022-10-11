@@ -15,6 +15,7 @@ public class EnhancedLangLoader {
 	public static void load(String prefix, JsonObject obj, BiConsumer<String, String> out) {
 		for (var en : obj.entrySet()) {
 			var k = prefix+en.getKey();
+			if ("lib39:enable_enhanced_lang".equals(k)) continue;
 			if (en.getValue() instanceof JsonPrimitive jp && jp.isString()) {
 				out.accept(k, process(jp.getAsString()));
 			} else if (en.getValue() instanceof JsonObject jo) {
