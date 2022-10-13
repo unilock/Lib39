@@ -221,6 +221,7 @@ public class BlockNetwork<N extends BlockNetworkNode, T extends BlockNetworkNode
 		for (BlockPos bp : membersByPos.keySet()) {
 			owner.networksByPos.put(bp, type, this);
 		}
+		update();
 	}
 
 	public void onRemoved() {
@@ -262,7 +263,6 @@ public class BlockNetwork<N extends BlockNetworkNode, T extends BlockNetworkNode
 				members.putEdge(n, cn);
 			}
 		}
-		update();
 	}
 	
 	public void writeNbt(NbtCompound compound) {

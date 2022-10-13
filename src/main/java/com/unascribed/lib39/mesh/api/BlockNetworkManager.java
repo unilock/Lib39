@@ -36,18 +36,24 @@ public class BlockNetworkManager extends PersistentState {
 		return networkTypes.inverse().get(type);
 	}
 	
-	protected ServerWorld world;
+	protected final ServerWorld world;
 	private final Map<UUID, BlockNetwork<?, ?>> networks = Maps.newHashMap();
 	protected final Table<BlockPos, BlockNetworkType<?, ?>, BlockNetwork<?, ?>> networksByPos = HashBasedTable.create();
 
+	public BlockNetworkManager(ServerWorld world) {
+		this.world = world;
+	}
+
 	public static BlockNetworkManager get(ServerWorld world) {
-		BlockNetworkManager fn = world.getPersistentStateManager().getOrCreate(BlockNetworkManager::readNbt, BlockNetworkManager::new, "lib39_mesh_networks");
-		fn.world = world;
+		BlockNetworkManager fn = world.getPersistentStateManager().getOrCreate(
+				nbt -> BlockNetworkManager.readNbt(world, nbt),
+				() -> new BlockNetworkManager(world),
+				"lib39_mesh_networks");
 		return fn;
 	}
 
-	public static BlockNetworkManager readNbt(NbtCompound tag) {
-		BlockNetworkManager ret = new BlockNetworkManager();
+	public static BlockNetworkManager readNbt(ServerWorld world, NbtCompound tag) {
+		BlockNetworkManager ret = new BlockNetworkManager(world);
 		NbtCompound networks = tag.getCompound("Networks");
 		for (String k : networks.getKeys()) {
 			NbtCompound nbt = networks.getCompound(k);
