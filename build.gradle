@@ -23,8 +23,8 @@ if (System.getenv("CURSE_TOKEN")) {
 	apply plugin: "com.matthewprenger.cursegradle"
 }
 
-sourceCompatibility = JavaVersion.toVersion(17)
-targetCompatibility = JavaVersion.toVersion(17)
+sourceCompatibility = JavaVersion.toVersion(16)
+targetCompatibility = JavaVersion.toVersion(16)
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -89,6 +89,10 @@ loom {
 
 java {
 	withSourcesJar()
+}
+
+compileJava {
+	options.release = 16
 }
 
 tasks.validateAccessWidener {
