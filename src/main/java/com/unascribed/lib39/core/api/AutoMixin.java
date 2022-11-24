@@ -3,11 +3,15 @@ package com.unascribed.lib39.core.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -85,6 +89,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 			if ("file".equals(url.getProtocol())) {
 				File f = new File(url.toURI());
 				if (f.isDirectory()) {
+					// Q/F dev environment
 					Path base = f.toPath();
 					try (var stream = Files.walk(base)) {
 						for (Path p : (Iterable<Path>)stream::iterator) {
@@ -94,6 +99,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 						}
 					}
 				} else {
+					// FLoader
 					try (ZipFile zip = new ZipFile(f)) {
 						for (var en : Collections.list(zip.entries())) {
 							if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
@@ -103,18 +109,35 @@ public class AutoMixin implements IMixinConfigPlugin {
 					}
 				}
 			} else {
-				try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
-					ZipEntry en;
-					while ((en = zip.getNextEntry()) != null) {
-						if (discover(rtrn, en.getName(), () -> zip)) {
-							skipped++;
+				try {
+					// QLoader <= 0.17
+					try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
+						ZipEntry en;
+						while ((en = zip.getNextEntry()) != null) {
+							if (discover(rtrn, en.getName(), () -> zip)) {
+								skipped++;
+							}
+						}
+					}
+				} catch (FileSystemException e) {
+					if ("Cannot open an InputStream on a directory!".equals(e.getMessage())) {
+						// QLoader >= 0.18
+						//    ~ W h y ~
+						var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
+						var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
+						FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
+						Path base = fsp.getPath(url.toURI());
+						for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
+							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+								skipped++;
+							}
 						}
 					}
 				}
 			}
 		} catch (URISyntaxException e) {
 			throw new AssertionError(e);
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("Cannot autodiscover mixins for "+pkg, e);
 		}
 		Lib39Log.debug("Discovered {} mixins in {} (skipped {})", rtrn.size(), pkg, skipped);
@@ -159,7 +182,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		
 	}
-	
+	 
 	private static URL getJarURL(URL codeSource) {
 		if ("jar".equals(codeSource.getProtocol())) {
 			String str = codeSource.toString().substring(4);
