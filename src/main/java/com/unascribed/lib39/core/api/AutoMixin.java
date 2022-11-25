@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -30,6 +31,7 @@ import com.google.common.collect.Lists;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 
 /**
  * Extend this class and register it as your mixin plugin to autodiscover mixins inside your mixin
@@ -99,7 +101,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 						}
 					}
 				} else {
-					// FLoader
+					// FLoader, old QLoader
 					try (ZipFile zip = new ZipFile(f)) {
 						for (var en : Collections.list(zip.entries())) {
 							if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
@@ -120,18 +122,30 @@ public class AutoMixin implements IMixinConfigPlugin {
 						}
 					}
 				} catch (FileSystemException e) {
-					if ("Cannot open an InputStream on a directory!".equals(e.getMessage())) {
-						// QLoader >= 0.18
-						//    ~ W h y ~
+					Path base = null;
+					try {
+						// QLoader >= 0.18.1-beta.18 via api
+						var modC = (Optional<ModContainer>) MethodHandles.publicLookup()
+								.findVirtual(FabricLoader.class, "quilt_getModContainer", MethodType.methodType(Optional.class, Class.class))
+								.invoke(FabricLoader.getInstance(), getClass());
+						if (modC.isPresent()) {
+							base = modC.get().getRootPath(); // not deprecated on Quilt
+						}
+					} catch (NoSuchMethodException nsme) {
+						// QLoader 0.18.1-beta before 18 (remove once that's certainly dead)
 						var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
 						var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
 						FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
-						Path base = fsp.getPath(url.toURI());
+						base = fsp.getPath(url.toURI());
+					}
+					if (base != null) {
 						for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
 							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
 								skipped++;
 							}
 						}
+					} else {
+						Lib39Log.error("Failed to discover origin for "+pkg);
 					}
 				}
 			}
