@@ -43,6 +43,7 @@ public class AutoMixin implements IMixinConfigPlugin {
 	
 	@Override
 	public void onLoad(String pkg) {
+		Lib39Log.debug("AutoMixin loaded for {}", pkg);
 		this.pkg = pkg;
 	}
 
@@ -85,16 +86,20 @@ public class AutoMixin implements IMixinConfigPlugin {
 	@Override
 	public List<String> getMixins() {
 		List<String> rtrn = Lists.newArrayList();
+		int total = 0;
 		int skipped = 0;
 		try {
 			URL url = getJarURL(getClass().getProtectionDomain().getCodeSource().getLocation());
+			Lib39Log.debug("Jar URL appears to be {}", url);
 			if ("file".equals(url.getProtocol())) {
 				File f = new File(url.toURI());
 				if (f.isDirectory()) {
 					// Q/F dev environment
 					Path base = f.toPath();
 					try (var stream = Files.walk(base)) {
+						Lib39Log.debug("Discovering mixins via directory iteration (Quilt/Fabric dev environment)");
 						for (Path p : (Iterable<Path>)stream::iterator) {
+							total++;
 							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
 								skipped++;
 							}
@@ -103,7 +108,9 @@ public class AutoMixin implements IMixinConfigPlugin {
 				} else {
 					// FLoader, old QLoader
 					try (ZipFile zip = new ZipFile(f)) {
+						Lib39Log.debug("Discovering mixins via direct ZIP iteration (Fabric or old Quilt)");
 						for (var en : Collections.list(zip.entries())) {
+							total++;
 							if (discover(rtrn, en.getName(), () -> zip.getInputStream(en))) {
 								skipped++;
 							}
@@ -111,41 +118,49 @@ public class AutoMixin implements IMixinConfigPlugin {
 					}
 				}
 			} else {
+				// Hours wasted on Quilt refactors: ||||| |
+				
+				Path base = null;
 				try {
-					// QLoader <= 0.17
-					try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
-						ZipEntry en;
-						while ((en = zip.getNextEntry()) != null) {
-							if (discover(rtrn, en.getName(), () -> zip)) {
-								skipped++;
-							}
+					// QLoader >= 0.18.1-beta.18 via api
+					var modC = (Optional<ModContainer>) MethodHandles.publicLookup()
+							.findVirtual(FabricLoader.class, "quilt_getModContainer", MethodType.methodType(Optional.class, Class.class))
+							.invoke(FabricLoader.getInstance(), getClass());
+					if (modC.isPresent()) {
+						Lib39Log.debug("Discovering mixins via Quilt API (Quilt >= 0.18.1-beta.18)");
+						base = modC.get().getRootPath(); // not deprecated on Quilt
+					}
+				} catch (NoSuchMethodException nsme) {
+					// QLoader 0.18.1-beta before 18 (remove once that's certainly dead)
+					var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
+					var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
+					FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
+					Lib39Log.debug("Discovering mixins via Quilt internals (Quilt 0.18.1-beta)");
+					base = fsp.getPath(url.toURI());
+				}
+				if (base != null) {
+					total++;
+					for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
+						total++;
+						if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+							skipped++;
 						}
 					}
-				} catch (FileSystemException e) {
-					Path base = null;
+				} else {
 					try {
-						// QLoader >= 0.18.1-beta.18 via api
-						var modC = (Optional<ModContainer>) MethodHandles.publicLookup()
-								.findVirtual(FabricLoader.class, "quilt_getModContainer", MethodType.methodType(Optional.class, Class.class))
-								.invoke(FabricLoader.getInstance(), getClass());
-						if (modC.isPresent()) {
-							base = modC.get().getRootPath(); // not deprecated on Quilt
-						}
-					} catch (NoSuchMethodException nsme) {
-						// QLoader 0.18.1-beta before 18 (remove once that's certainly dead)
-						var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
-						var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
-						FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
-						base = fsp.getPath(url.toURI());
-					}
-					if (base != null) {
-						for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
-							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
-								skipped++;
+						// QLoader <= 0.17
+						try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
+							Lib39Log.debug("Discovering mixins via URL ZIP iteration (Quilt <= 0.17)");
+							ZipEntry en;
+							while ((en = zip.getNextEntry()) != null) {
+								total++;
+								if (discover(rtrn, en.getName(), () -> zip)) {
+									skipped++;
+								}
 							}
 						}
-					} else {
-						Lib39Log.error("Failed to discover origin for "+pkg);
+					} catch (FileSystemException e) {
+						Lib39Log.error("Failed to discover origin for {}", pkg);
 					}
 				}
 			}
@@ -154,7 +169,11 @@ public class AutoMixin implements IMixinConfigPlugin {
 		} catch (Throwable e) {
 			throw new RuntimeException("Cannot autodiscover mixins for "+pkg, e);
 		}
-		Lib39Log.debug("Discovered {} mixins in {} (skipped {})", rtrn.size(), pkg, skipped);
+		if (rtrn.isEmpty()) {
+			Lib39Log.warn("Found no mixins in {}", pkg);
+		} else {
+			Lib39Log.debug("Discovered {} mixins in {} (skipped {}, found {} total files)", rtrn.size(), pkg, skipped, total);
+		}
 		return rtrn;
 	}
 
