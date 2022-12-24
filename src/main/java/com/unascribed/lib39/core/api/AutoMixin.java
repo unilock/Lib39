@@ -8,7 +8,6 @@ import java.lang.invoke.MethodType;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
@@ -118,49 +117,49 @@ public class AutoMixin implements IMixinConfigPlugin {
 					}
 				}
 			} else {
-				// Hours wasted on Quilt refactors: ||||| |
-				
-				Path base = null;
+				// Hours wasted on Quilt refactors: ||||| ||
 				try {
-					// QLoader >= 0.18.1-beta.18 via api
-					var modC = (Optional<ModContainer>) MethodHandles.publicLookup()
-							.findVirtual(FabricLoader.class, "quilt_getModContainer", MethodType.methodType(Optional.class, Class.class))
-							.invoke(FabricLoader.getInstance(), getClass());
-					if (modC.isPresent()) {
-						Lib39Log.debug("Discovering mixins via Quilt API (Quilt >= 0.18.1-beta.18)");
-						base = modC.get().getRootPath(); // not deprecated on Quilt
-					}
-				} catch (NoSuchMethodException nsme) {
-					// QLoader 0.18.1-beta before 18 (remove once that's certainly dead)
-					var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
-					var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
-					FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
-					Lib39Log.debug("Discovering mixins via Quilt internals (Quilt 0.18.1-beta)");
-					base = fsp.getPath(url.toURI());
-				}
-				if (base != null) {
-					total++;
-					for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
-						total++;
-						if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
-							skipped++;
-						}
-					}
-				} else {
-					try {
-						// QLoader <= 0.17
-						try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
-							Lib39Log.debug("Discovering mixins via URL ZIP iteration (Quilt <= 0.17)");
-							ZipEntry en;
-							while ((en = zip.getNextEntry()) != null) {
-								total++;
-								if (discover(rtrn, en.getName(), () -> zip)) {
-									skipped++;
-								}
+					// QLoader <= 0.17
+					try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
+						ZipEntry en;
+						while ((en = zip.getNextEntry()) != null) {
+							if (total == 0) {
+								Lib39Log.debug("Discovering mixins via URL ZIP iteration (Quilt <= 0.17)");
+							}
+							total++;
+							if (discover(rtrn, en.getName(), () -> zip)) {
+								skipped++;
 							}
 						}
-					} catch (FileSystemException e) {
-						Lib39Log.error("Failed to discover origin for {}", pkg);
+					}
+				} catch (Exception e) {}
+				if (total == 0) {
+					Path base = null;
+					try {
+						// QLoader >= 0.18.1-beta.18 via api
+						var modC = (Optional<ModContainer>) MethodHandles.publicLookup()
+								.findVirtual(FabricLoader.class, "quilt_getModContainer", MethodType.methodType(Optional.class, Class.class))
+								.invoke(FabricLoader.getInstance(), getClass());
+						if (modC.isPresent()) {
+							Lib39Log.debug("Discovering mixins via Quilt API (Quilt >= 0.18.1-beta.18)");
+							base = modC.get().getRootPath(); // not deprecated on Quilt
+						}
+					} catch (NoSuchMethodException nsme) {
+						// QLoader 0.18.1-beta before 18 (remove once that's certainly dead)
+						var qmfsp = Class.forName("org.quiltmc.loader.impl.filesystem.QuiltMemoryFileSystemProvider");
+						var lu = MethodHandles.privateLookupIn(qmfsp, MethodHandles.lookup());
+						FileSystemProvider fsp = (FileSystemProvider) lu.findStatic(qmfsp, "instance", MethodType.methodType(qmfsp)).invoke();
+						Lib39Log.debug("Discovering mixins via Quilt internals (Quilt 0.18.1-beta)");
+						base = fsp.getPath(url.toURI());
+					}
+					if (base != null) {
+						total++;
+						for (Path p : (Iterable<Path>)Files.walk(base)::iterator) {
+							total++;
+							if (discover(rtrn, base.relativize(p).toString(), () -> Files.newInputStream(p))) {
+								skipped++;
+							}
+						}
 					}
 				}
 			}
