@@ -296,6 +296,7 @@ if (System.getenv("MODRINTH_TOKEN")) {
 		versionNumber = project.version
 		versionName = 'v'+project.version
 		versionType = 'release'
+		changelog = file('CHANGELOG.md').text
 		uploadFile = fatJar
 		additionalFiles = uploadAdditionalFiles
 		gameVersions = ['1.19.1', '1.19.2']
@@ -310,6 +311,8 @@ if (System.getenv("CURSE_TOKEN")) {
 		project {
 			id = '661690'
 			releaseType = 'release'
+			changelogType = 'markdown'
+			changelog = file('CHANGELOG.md')
 
 			addGameVersion '1.19.1'
 			addGameVersion '1.19.2'
