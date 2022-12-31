@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.unascribed.lib39.core.Lib39Log;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.tunnel.api.annotation.field.Optional;
 import com.unascribed.lib39.tunnel.api.exception.BadMessageException;
 import com.unascribed.lib39.tunnel.api.exception.WrongSideException;
@@ -31,7 +32,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public final class NetworkContext {
@@ -125,7 +125,7 @@ public final class NetworkContext {
 				m.doHandleServer(handler.player);
 			} catch (Throwable t) {
 				Lib39Log.warn("Exception thrown during packet handling, kicking player", t);
-				handler.disconnect(Text.literal("Internal server error"));
+				handler.disconnect(P39.text().literal("Internal server error"));
 			}
 			return true;
 		}

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-dessicant",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Dessicant)",
 	"description": "Helps you keep things DRY.",
 	"authors": [ "unascribed" ],
@@ -18,7 +18,7 @@
 	"mixins": [ "lib39-dessicant.mixins.json" ],
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-core",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Core)",
 	"description": "AutoRegister, AutoMixin, and friends.",
 	"authors": [ "unascribed" ],
@@ -23,7 +23,7 @@
 	"mixins": [ "lib39-core.mixins.json" ],
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": ">=1.18"
+		"minecraft": "^${mcversion}"
 	},
 	"custom": {
 		"modmenu": {

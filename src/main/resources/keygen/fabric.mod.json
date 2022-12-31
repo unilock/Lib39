@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-keygen",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Keygen)",
 	"description": "Adds support for playing back tracker music in the XM, S3M, and MOD formats via IBXM2.",
 	"authors": [ "unascribed" ],
@@ -18,7 +18,7 @@
 	"mixins": [ "lib39-keygen.mixins.json" ],
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

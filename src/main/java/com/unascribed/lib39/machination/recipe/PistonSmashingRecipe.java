@@ -5,9 +5,8 @@ import java.util.List;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.Lib39Machination;
-import com.unascribed.lib39.machination.Lib39Machination.RecipeSerializers;
-import com.unascribed.lib39.machination.Lib39Machination.RecipeTypes;
 import com.unascribed.lib39.machination.ingredient.BlockIngredient;
 
 import com.google.common.collect.Lists;
@@ -25,7 +24,6 @@ import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public class PistonSmashingRecipe implements Recipe<Inventory> {
@@ -161,7 +159,7 @@ public class PistonSmashingRecipe implements Recipe<Inventory> {
 					}
 					for (JsonElement ele : iter) {
 						JsonObject enObj = ele.getAsJsonObject();
-						StatusEffect effect = Registry.STATUS_EFFECT.get(Identifier.tryParse(enObj.get("effect").getAsString()));
+						StatusEffect effect = P39.registries().statusEffect().get(Identifier.tryParse(enObj.get("effect").getAsString()));
 						if (effect == null) continue;
 						int amplifier = JsonHelper.getInt(enObj, "amplifier", 0);
 						int duration = JsonHelper.getInt(enObj, "duration");

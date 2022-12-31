@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-util",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Util)",
 	"description": "Assorted utilities with no other home.",
 	"authors": [ "unascribed" ],
@@ -17,7 +17,7 @@
 	"environment": "*",
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

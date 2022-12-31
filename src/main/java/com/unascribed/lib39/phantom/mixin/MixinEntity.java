@@ -3,6 +3,7 @@ package com.unascribed.lib39.phantom.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,7 +18,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -79,7 +79,7 @@ public abstract class MixinEntity {
 	}
 	
 	@Inject(at=@At("RETURN"), method="updateMovementInFluid")
-	public void lib39Phantom$forgetMutableForFluid(TagKey<Fluid> tag, double d, CallbackInfoReturnable<Boolean> ci) {
+	public void lib39Phantom$forgetMutableForFluid(@Coerce Object tag, double d, CallbackInfoReturnable<Boolean> ci) {
 		lib39Phantom$currentlyCollidingPos = null;
 	}
 	

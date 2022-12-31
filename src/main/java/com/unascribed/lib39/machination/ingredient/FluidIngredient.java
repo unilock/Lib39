@@ -6,29 +6,27 @@ import java.util.function.Predicate;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.unascribed.lib39.core.P39;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import net.minecraft.fluid.Fluid;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.tag.TagKey;
-import net.minecraft.util.Holder;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class FluidIngredient implements Predicate<Fluid> {
 
 	private final Set<Fluid> exacts = Sets.newHashSet();
-	private final Set<TagKey<Fluid>> tags = Sets.newHashSet();
+	private final Set<P39.Tag<Fluid>> tags = Sets.newHashSet();
 	
 	private FluidIngredient() {}
 	
 	@Override
 	public boolean test(Fluid b) {
 		if (exacts.contains(b)) return true;
-		for (TagKey<Fluid> tag : tags) {
-			if (b.isIn(tag)) return true;
+		for (var tag : tags) {
+			if (tag.has(b)) return true;
 		}
 		return false;
 	}
@@ -36,9 +34,9 @@ public class FluidIngredient implements Predicate<Fluid> {
 	public List<Fluid> getMatchingFluids() {
 		List<Fluid> li = Lists.newArrayList();
 		li.addAll(exacts);
-		for (TagKey<Fluid> tag : tags) {
-			for (Holder<Fluid> fluid : Registry.FLUID.getTagOrEmpty(tag)) {
-				li.add(fluid.value());
+		for (var tag : tags) {
+			for (var fluid : tag.getAll()) {
+				li.add(fluid);
 			}
 		}
 		return li;
@@ -48,7 +46,7 @@ public class FluidIngredient implements Predicate<Fluid> {
 		List<Fluid> all = getMatchingFluids();
 		out.writeVarInt(all.size());
 		for (Fluid f : all) {
-			out.writeVarInt(Registry.FLUID.getRawId(f));
+			out.writeVarInt(P39.registries().fluid().getRawId(f));
 		}
 	}
 	
@@ -56,7 +54,7 @@ public class FluidIngredient implements Predicate<Fluid> {
 		int amt = in.readVarInt();
 		FluidIngredient out = new FluidIngredient();
 		for (int i = 0; i < amt; i++) {
-			out.exacts.add(Registry.FLUID.get(in.readVarInt()));
+			out.exacts.add(P39.registries().fluid().get(in.readVarInt()));
 		}
 		return out;
 	}
@@ -77,9 +75,9 @@ public class FluidIngredient implements Predicate<Fluid> {
 		if (!ele.isJsonObject()) throw new IllegalArgumentException("Expected object, got "+ele);
 		JsonObject obj = ele.getAsJsonObject();
 		if (obj.has("fluid")) {
-			out.exacts.add(Registry.FLUID.get(Identifier.tryParse(obj.get("fluid").getAsString())));
+			out.exacts.add(P39.registries().fluid().get(Identifier.tryParse(obj.get("fluid").getAsString())));
 		} else if (obj.has("tag")) {
-			out.tags.add(TagKey.of(Registry.FLUID_KEY, Identifier.tryParse(obj.get("tag").getAsString())));
+			out.tags.add(P39.registries().tag(P39.registries().fluid(), Identifier.tryParse(obj.get("tag").getAsString())));
 		} else {
 			throw new IllegalArgumentException("Don't know how to parse "+ele+" without a fluid or tag value");
 		}

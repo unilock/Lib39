@@ -6,12 +6,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.unascribed.lib39.core.Lib39Log;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.crowbar.api.SurfaceRuleModifier;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
 import net.minecraft.world.gen.surfacebuilder.SurfaceRules.SequenceMaterialRule;
 import net.minecraft.world.gen.surfacebuilder.VanillaSurfaceRules;
@@ -39,7 +39,7 @@ public class MixinVanillaSurfaceRules {
 				mthd.accept(en.getEntrypoint(), (id, bs) -> {
 					rule.sequence().add(0,
 							SurfaceRules.condition(
-								SurfaceRules.biome(RegistryKey.of(Registry.BIOME_KEY, id)),
+								SurfaceRules.biome(RegistryKey.of(P39.registries().biomeRegistry(), id)),
 								SurfaceRules.block(bs)
 							));
 				});

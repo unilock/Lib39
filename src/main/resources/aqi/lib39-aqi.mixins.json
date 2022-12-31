@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.unascribed.lib39.aqi.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "lib39-aqi-refmap.json",
+	"plugin": "com.unascribed.lib39.aqi.Lib39AQIMixin",
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

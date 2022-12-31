@@ -6,18 +6,13 @@ import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.Lib39Machination;
-import com.unascribed.lib39.machination.Lib39Machination.RecipeSerializers;
-import com.unascribed.lib39.machination.Lib39Machination.RecipeTypes;
 import com.unascribed.lib39.machination.ingredient.FluidIngredient;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.command.argument.BlockArgumentParser.BlockResult;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -30,7 +25,6 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public class SoakingRecipe implements Recipe<Inventory> {
@@ -150,19 +144,14 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			if (resultJson.has("item")) {
 				result = Either.left(ShapedRecipe.outputFromJson(resultJson));
 			} else {
-				try {
-					BlockResult bap = BlockArgumentParser.parseForBlock(Registry.BLOCK, new StringReader(resultJson.get("block").getAsString()), false);
-					result = Either.right(bap.blockState());
-				} catch (CommandSyntaxException e) {
-					throw new RuntimeException(e);
-				}
+				result = Either.right(P39.parsing().parseBlockState(resultJson.get("block").getAsString()));
 			}
 			int time = JsonHelper.getInt(obj, "time", 0);
 			int multiDelay = JsonHelper.getInt(obj, "multiDelay", 1);
 			String soundId = JsonHelper.getString(obj, "sound", null);
 			SoundEvent sound = null;
 			if (soundId != null) {
-				sound = Registry.SOUND_EVENT.get(new Identifier(soundId));
+				sound = P39.registries().soundEvent().get(new Identifier(soundId));
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -192,7 +181,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			int multiDelay = buf.readVarInt();
 			SoundEvent sound = null;
 			if (buf.readBoolean()) {
-				sound = Registry.SOUND_EVENT.get(buf.readVarInt());
+				sound = P39.registries().soundEvent().get(buf.readVarInt());
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -212,7 +201,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			buf.writeVarInt(recipe.time);
 			buf.writeVarInt(recipe.multiDelay);
 			buf.writeBoolean(recipe.sound != null);
-			if (recipe.sound != null) buf.writeVarInt(Registry.SOUND_EVENT.getRawId(recipe.sound));
+			if (recipe.sound != null) buf.writeVarInt(P39.registries().soundEvent().getRawId(recipe.sound));
 		}
 		
 	}

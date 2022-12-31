@@ -33,9 +33,15 @@ public class ItemSubGroup extends ItemGroup {
 	public int getIndexInParent() {
 		return indexInParent;
 	}
-	
+
 	@Override
-	public ItemStack createIcon() {
+	public ItemStack getIcon() {
+		return ItemStack.EMPTY;
+	}
+	
+	// unmapped as it's missing from the intersection, but that's ok
+	@Override
+	public ItemStack method_7750() {
 		return ItemStack.EMPTY;
 	}
 	

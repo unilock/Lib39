@@ -1,34 +1,29 @@
 package com.unascribed.lib39.gesundheit;
 
-import com.google.gson.internal.UnsafeAllocator;
+import java.util.function.Supplier;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.ParticleEffect;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.Difficulty;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
 
 public class DummyClientWorld extends ClientWorld {
 
+	public DummyClientWorld(ClientPlayNetworkHandler netHandler, Properties clientWorldProperties, RegistryKey<World> registryKey, Holder<DimensionType> dimensionType, int chunkManager, int simulationDistance, Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed) {
+		super(null, null, null, null, 0, 0, null, null, false, 0);
+		throw new AbstractMethodError();
+	}
+
 	private ParticleManager particleManager = MinecraftClient.getInstance().particleManager;
 	
-	private DummyClientWorld() throws Exception {
-		super(UnsafeAllocator.create().newInstance(ClientPlayNetworkHandler.class),
-				new Properties(Difficulty.PEACEFUL, false, false), World.NETHER,
-				MinecraftClient.getInstance().world.getRegistryManager().get(Registry.DIMENSION_TYPE_KEY)
-					.getHolderOrThrow(MinecraftClient.getInstance().world.method_44013()),
-				0, 0, MinecraftClient.getInstance()::getProfiler,
-				MinecraftClient.getInstance().worldRenderer,
-				false, 133742069);
-	}
 	
-	@Override
-	public DynamicRegistryManager getRegistryManager() {
-		return MinecraftClient.getInstance().world.getRegistryManager();
-	}
 	
 	public void setParticleManager(ParticleManager particleManager) {
 		this.particleManager = particleManager;
@@ -55,11 +50,7 @@ public class DummyClientWorld extends ClientWorld {
 	}
 	
 	public static DummyClientWorld create() {
-		try {
-			return new DummyClientWorld();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		throw new AbstractMethodError();
 	}
 	
 }

@@ -43,7 +43,7 @@ public class MixinScreen implements ParticleScreen {
 		}
 	}
 	
-	@Inject(at=@At("HEAD"), method="renderTooltipFromComponents")
+	@Inject(at=@At("HEAD"), method="method_32633")
 	public void lib39Gesundheit$renderTooltipFromComponents(MatrixStack matrices, List<TooltipComponent> components, int x, int y, CallbackInfo ci) {
 		lib39Gesundheit$renderParticles(matrices, MinecraftClient.getInstance().getTickDelta());
 	}

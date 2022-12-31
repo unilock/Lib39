@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-weld",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Weld)",
 	"description": "Adds a \"big blocks\" system.",
 	"authors": [ "unascribed" ],
@@ -22,7 +22,7 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^^${mcversion}",
 		"fabric-resource-loader-v0": "*",
 		"lib39-core": "^${version}"
 	},

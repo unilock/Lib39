@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.unascribed.lib39.core.mixinsupport.AutoMixinEligible;
 import com.unascribed.lib39.fractal.api.ItemSubGroup;
 import com.unascribed.lib39.fractal.quack.ItemGroupParent;
 
@@ -21,24 +22,25 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
 @Mixin(ItemGroup.class)
+@AutoMixinEligible(unlessConfigSet="platform 1.19.3")
 public class MixinItemGroup implements ItemGroupParent {
 
 	private final List<ItemSubGroup> lib39Fractal$children = Lists.newArrayList();
 	private ItemSubGroup lib39Fractal$selectedChild = null;
 
-	@Inject(at=@At("HEAD"), method="appendStacks", cancellable=true)
-	public void appendStacksHead(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
+	@Inject(at=@At("HEAD"), method="method_7738", cancellable=true)
+	public void lib39$appendStacksHead(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$selectedChild != null) {
-			lib39Fractal$selectedChild.appendStacks(stacks);
+			lib39Fractal$selectedChild.method_7738(stacks);
 			ci.cancel();
 		}
 	}
 	
-	@Inject(at=@At("TAIL"), method="appendStacks", cancellable=true)
+	@Inject(at=@At("TAIL"), method="method_7738", cancellable=true)
 	public void appendStacksTail(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$children != null) {
 			for (ItemSubGroup child : lib39Fractal$children) {
-				child.appendStacks(stacks);
+				child.method_7738(stacks);
 			}
 		}
 	}
@@ -61,15 +63,15 @@ public class MixinItemGroup implements ItemGroupParent {
 	// from Polymer
 	private static ItemGroup[] LIB39FRACTAL$GROUPS_OLD;
 	@Mutable @Shadow @Final
-	public static ItemGroup[] GROUPS;
+	public static ItemGroup[] field_7921;
 
-	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.GROUPS:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
+	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.field_7921:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
 			method="<init>")
 	private void lib39Fractal$replaceArrayToSkipAdding(int index, String id, CallbackInfo ci) {
 		Object self = this;
 		if (self instanceof ItemSubGroup) {
-			LIB39FRACTAL$GROUPS_OLD = GROUPS;
-			GROUPS = new ItemGroup[1];
+			LIB39FRACTAL$GROUPS_OLD = field_7921;
+			field_7921 = new ItemGroup[1];
 		}
 	}
 
@@ -78,7 +80,7 @@ public class MixinItemGroup implements ItemGroupParent {
 	private void lib39Fractal$unreplaceArray(int index, String id, CallbackInfo ci) {
 		Object self = this;
 		if (self instanceof ItemSubGroup) {
-			GROUPS = LIB39FRACTAL$GROUPS_OLD;
+			field_7921 = LIB39FRACTAL$GROUPS_OLD;
 		}
 	}
 	

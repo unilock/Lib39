@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.dessicant.DessicantData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,7 +18,6 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ItemStack.class)
@@ -27,10 +27,10 @@ public class MixinItemStack {
 			method="getTooltip", locals=LocalCapture.CAPTURE_FAILHARD)
 	public void getTooltip(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> ci, List<Text> tooltip) {
 		ItemStack self = (ItemStack)(Object)this;
-		if (DessicantData.optedInNamespaces.contains(Registry.ITEM.getId(self.getItem()).getNamespace())) {
+		if (DessicantData.optedInNamespaces.contains(P39.registries().item().getId(self.getItem()).getNamespace())) {
 			int i = 1;
 			while (I18n.hasTranslation(self.getTranslationKey()+".tip."+i)) {
-				tooltip.add(Text.translatable(self.getTranslationKey()+".tip."+i));
+				tooltip.add(P39.text().translatable(self.getTranslationKey()+".tip."+i));
 				i++;
 			}
 		}

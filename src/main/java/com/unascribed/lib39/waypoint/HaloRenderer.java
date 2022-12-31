@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormats;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
 import com.unascribed.lib39.util.api.MysticSet;
 import com.unascribed.lib39.waypoint.api.HaloBlockEntity;
@@ -39,7 +39,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.world.World;
 
@@ -104,17 +103,17 @@ public class HaloRenderer {
 				case UP: x = 180; break;
 			}
 			matrices.translate(0.5, 0.5, 0.5);
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(y));
-			matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(x));
+			P39.rendering().rotate(matrices, y, 0, 1, 0);
+			P39.rendering().rotate(matrices, x, 1, 0, 0);
 			matrices.translate(-0.5, -0.5, -0.5);
 		}
 
-		for (BakedQuad bq : bm.getQuads(state, null, world.random)) {
+		for (BakedQuad bq : P39.rendering().getQuads(bm, state, null, world)) {
 			dvc.bakedQuad(matrices.peek(), bq, r, g, b, 0, 0);
 		}
 		for (Direction dir : Direction.values()) {
 			if (pos == null || Block.shouldDrawSide(state, MinecraftClient.getInstance().world, pos, dir, pos.offset(dir))) {
-				for (BakedQuad bq : bm.getQuads(state, dir, world.random)) {
+				for (BakedQuad bq : P39.rendering().getQuads(bm, state, dir, world)) {
 					dvc.bakedQuad(matrices.peek(), bq, r, g, b, 0, 0);
 				}
 			}
@@ -169,8 +168,7 @@ public class HaloRenderer {
 					scratch.pop();
 				}
 				VertexBuffer vb = buffers.computeIfAbsent(csp, blah -> new VertexBuffer());
-				vb.bind();
-				vb.upload(vc.end());
+				P39.rendering().upload(vb, vc);
 				buffers.put(csp, vb);
 				boundingBoxes.put(csp, bounds);
 			}
@@ -187,7 +185,7 @@ public class HaloRenderer {
 						VertexBuffer buf = buffers.get(pos);
 						buf.bind();
 						WaypointRenderLayers.getHalo().startDrawing();
-						buf.setShader(matrices.peek().getPosition(), RenderSystem.getProjectionMatrix(), GameRenderer.getPositionTexColorNormalShader());
+						P39.rendering().draw(buf, matrices, GameRenderer.getPositionTexColorNormalShader());
 						WaypointRenderLayers.getHalo().endDrawing();
 						VertexBuffer.unbind();
 					matrices.pop();

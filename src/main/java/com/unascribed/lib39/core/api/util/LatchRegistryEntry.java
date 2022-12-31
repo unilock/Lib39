@@ -1,6 +1,6 @@
 package com.unascribed.lib39.core.api.util;
 
-import net.minecraft.util.Holder;
+import net.minecraft.registry.Holder;
 
 /**
  * Yarn-named version of {@link LatchHolder}.

@@ -1,0 +1,6 @@
+tiny	2	0	intermediary	named
+c	net/minecraft/class_2378	net/minecraft/registry/Registry
+c	net/minecraft/class_5321	net/minecraft/registry/RegistryKey
+c	net/minecraft/class_287	com/mojang/blaze3d/vertex/BufferBuilder
+c	net/minecraft/class_291	com/mojang/blaze3d/vertex/VertexBuffer
+c	net/minecraft/class_5944	net/minecraft/client/render/ShaderProgram

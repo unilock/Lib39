@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-phantom",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Phantom)",
 	"description": "Adds a system for temporarily phasing blocks out of the world.",
 	"authors": [ "unascribed" ],
@@ -18,7 +18,7 @@
 	"mixins": [ "lib39-phantom.mixins.json" ],
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

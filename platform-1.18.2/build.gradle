@@ -1,0 +1,97 @@
+plugins {
+	id 'fabric-loom'
+	id 'io.github.juuxel.loom-quiltflower'
+}
+
+sourceCompatibility = JavaVersion.toVersion(16)
+targetCompatibility = JavaVersion.toVersion(16)
+
+repositories {
+	maven {
+		url 'https://repo.unascribed.com'
+		content {
+			includeGroup 'com.unascribed'
+		}
+	}
+	maven {
+		url 'https://maven.quiltmc.org/repository/release'
+		content {
+			includeGroup 'org.quiltmc'
+		}
+	}
+	maven {
+		url 'https://maven.terraformersmc.com/releases/'
+		content {
+			includeGroup 'dev.emi'
+			includeGroup 'com.terraformersmc'
+		}
+	}
+	maven {
+		url "https://maven.shedaniel.me/"
+		content {
+			includeGroup 'me.shedaniel'
+			includeGroup 'me.shedaniel.cloth'
+			includeGroup 'me.shedaniel.cloth.api'
+			includeGroup 'dev.architectury'
+		}
+	}
+	maven {
+		url "https://dvs1.progwml6.com/files/maven/"
+		content {
+			includeGroup 'mezz.jei'
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraft_version}"
+	mappings loom.layered {
+		mappings("org.quiltmc:quilt-mappings:${mappings_version}:intermediary-v2")
+		mappings(file('../fixups.tiny'))
+	}
+	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+	
+	implementation rootProject
+}
+
+loom {
+	accessWidenerPath = file("../src/main/resources/lib39.accesswidener")
+}
+
+java {
+	withSourcesJar()
+}
+
+compileJava {
+	options.release = 16
+}
+
+tasks.validateAccessWidener {
+	enabled = false
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+}
+
+tasks.withType(AbstractArchiveTask) {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+tasks.jar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all'
+}
+
+tasks.remapJar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all-remapped'
+}
+
+tasks.remapSourcesJar {
+	destinationDirectory.set(file('build/tmp'))
+	classifier 'all-sources-remapped'
+}

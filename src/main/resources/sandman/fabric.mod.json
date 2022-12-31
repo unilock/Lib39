@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-sandman",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Sandman)",
 	"description": "Allows making items that \"always tick\", even in inventories or on the ground.",
 	"authors": [ "unascribed" ],
@@ -21,7 +21,7 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

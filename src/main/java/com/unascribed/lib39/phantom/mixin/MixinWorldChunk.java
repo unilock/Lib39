@@ -15,23 +15,12 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.UpgradeData;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.gen.chunk.BlendingData;
 
 @Mixin(WorldChunk.class)
-public abstract class MixinWorldChunk extends Chunk {
-
-	public MixinWorldChunk(ChunkPos pos, UpgradeData upgradeData, HeightLimitView heightLimitView, Registry<Biome> biome, long inhabitedTime, ChunkSection[] sectionArrayInitializer, BlendingData blendingData) {
-		super(pos, upgradeData, heightLimitView, biome, inhabitedTime, sectionArrayInitializer, blendingData);
-	}
+public abstract class MixinWorldChunk {
 
 	@Shadow @Final
 	private World world;
@@ -39,7 +28,7 @@ public abstract class MixinWorldChunk extends Chunk {
 	@Inject(at=@At("HEAD"), method="getBlockEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/world/chunk/WorldChunk$CreationType;)Lnet/minecraft/block/entity/BlockEntity;", cancellable=true)
 	public void lib39Phantom$getBlockEntity(BlockPos pos, WorldChunk.CreationType creationType, CallbackInfoReturnable<BlockEntity> ci) {
 		if (world != null && world.isClient && world instanceof PhantomWorld) {
-			if (((PhantomWorld)world).lib39Phantom$isPhased(this.pos, pos)) {
+			if (((PhantomWorld)world).lib39Phantom$isPhased(((Chunk)(Object)this).getPos(), pos)) {
 				ci.setReturnValue(null);
 			}
 		}
@@ -48,7 +37,7 @@ public abstract class MixinWorldChunk extends Chunk {
 	@Inject(at=@At("HEAD"), method="getBlockState", cancellable=true)
 	public void lib39Phantom$getBlockState(BlockPos pos, CallbackInfoReturnable<BlockState> ci) {
 		if (world != null && world.isClient && world instanceof PhantomWorld) {
-			if (((PhantomWorld)world).lib39Phantom$isPhased(this.pos, pos)) {
+			if (((PhantomWorld)world).lib39Phantom$isPhased(((Chunk)(Object)this).getPos(), pos)) {
 				ci.setReturnValue(Blocks.VOID_AIR.getDefaultState());
 			}
 		}
@@ -57,7 +46,7 @@ public abstract class MixinWorldChunk extends Chunk {
 	@Inject(at=@At("HEAD"), method="getFluidState", cancellable=true)
 	public void lib39Phantom$getFluidState(BlockPos pos, CallbackInfoReturnable<FluidState> ci) {
 		if (world != null && world.isClient && world instanceof PhantomWorld) {
-			if (((PhantomWorld)world).lib39Phantom$isPhased(this.pos, pos)) {
+			if (((PhantomWorld)world).lib39Phantom$isPhased(((Chunk)(Object)this).getPos(), pos)) {
 				ci.setReturnValue(Fluids.EMPTY.getDefaultState());
 			}
 		}

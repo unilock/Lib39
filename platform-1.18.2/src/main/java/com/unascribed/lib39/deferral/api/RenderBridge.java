@@ -1,13 +1,14 @@
 package com.unascribed.lib39.deferral.api;
 
+import java.lang.invoke.MethodHandles;
 import java.nio.FloatBuffer;
+import java.util.function.Supplier;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL21;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.unascribed.lib39.core.api.util.ReflectionHelper;
 import com.unascribed.lib39.deferral.Lib39Deferral;
-import com.unascribed.lib39.deferral.mixin.AccessorRenderSystem;
-
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
@@ -42,7 +43,7 @@ public class RenderBridge extends GL21 {
 	
 	public static void glPushMCMatrix(MatrixStack matrices) {
 		glPushMCMatrix();
-		glMultMatrixf(matrices.peek().getPosition());
+		glMultMatrixf(matrices.peek().getModel());
 	}
 	
 	public static void glPopMCMatrix() {
@@ -52,8 +53,11 @@ public class RenderBridge extends GL21 {
 		glPopMatrix();
 	}
 	
+	private static final Supplier<Vec3f[]> shaderLightDirections = ReflectionHelper.of(MethodHandles.lookup(), RenderSystem.class)
+			.obtainStaticGetter(Vec3f[].class, "shaderLightDirections");
+	
 	public static void glCopyMCLight() {
-		Vec3f[] lights = AccessorRenderSystem.lib39Deferral$getShaderLightDirections();
+		Vec3f[] lights = shaderLightDirections.get();
 		glPushMatrix();
 		glLoadIdentity();
 		glEnable(GL_LIGHT0);

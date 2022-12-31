@@ -1,5 +1,6 @@
 package com.unascribed.lib39.machination;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.core.api.AutoRegistry;
 import com.unascribed.lib39.machination.logic.SoakingHandler;
 import com.unascribed.lib39.machination.recipe.PistonSmashingRecipe;
@@ -10,7 +11,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
-import net.minecraft.util.registry.Registry;
 
 public class Lib39Machination implements ModInitializer {
 
@@ -28,8 +28,8 @@ public class Lib39Machination implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
-		autoreg.autoRegister(Registry.RECIPE_TYPE, RecipeTypes.class, RecipeType.class);
-		autoreg.autoRegister(Registry.RECIPE_SERIALIZER, RecipeSerializers.class, RecipeSerializer.class);
+		autoreg.autoRegister(P39.registries().recipeType(), RecipeTypes.class, RecipeType.class);
+		autoreg.autoRegister(P39.registries().recipeSerializer(), RecipeSerializers.class, RecipeSerializer.class);
 		
 		ServerTickEvents.START_WORLD_TICK.register(SoakingHandler::startServerWorldTick);
 		ServerTickEvents.END_WORLD_TICK.register(SoakingHandler::endServerWorldTick);

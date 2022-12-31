@@ -1,5 +1,6 @@
 package com.unascribed.lib39.fractal;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.fractal.quack.ItemGroupParent;
 import com.unascribed.lib39.fractal.quack.SubTabLocation;
 
@@ -14,7 +15,7 @@ public class Lib39FractalEMIPlugin implements EmiPlugin {
 	@Override
 	public void register(EmiRegistry registry) {
 		registry.addExclusionArea(CreativeInventoryScreen.class, (screen, out) -> {
-			ItemGroup selected = ItemGroup.GROUPS[screen.getSelectedTab()];
+			ItemGroup selected = P39.screens().getSelectedItemGroup(screen);
 			ItemGroupParent parent = (ItemGroupParent)selected;
 			if (screen instanceof SubTabLocation stl && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 				out.accept(new Bounds(stl.lib39Fractal$getX(), stl.lib39Fractal$getY(), stl.lib39Fractal$getW(), stl.lib39Fractal$getH()));

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-conflagration",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Conflagration)",
 	"description": "A CSS-based configuration library.",
 	"authors": [ "unascribed" ],
@@ -15,11 +15,8 @@
 	"license": "MIT",
 	"icon": "lib39.png",
 	"environment": "*",
-	"mixins": [ "lib39-conflagration.mixins.json" ],
 	"entrypoints": { "main": ["com.unascribed.lib39.conflagration.Lib39ConflagrationInit"] },
 	"depends": {
-		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

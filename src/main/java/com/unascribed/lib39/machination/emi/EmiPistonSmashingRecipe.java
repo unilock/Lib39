@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.compress.utils.Lists;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.recipe.PistonSmashingRecipe;
 
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -14,9 +15,7 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3f;
 
 public class EmiPistonSmashingRecipe implements EmiRecipe {
 
@@ -102,7 +101,7 @@ public class EmiPistonSmashingRecipe implements EmiRecipe {
 		widgets.addSlot(EmiIngredient.of(catalysts.stream().map(BlockEmiStack::new).toList()), x+16, 24)
 			.drawBack(false);
 		widgets.add(new RotatedTextureWidget(PISTON_SIDE, x-31, 25, 16, 16, 0, 0, 16, 16, 16, 16,
-				Vec3f.POSITIVE_Z.getDegreesQuaternion(90)));
+				90, 0, 0, 1));
 		x += 8;
 		widgets.addTexture(CURVED_ARROW, x, 3, 16, 16, 0, 0, 16, 16, 16, 16);
 		x += 20;
@@ -116,7 +115,7 @@ public class EmiPistonSmashingRecipe implements EmiRecipe {
 			x += 12;
 			widgets.addSlot(cloudOutput, x, 0)
 				.recipeContext(this)
-				.appendTooltip(Text.translatable("emi.category.lib39-machination.piston_smashing.cloud_output_hint"));
+				.appendTooltip(P39.text().translatable("emi.category.lib39-machination.piston_smashing.cloud_output_hint"));
 			x += 20;
 		}
 	}

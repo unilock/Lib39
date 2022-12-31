@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.Tessellator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticle;
 import com.unascribed.lib39.gesundheit.mixin.AccessorParticleManager;
-import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.particle.Particle;
@@ -29,13 +28,12 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vector4f;
 import net.minecraft.util.profiler.Profiler;
 
 public class GuiParticleManager extends ParticleManager {
 
-	public GuiParticleManager(ClientWorld world, TextureManager textureManager) {
-		super(world, new UnregisterableTextureManager(textureManager));
+	public GuiParticleManager(DummyClientWorld world, TextureManager textureManager) {
+		super((ClientWorld)(Object)world, new UnregisterableTextureManager(textureManager));
 		this.particleAtlasTexture = MinecraftClient.getInstance().particleManager.particleAtlasTexture;
 	}
 	
@@ -56,14 +54,7 @@ public class GuiParticleManager extends ParticleManager {
 		
 		Tessellator tess = Tessellator.getInstance();
 		BufferBuilder bldr = tess.getBufferBuilder();
-		VertexConsumer vc = new DelegatingVertexConsumer(bldr) {
-			@Override
-			public VertexConsumer vertex(double x, double y, double z) {
-				Vector4f vec = new Vector4f((float)x, (float)y, (float)z, 1);
-				vec.transform(matrices.peek().getPosition());
-				return super.vertex(vec.getX(), vec.getY(), vec.getZ());
-			}
-		};
+		VertexConsumer vc = new TransformingVertexConsumer(bldr, matrices);
 
 		for (Map.Entry<ParticleTextureSheet, Queue<Particle>> en : ((AccessorParticleManager)this).lib39Gesundheit$getParticles().entrySet()) {
 			if (en.getValue() != null) {

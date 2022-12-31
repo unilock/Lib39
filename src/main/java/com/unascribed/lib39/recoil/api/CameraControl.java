@@ -4,14 +4,13 @@ import net.minecraft.util.math.Vec3d;
 
 public final class CameraControl {
 	
-	private float yaw, pitch, roll;
+	private float yaw, pitch;
 	private Vec3d pos;
 
-	public CameraControl(Vec3d pos, float yaw, float pitch, float roll) {
+	public CameraControl(Vec3d pos, float yaw, float pitch) {
 		this.pos = pos;
 		this.yaw = yaw;
 		this.pitch = pitch;
-		this.roll = roll;
 	}
 	
 	public void setYaw(float yaw) {
@@ -20,10 +19,6 @@ public final class CameraControl {
 	
 	public void setPitch(float pitch) {
 		this.pitch = pitch;
-	}
-	
-	public void setRoll(float roll) {
-		this.roll = roll;
 	}
 	
 	public void setPos(Vec3d pos) {
@@ -38,10 +33,6 @@ public final class CameraControl {
 		return pitch;
 	}
 	
-	public float getRoll() {
-		return roll;
-	}
-
 	public Vec3d getPos() {
 		return pos;
 	}

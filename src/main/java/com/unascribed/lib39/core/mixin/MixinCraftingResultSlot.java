@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.unascribed.lib39.core.Lib39Mod;
+import com.unascribed.lib39.core.P39;
+
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -31,7 +33,8 @@ public class MixinCraftingResultSlot {
 		if (player.world.isClient) return;
 		Optional<CraftingRecipe> recipe = player.world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, player.world);
 		if (recipe.isPresent() && Lib39Mod.craftingSounds.containsKey(recipe.get().getId())) {
-			player.world.playSound(null, player.getX(), player.getY(), player.getZ(), Lib39Mod.craftingSounds.get(recipe.get().getId()), player.getSoundCategory(), 1, 1);
+			P39.worlds().playSound(player.world, null, player.getX(), player.getY(), player.getZ(),
+					Lib39Mod.craftingSounds.get(recipe.get().getId()), player.getSoundCategory(), 1, 1);
 		}
 	}
 	

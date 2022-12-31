@@ -2,14 +2,14 @@ package com.unascribed.lib39.sandman;
 
 import java.util.Set;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.sandman.api.TicksAlwaysItem;
 import com.unascribed.lib39.sandman.mixin.AccessorHorseBaseEntity;
 import com.unascribed.lib39.sandman.mixin.AccessorLootableContainerBlockEntity;
-import com.unascribed.lib39.sandman.mixin.AccessorThreadedAnvilChunkStorage;
-
 import com.google.common.base.Predicates;
 import com.google.common.collect.Sets;
 
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
@@ -23,38 +23,30 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.WorldChunk;
 
 public class TickAlwaysItemHandler {
 
 	public static void startServerWorldTick(ServerWorld world) {
-		for (ChunkHolder ch : ((AccessorThreadedAnvilChunkStorage)world.getChunkManager().threadedAnvilChunkStorage).lib39Sandman$getChunkHolders().values()) {
-			if (world.random.nextInt(40) == 0) {
-				var holderChunk = ch.getWorldChunk();
-				if (holderChunk != null && holderChunk.getStatus().isAtLeast(ChunkStatus.FULL)) {
-					var realChunk = world.getChunk(holderChunk.getPos().x, holderChunk.getPos().z, ChunkStatus.FULL, false);
-					if (realChunk != null && realChunk instanceof WorldChunk wc) {
-						var bes = wc.getBlockEntities();
-						if (bes != null) {
-							for (BlockEntity be : bes.values()) {
-								if (world.random.nextInt(3) == 0) {
-									if (be instanceof AccessorLootableContainerBlockEntity a && a.lib39Sandman$getLootTableId() != null)
-										continue;
-									if (be instanceof Inventory inv) {
-										for (int i = 0; i < inv.size(); i++) {
-											ItemStack is = inv.getStack(i);
-											if (is.getItem() instanceof TicksAlwaysItem tai) {
-												tai.blockInventoryTick(is, world, be.getPos(), i);
-												inv.setStack(i, is);
-											}
-										}
-										break;
+		var rnd = ThreadLocalRandom.current();
+		for (var wc : P39.worlds().getLoadedChunks(world)) {
+			if (rnd.nextInt(40) == 0) {
+				var bes = wc.getBlockEntities();
+				if (bes != null) {
+					for (BlockEntity be : bes.values()) {
+						if (rnd.nextInt(3) == 0) {
+							if (be instanceof AccessorLootableContainerBlockEntity a && a.lib39Sandman$getLootTableId() != null)
+								continue;
+							if (be instanceof Inventory inv) {
+								for (int i = 0; i < inv.size(); i++) {
+									ItemStack is = inv.getStack(i);
+									if (is.getItem() instanceof TicksAlwaysItem tai) {
+										tai.blockInventoryTick(is, world, be.getPos(), i);
+										inv.setStack(i, is);
 									}
 								}
+								break;
 							}
 						}
 					}
@@ -91,7 +83,7 @@ public class TickAlwaysItemHandler {
 				}
 				continue;
 			}
-			if (world.random.nextInt(40) == 0) {
+			if (rnd.nextInt(40) == 0) {
 				if (e.getClass().getName().equals("net.mehvahdjukaar.snowyspirit.common.entity.ContainerHolderEntity")) {
 					var nbt = new NbtCompound();
 					e.writeNbt(nbt);

@@ -1,7 +1,7 @@
 package com.unascribed.lib39.waypoint;
 
-import com.mojang.blaze3d.platform.GlStateManager.class_4534;
-import com.mojang.blaze3d.platform.GlStateManager.class_4535;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormats;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
@@ -16,7 +16,7 @@ public final class WaypointRenderLayers extends RenderPhase {
 
 	private static final RenderPhase.Transparency ADDITIVE_WITH_ALPHA_TRANSPARENCY = new RenderPhase.Transparency("lib39_waypoint_additive_transparency_with_alpha", () -> {
 		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(class_4535.SRC_ALPHA, class_4534.ONE, class_4535.SRC_ALPHA, class_4534.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE, SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 	}, () -> {
 		RenderSystem.disableBlend();
 		RenderSystem.defaultBlendFunc();

@@ -1,9 +1,11 @@
 package com.unascribed.lib39.weld;
 
+import com.unascribed.lib39.core.P39;
+
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class Lib39Weld implements ModInitializer {
 
@@ -11,7 +13,7 @@ public class Lib39Weld implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
-		Registry.register(Registry.SOUND_EVENT, "lib39-weld:silence", SILENCE);
+		Registry.register(P39.registries().soundEvent(), "lib39-weld:silence", SILENCE);
 	}
 
 }

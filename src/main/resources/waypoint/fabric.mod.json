@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-waypoint",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Waypoint)",
 	"description": "Adds an additional baked world layer with additive blending for rendering various kinds of glowy effects.",
 	"authors": [ "unascribed" ],
@@ -21,7 +21,7 @@
 	"accessWidener": "lib39-waypoint.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}",
 		"fabric-transitive-access-wideners-v1": "*",
 		"fabric-lifecycle-events-v1": "*",

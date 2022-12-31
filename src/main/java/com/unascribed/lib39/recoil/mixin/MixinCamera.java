@@ -1,6 +1,5 @@
 package com.unascribed.lib39.recoil.mixin;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,9 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.BlockView;
 
 @Environment(EnvType.CLIENT)
@@ -28,15 +25,6 @@ public abstract class MixinCamera {
 	private float pitch;
 	@Shadow
 	private float yaw;
-	
-	@Shadow @Final
-	private Vec3f horizontalPlane;
-	@Shadow @Final
-	private Vec3f verticalPlane;
-	@Shadow @Final
-	private Vec3f diagonalPlane;
-	@Shadow @Final
-	private Quaternion rotation;
 	
 	@Shadow
 	protected abstract void setRotation(float yaw, float pitch);
@@ -62,29 +50,13 @@ public abstract class MixinCamera {
 			p = Perspective.FIRST_PERSON;
 		}
 		Object self = this;
-		CameraControl ctrl = new CameraControl(getPos(), getYaw(), getPitch(), 0);
+		CameraControl ctrl = new CameraControl(getPos(), getYaw(), getPitch());
 		RecoilEvents.CAMERA_SETUP.invoker().onCameraSetup((Camera)self, focusedEntity, p, tickDelta, ctrl);
 		if (ctrl.getPos() != getPos()) {
 			setPos(ctrl.getPos());
 		}
-		if (ctrl.getYaw() != getYaw() || ctrl.getPitch() != getPitch() || ctrl.getRoll() != 0) {
-			if (ctrl.getRoll() != 0) {
-				// oh no...
-				pitch = ctrl.getPitch();
-				yaw = ctrl.getYaw();
-				rotation.set(0, 0, 0, 1);
-				rotation.hamiltonProduct(Vec3f.POSITIVE_Y.getDegreesQuaternion(-yaw));
-				rotation.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(pitch));
-				rotation.hamiltonProduct(Vec3f.POSITIVE_Z.getDegreesQuaternion(ctrl.getRoll()));
-				horizontalPlane.set(0, 0, 1);
-				horizontalPlane.rotate(rotation);
-				verticalPlane.set(0, 1, 0);
-				verticalPlane.rotate(rotation);
-				diagonalPlane.set(1, 0, 0);
-				diagonalPlane.rotate(rotation);
-			} else {
-				setRotation(ctrl.getYaw(), ctrl.getPitch());
-			}
+		if (ctrl.getYaw() != getYaw() || ctrl.getPitch() != getPitch()) {
+			setRotation(ctrl.getYaw(), ctrl.getPitch());
 		}
 	}
 	

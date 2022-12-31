@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-gesundheit",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Gesundheit)",
 	"description": "Adds a GUI particle system.",
 	"authors": [ "unascribed" ],
@@ -19,7 +19,7 @@
 	"accessWidener": "lib39-gesundheit.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "lib39-fractal",
-	"version": "${version}",
+	"version": "${version}+${mcversion}",
 	"name": "Lib39 (Fractal)",
 	"description": "Adds item subgroups.",
 	"authors": [ "unascribed" ],
@@ -24,7 +24,7 @@
 	"depends": {
 		"fabricloader": ">=0.7.4",
 		"fabric-resource-loader-v0": "*",
-		"minecraft": "^1.19",
+		"minecraft": "^${mcversion}",
 		"lib39-core": "^${version}"
 	},
 	"custom": {

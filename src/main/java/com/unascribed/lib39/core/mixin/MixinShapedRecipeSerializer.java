@@ -7,11 +7,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.gson.JsonObject;
 import com.unascribed.lib39.core.Lib39Mod;
+import com.unascribed.lib39.core.P39;
 
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 @Mixin(ShapedRecipe.Serializer.class)
 public class MixinShapedRecipeSerializer {
@@ -19,7 +19,7 @@ public class MixinShapedRecipeSerializer {
 	@Inject(at=@At("RETURN"), method="read(Lnet/minecraft/util/Identifier;Lcom/google/gson/JsonObject;)Lnet/minecraft/recipe/ShapedRecipe;")
 	public void lib39Core$read(Identifier identifier, JsonObject jsonObject, CallbackInfoReturnable<Recipe<?>> ci) {
 		if (jsonObject.has("lib39:sound")) {
-			Lib39Mod.craftingSounds.put(identifier, Registry.SOUND_EVENT.get(new Identifier(jsonObject.get("lib39:sound").getAsString())));
+			Lib39Mod.craftingSounds.put(identifier, P39.registries().soundEvent().get(new Identifier(jsonObject.get("lib39:sound").getAsString())));
 		} else {
 			Lib39Mod.craftingSounds.remove(identifier);
 		}

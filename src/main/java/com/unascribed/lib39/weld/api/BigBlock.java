@@ -2,15 +2,18 @@ package com.unascribed.lib39.weld.api;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.weld.Lib39Weld;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -165,8 +168,16 @@ public abstract class BigBlock extends Block {
 	}
 	
 	@Override
-	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
-		super.scheduledTick(state, world, pos, random);
+	public void method_9588(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
+		_scheduledTick(state, world, pos);
+	}
+	
+	// @Override
+	public void method_9588(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		_scheduledTick(state, world, pos);
+	}
+	
+	private void _scheduledTick(BlockState state, ServerWorld world, BlockPos pos) {
 		for (Direction dir : Direction.values()) {
 			BlockState expected = getExpectedNeighbor(state, dir);
 			if (expected != null) {
@@ -178,7 +189,7 @@ public abstract class BigBlock extends Block {
 			}
 		}
 	}
-	
+
 	@Override
 	public PistonBehavior getPistonBehavior(BlockState state) {
 		return PistonBehavior.BLOCK;
@@ -191,9 +202,10 @@ public abstract class BigBlock extends Block {
 	}
 	
 	public void alterDroppedEntity(BlockPos pos, BlockState state, ItemEntity entity) {
-		double x = pos.getX()-getX(state)+(entity.world.random.nextFloat() * (getXSize(state)/2D) + (getXSize(state)/4D));
-		double y = pos.getY()-getY(state)+(entity.world.random.nextFloat() * (getYSize(state)/2D) + (getYSize(state)/4D));
-		double z = pos.getZ()-getZ(state)+(entity.world.random.nextFloat() * (getZSize(state)/2D) + (getZSize(state)/4D));
+		var rnd = ThreadLocalRandom.current();
+		double x = pos.getX()-getX(state)+(rnd.nextFloat() * (getXSize(state)/2D) + (getXSize(state)/4D));
+		double y = pos.getY()-getY(state)+(rnd.nextFloat() * (getYSize(state)/2D) + (getYSize(state)/4D));
+		double z = pos.getZ()-getZ(state)+(rnd.nextFloat() * (getZSize(state)/2D) + (getZSize(state)/4D));
 		entity.setPosition(x, y, z);
 	}
 
@@ -206,7 +218,7 @@ public abstract class BigBlock extends Block {
 		double x = (pos.getX()-b.getX(state))+(b.getXSize(state)/2D);
 		double y = (pos.getY()-b.getY(state))+(b.getYSize(state)/2D);
 		double z = (pos.getZ()-b.getZ(state))+(b.getZSize(state)/2D);
-		world.playSound(player, x, y, z, event, cat, vol, pitch);
+		P39.worlds().playSound(world, player, x, y, z, event, cat, vol, pitch);
 	}
 
 	public static boolean isReceivingRedstonePower(World world, BlockPos pos, BlockState state) {

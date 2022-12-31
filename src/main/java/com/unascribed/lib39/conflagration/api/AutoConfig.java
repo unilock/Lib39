@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import com.unascribed.lib39.conflagration.Lib39ConflagrationInit;
 import com.unascribed.lib39.conflagration.api.qdcss.QDCSS;
 import com.unascribed.lib39.core.Lib39Log;
+import com.unascribed.lib39.core.P39;
 
 import com.google.common.base.Ascii;
 import com.google.common.base.Enums;
@@ -130,7 +131,7 @@ public abstract class AutoConfig {
 		/**
 		 * The file does not exist. All options adopted default values.
 		 */
-		DOES_NOT_EXIST,
+		MISSING,
 		/**
 		 * The file exists, but some keys were missing. Those options adopted default values.
 		 */
@@ -201,7 +202,7 @@ public abstract class AutoConfig {
 		configsByPath.put(path, reg);
 		configsByClass.put(cfg, reg);
 		var res = load(cfg);
-		if (res == LoadResult.DOES_NOT_EXIST || (res == LoadResult.NORMAL && Lib39ConflagrationInit.isInitialized)) {
+		if (res == LoadResult.MISSING || (res == LoadResult.NORMAL && Lib39ConflagrationInit.isInitialized)) {
 			saveAsync(cfg);
 		}
 		if (res != LoadResult.NORMAL) {
@@ -307,19 +308,19 @@ public abstract class AutoConfig {
 		@Override
 		@Environment(EnvType.CLIENT)
 		public Optional<ButtonWidget> createWidget(Text desc, int x, int y, int width, int height, Boolean currentValue, Consumer<Boolean> updateCallback) {
-			var w = new ButtonWidget(x, y, width, height, Text.translatable(currentValue ? "options.on" : "options.off"), b -> {}) {
+			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(currentValue ? "options.on" : "options.off"), b -> {}) {
 				private boolean value = currentValue;
 				
 				@Override
 				protected MutableText getNarrationMessage() {
-					return Text.translatable(value ? "options.on.composed" : "options.off.composed", desc);
+					return P39.text().translatable(value ? "options.on.composed" : "options.off.composed", desc);
 				}
 				
 				@Override
 				public void onPress() {
 					value = !value;
 					updateCallback.accept(value);
-					setMessage(Text.translatable(value ? "options.on" : "options.off"));
+					setMessage(P39.text().translatable(value ? "options.on" : "options.off"));
 				}
 			};
 			return Optional.of(w);
@@ -352,19 +353,19 @@ public abstract class AutoConfig {
 		public Optional<ButtonWidget> createWidget(Text desc, int x, int y, int width, int height, E currentValue, Consumer<E> updateCallback) {
 			Iterator<E> cycle = Iterators.cycle(clazz.getEnumConstants());
 			Iterators.find(cycle, t -> t == currentValue);
-			var w = new ButtonWidget(x, y, width, height, Text.translatable(translationKey+"."+Ascii.toLowerCase(currentValue.name())), b -> {}) {
+			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(translationKey+"."+Ascii.toLowerCase(currentValue.name())), b -> {}) {
 				private E value = currentValue;
 				
 				@Override
 				protected MutableText getNarrationMessage() {
-					return Text.translatable("options.generic_value", desc, Text.translatable(translationKey+"."+Ascii.toLowerCase(value.name())));
+					return P39.text().translatable("options.generic_value", desc, P39.text().translatable(translationKey+"."+Ascii.toLowerCase(value.name())));
 				}
 				
 				@Override
 				public void onPress() {
 					value = cycle.next();
 					updateCallback.accept(value);
-					setMessage(Text.translatable(translationKey+"."+Ascii.toLowerCase(value.name())));
+					setMessage(P39.text().translatable(translationKey+"."+Ascii.toLowerCase(value.name())));
 				}
 			};
 			return Optional.of(w);
@@ -413,7 +414,7 @@ public abstract class AutoConfig {
 		@Override
 		@Environment(EnvType.CLIENT)
 		public Optional<SliderWidget> createWidget(Text desc, int x, int y, int width, int height, Double currentValue, Consumer<Double> updateCallback) {
-			var w = new SliderWidget(x, y, width, height, Text.literal(String.format("%.2f", currentValue)), currentValue) {
+			var w = new SliderWidget(x, y, width, height, P39.text().literal(String.format("%.2f", currentValue)), currentValue) {
 				
 				private double realValue = currentValue;
 				
@@ -426,9 +427,9 @@ public abstract class AutoConfig {
 				@Override
 				protected void updateMessage() {
 					if (specialValueTranslationKeys.containsKey(realValue)) {
-						setMessage(Text.translatable(specialValueTranslationKeys.get(realValue)));
+						setMessage(P39.text().translatable(specialValueTranslationKeys.get(realValue)));
 					} else {
-						setMessage(Text.literal(String.format("%.2f", realValue)));
+						setMessage(P39.text().literal(String.format("%.2f", realValue)));
 					}
 				}
 			};
@@ -476,7 +477,7 @@ public abstract class AutoConfig {
 		@Override
 		@Environment(EnvType.CLIENT)
 		public Optional<SliderWidget> createWidget(Text desc, int x, int y, int width, int height, Integer currentValue, Consumer<Integer> updateCallback) {
-			var w = new SliderWidget(x, y, width, height, Text.literal(currentValue.toString()), currentValue) {
+			var w = new SliderWidget(x, y, width, height, P39.text().literal(currentValue.toString()), currentValue) {
 				
 				private int realValue = currentValue;
 				
@@ -489,9 +490,9 @@ public abstract class AutoConfig {
 				@Override
 				protected void updateMessage() {
 					if (specialValueTranslationKeys.containsKey(realValue)) {
-						setMessage(Text.translatable(specialValueTranslationKeys.get(realValue)));
+						setMessage(P39.text().translatable(specialValueTranslationKeys.get(realValue)));
 					} else {
-						setMessage(Text.literal(Integer.toString(realValue)));
+						setMessage(P39.text().literal(Integer.toString(realValue)));
 					}
 				}
 				

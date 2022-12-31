@@ -5,3 +5,7 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
+include('platform-1.18.2')
+include('platform-1.19.2')
+include('platform-1.19.3')

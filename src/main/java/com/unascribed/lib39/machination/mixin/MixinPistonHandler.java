@@ -10,10 +10,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.Lib39Machination;
 import com.unascribed.lib39.machination.logic.SmashCloudLogic;
 import com.unascribed.lib39.machination.recipe.PistonSmashingRecipe;
 
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.piston.PistonHandler;
@@ -21,7 +23,6 @@ import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -57,7 +58,7 @@ public class MixinPistonHandler {
 							cloud.setColor(r.getCloudColor());
 							cloud.setRadius(r.getCloudSize()/4f);
 							cloud.setDuration(100);
-							cloud.setCustomName(Text.literal(SmashCloudLogic.MAGIC+r.getId()));
+							cloud.setCustomName(P39.text().literal(SmashCloudLogic.MAGIC+r.getId()));
 							for (StatusEffectInstance sei : r.getCloudEffects()) {
 								cloud.addEffect(sei);
 							}
@@ -66,7 +67,8 @@ public class MixinPistonHandler {
 						if (!r.getOutput().isEmpty()) {
 							ItemStack stack = r.craft(null);
 							ItemEntity item = new ItemEntity(world, moving.getX()+0.5, moving.getY()+ofs, moving.getZ()+0.5, stack);
-							item.setVelocity(world.random.nextGaussian()/8, (ofs-0.5)/6, world.random.nextGaussian()/8);
+							var rnd = ThreadLocalRandom.current();
+							item.setVelocity(rnd.nextGaussian()/8, (ofs-0.5)/6, rnd.nextGaussian()/8);
 							world.spawnEntity(item);
 						}
 						ci.setReturnValue(true);

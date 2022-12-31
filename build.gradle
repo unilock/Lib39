@@ -10,10 +10,10 @@ buildscript {
 	}
 }
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.7.3'
-	id 'org.quiltmc.quilt-mappings-on-loom' version '4.2.0'
+	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'io.github.juuxel.loom-quiltflower' version '1.8.0'
 	id 'maven-publish'
+	id 'eclipse'
 }
 
 if (System.getenv("MODRINTH_TOKEN")) {
@@ -67,11 +67,80 @@ repositories {
 	}
 }
 
+import net.fabricmc.mappingio.tree.MappingTree
+import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
+import net.fabricmc.mappingio.tree.MappingTree.MethodArgMapping
+import net.fabricmc.mappingio.tree.MemoryMappingTree
+import net.fabricmc.mappingio.MappedElementKind
+import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor
+import net.fabricmc.mappingio.format.Tiny2Writer
+import com.google.common.collect.Multiset
+import com.google.common.collect.HashMultiset
+
+task generateIntersectionMappings {
+	outputs.file file('.gradle/intersection-mappings-2.tiny')
+	doFirst {
+		def mappings = []
+		subprojects { p ->
+			mappings.add(p.loom.mappingsProvider.mappings)
+		}
+		def out = new MemoryMappingTree()
+		def count = mappings.size()
+		def seen = HashMultiset.create()
+		def classes = new HashMap()
+		out.visitHeader()
+		out.visitNamespaces("intermediary", ["named"])
+		out.visitContent()
+		mappings.each { MemoryMappingTree mp ->
+			mp.classes.each { ClassMapping c ->
+				// this api is HORRIBLE. GOD
+				if (seen.add("class:${c.getDstName(0)}", 1) == count-1) {
+					out.visitClass(c.getDstName(0))
+					out.visitDstName(MappedElementKind.CLASS, 0, c.getDstName(1))
+					out.visitComment(MappedElementKind.CLASS, c.comment)
+					out.visitElementContent(MappedElementKind.CLASS)
+				}
+				c.methods.each { MemoryMappingTree.MethodEntry m ->
+					if (seen.add("method:${c.getDstName(0)}:${m.getDstName(0)}${m.getDstDesc(0)}", 1) == count-1) {
+						out.visitMethod(m.getDstName(0), m.getDstDesc(0))
+						out.visitDstName(MappedElementKind.METHOD, 0, m.getDstName(1))
+						out.visitDstDesc(MappedElementKind.METHOD, 0, m.getDstDesc(1))
+						out.visitComment(MappedElementKind.METHOD, m.comment)
+						out.visitElementContent(MappedElementKind.METHOD)
+						m.args.each { MethodArgMapping a ->
+							out.visitMethodArg(a.argPosition, a.lvIndex, a.getDstName(0))
+							out.visitDstName(MappedElementKind.METHOD_ARG, 0, a.getDstName(1))
+							out.visitComment(MappedElementKind.METHOD_ARG, a.comment)
+							out.visitElementContent(MappedElementKind.METHOD_ARG)
+						}
+					}
+				}
+				c.fields.each { MemoryMappingTree.FieldEntry f ->
+					if (seen.add("field:${c.getDstName(0)}:${f.getDstName(0)}${f.getDstDesc(0)}", 1) == count-1) {
+						out.visitField(f.getDstName(0), f.getDstDesc(0))
+						out.visitDstName(MappedElementKind.FIELD, 0, f.getDstName(1))
+						out.visitDstDesc(MappedElementKind.FIELD, 0, f.getDstDesc(1))
+						out.visitComment(MappedElementKind.FIELD, f.comment)
+						out.visitElementContent(MappedElementKind.FIELD)
+					}
+				}
+			}
+		}
+		out.visitEnd()
+		file('.gradle/intersection-mappings-2.tiny').withWriter { w ->
+			def writer = new Tiny2Writer(w, false)
+			out.accept(writer)
+		}
+	}
+}
+tasks.compileJava.dependsOn generateIntersectionMappings
+
+
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings(loom.layered {
-		addLayer quiltMappings.mappings("org.quiltmc:quilt-mappings:${minecraft_version}+build.${mappings_version}:v2")
-	})
+	mappings loom.layered {
+		mappings(file('.gradle/intersection-mappings-2.tiny'))
+	}
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
 	modCompileOnly "dev.emi:emi:0.3.1+1.19"
@@ -103,7 +172,8 @@ processResources {
 	inputs.property "version", project.version
 
 	filesMatching("**/fabric.mod.json") {
-		expand "version": project.version
+		expand "version": project.version,
+			"mcversion": '${mcversion}'
 	}
 }
 
@@ -150,144 +220,173 @@ import com.google.gson.JsonArray;
 
 def gson = new GsonBuilder().setPrettyPrinting().create()
 
-def fatJarFmj = new JsonObject()
-fatJarFmj.addProperty("schemaVersion", 1)
-fatJarFmj.addProperty("id", "lib39")
-fatJarFmj.addProperty("name", "Lib39")
-fatJarFmj.addProperty("version", project.version)
-fatJarFmj.addProperty("description", "A library of useful tidbits originating in Yttr.")
-fatJarFmj.addProperty("icon", "lib39.png")
-fatJarFmj.addProperty("license", "MIT")
-fatJarFmj.addProperty("environment", "*")
-def fatJarJars = new JsonArray()
-fatJarFmj.add("jars", fatJarJars)
+def fatJarJars = new HashMap()
 
 
-task fatJar(type: Jar) {
-	doFirst {
-		file('build/tmp/fatjar').mkdirs()
-		file('build/tmp/fatjar/fabric.mod.json').text = gson.toJson(fatJarFmj)
-	}
-	classifier ''
-	from 'src/main/resources/lib39.png'
-	from 'build/tmp/fatjar/fabric.mod.json'
+subprojects { p ->
+	fatJarJars.put(p.minecraft_version, new JsonArray())
+	def fatJarFmj = new JsonObject()
+	fatJarFmj.addProperty("schemaVersion", 1)
+	fatJarFmj.addProperty("id", "lib39")
+	fatJarFmj.addProperty("name", "Lib39")
+	fatJarFmj.addProperty("version", "${rootProject.version}+${p.minecraft_version}")
+	fatJarFmj.addProperty("description", "A library of useful tidbits originating in Yttr.")
+	fatJarFmj.addProperty("icon", "lib39.png")
+	fatJarFmj.addProperty("license", "MIT")
+	fatJarFmj.addProperty("environment", "*")
+	fatJarFmj.add("jars", fatJarJars.get(p.minecraft_version))
+	rootProject.build.dependsOn(rootProject.tasks.create("fatJar${p.minecraft_version}", Jar) {
+		doFirst {
+			rootProject.file("build/tmp/fatjar/${p.minecraft_version}").mkdirs()
+			rootProject.file("build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json").text = gson.toJson(fatJarFmj)
+		}
+		classifier ''
+		version "${rootProject.version}+${p.minecraft_version}"
+		from 'src/main/resources/lib39.png'
+		from "build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json"
+	})
 }
 
-def uploadAdditionalFiles = []
+def uploadAdditionalFiles = new HashMap()
 
 tasks.remapJar.finalizedBy splitRefmap
 
 def defineModule = { name, depModules ->
 	def Name = name.substring(0, 1).toUpperCase(Locale.ROOT)+name.substring(1)
-	def t = tasks.create(name+'Jar', Jar) {
-		dependsOn remapJar
-		classifier name
-		from(zipTree(remapJar.archivePath)) {
-			include 'META-INF/**'
-			include 'com/unascribed/lib39/'+name+'/**'
-			include name+'/**'
-			include 'lib39.png'
-			includeEmptyDirs = false
-			eachFile {
-				if (it.path.startsWith(name+"/")) {
-					it.path = it.path.substring(name.length()+1)
+	subprojects { p ->
+		if (!uploadAdditionalFiles.containsKey(p.minecraft_version)) {
+			uploadAdditionalFiles.put(p.minecraft_version, [])
+		}
+		def t = rootProject.tasks.create("${name}Jar${p.minecraft_version}", Jar) {
+			dependsOn rootProject.remapJar
+			dependsOn p.tasks['remapJar']
+			destinationDirectory.set(rootProject.file("build/libs/modules-${p.minecraft_version}"))
+			classifier name
+			version "${rootProject.version}+${p.minecraft_version}"
+			[rootProject.remapJar, p.tasks['remapJar']].each { rJ ->
+				from(zipTree(rJ.archivePath)) {
+					include 'META-INF/**'
+					include 'com/unascribed/lib39/'+name+'/**'
+					include name+'/**'
+					include 'lib39.png'
+					includeEmptyDirs = false
+					duplicatesStrategy 'include'
+					eachFile {
+						if (it.path.startsWith(name+"/")) {
+							it.path = it.path.substring(name.length()+1)
+						}
+					}
+					filesMatching("**/fabric.mod.json") {
+						expand "mcversion": p.minecraft_version
+					}
 				}
 			}
 		}
-	}
-	tasks.build.dependsOn t
-	t.finalizedBy(tasks.create('amend'+Name+'Jar') {
-		dependsOn t
-		doFirst {
-			amender(t.archivePath)
+		rootProject.tasks['build'].dependsOn t
+		t.finalizedBy(rootProject.tasks.create('amend'+Name+'Jar'+p.minecraft_version) {
+			dependsOn t
+			doFirst {
+				amender(t.archivePath)
+			}
+		})
+	
+		def fJ = rootProject.tasks["fatJar${p.minecraft_version}"]
+		fJ.dependsOn(t)
+		fJ.from(t.archivePath) {
+			into 'META-INF/jars'
 		}
-	})
-
-	tasks.fatJar.dependsOn(t)
-	tasks.fatJar.from(t.archivePath) {
-		into 'META-INF/jars'
-	}
-	uploadAdditionalFiles.add(t)
-	def jarObj = new JsonObject()
-	jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
-	fatJarJars.add(jarObj)
-
-	def srcT = tasks.create(name+'SourcesJar', Jar) {
-		dependsOn remapSourcesJar
-		classifier name+'-sources'
-		from(zipTree(remapSourcesJar.archivePath)) {
-			include 'META-INF/**'
-			include 'com/unascribed/lib39/'+name+'/**'
-			include name+'/**'
-			include 'lib39.png'
-			includeEmptyDirs = false
-			eachFile {
-				if (it.path.startsWith(name+"/")) {
-					it.path = it.path.substring(name.length()+1)
+		uploadAdditionalFiles.get(p.minecraft_version).add(t)
+		def jarObj = new JsonObject()
+		jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
+		fatJarJars.get(p.minecraft_version).add(jarObj)
+	
+		def srcT = rootProject.tasks.create("${name}SourcesJar${p.minecraft_version}", Jar) {
+			dependsOn rootProject.remapSourcesJar
+			dependsOn p.remapSourcesJar
+			classifier name+'-sources'
+			destinationDirectory.set(rootProject.file("build/libs/sources-${p.minecraft_version}"))
+			version "${rootProject.version}+${p.minecraft_version}"
+			[rootProject.remapSourcesJar, p.tasks['remapSourcesJar']].each { rSJ ->
+				from(zipTree(rSJ.archivePath)) {
+					include 'META-INF/**'
+					include 'com/unascribed/lib39/'+name+'/**'
+					include name+'/**'
+					include 'lib39.png'
+					includeEmptyDirs = false
+					duplicatesStrategy 'include'
+					eachFile {
+						if (it.path.startsWith(name+"/")) {
+							it.path = it.path.substring(name.length()+1)
+						}
+					}
 				}
 			}
 		}
-	}
-
-	loom.disableDeprecatedPomGeneration(publishing.publications.create(name, MavenPublication) {
-		groupId 'com.unascribed'
-		artifactId 'lib39-'+name
-		version project.version
-		artifact(t.archivePath) {
-			classifier ''
-			builtBy t
-		}
-		artifact(srcT.archivePath) {
-			classifier 'sources'
-			builtBy srcT
-		}
-
-		pom.withXml { xml ->
-			def deps = xml.asNode().appendNode('dependencies')
-			depModules.each {
-				def dep = deps.appendNode('dependency')
-				def spec = ['com.unascribed', 'lib39-'+it, project.version]
-				if (it.contains(':')) {
-					spec = it.split(":")
-				}
-				if (spec[0] == 'fapi') {
-					spec[0] = 'net.fabricmc.fabric-api'
-					spec[2] = fabricApi.moduleVersion(spec[1], spec[2])
-				}
-				dep.appendNode('groupId', spec[0])
-				dep.appendNode('artifactId', spec[1])
-				dep.appendNode('version', spec[2])
+	
+		loom.disableDeprecatedPomGeneration(publishing.publications.create("${name}${p.minecraft_version}", MavenPublication) {
+			groupId 'com.unascribed'
+			artifactId 'lib39-'+name
+			version "${rootProject.version}+${p.minecraft_version}"
+			artifact(t.archivePath) {
+				classifier ''
+				builtBy t
 			}
-		}
-	})
+			artifact(srcT.archivePath) {
+				classifier 'sources'
+				builtBy srcT
+			}
+	
+			pom.withXml { xml ->
+				def deps = xml.asNode().appendNode('dependencies')
+				depModules.each {
+					def dep = deps.appendNode('dependency')
+					def spec = ['com.unascribed', 'lib39-'+it, "${project.version}+${p.minecraft_version}"]
+					if (it.contains(':')) {
+						spec = it.split(":")
+					}
+					if (spec[0] == 'fapi') {
+						spec[0] = 'net.fabricmc.fabric-api'
+						spec[2] = p.fabricApi.moduleVersion(spec[1], spec[2])
+					}
+					dep.appendNode('groupId', spec[0])
+					dep.appendNode('artifactId', spec[1])
+					dep.appendNode('version', spec[2])
+				}
+			}
+		})
+	}
 }
 
-defineModule 'core', []
-defineModule 'lockpick', ['core']
-defineModule 'gesundheit', ['core']
-defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
-defineModule 'tunnel', ['core']
-defineModule 'phantom', ['core']
-defineModule 'waypoint', ['core',
-	"fapi:fabric-transitive-access-wideners-v1:${fabric_version}",
-	"fapi:fabric-lifecycle-events-v1:${fabric_version}",
-	"fapi:fabric-rendering-v1:${fabric_version}",
-	"fapi:fabric-resource-loader-v0:${fabric_version}"
-]
-defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
-defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
-defineModule 'crowbar', ['core', "fapi:fabric-api-base:${fabric_version}"]
-defineModule 'keygen', ['core']
-defineModule 'dessicant', ['core']
-defineModule 'deferral', []
-defineModule 'machination', ['core',
-	"fapi:fabric-lifecycle-events-v1:${fabric_version}",
-	"fapi:fabric-resource-loader-v0:${fabric_version}"
-]
-defineModule 'util', ['core']
-defineModule 'ripple', ['core']
-defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
-defineModule 'mesh', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
+evaluationDependsOnChildren()
+afterEvaluate {
+	defineModule 'core', []
+	defineModule 'lockpick', ['core']
+	defineModule 'gesundheit', ['core']
+	defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+	defineModule 'tunnel', ['core']
+	defineModule 'phantom', ['core']
+	defineModule 'waypoint', ['core',
+		"fapi:fabric-transitive-access-wideners-v1:${fabric_version}",
+		"fapi:fabric-lifecycle-events-v1:${fabric_version}",
+		"fapi:fabric-rendering-v1:${fabric_version}",
+		"fapi:fabric-resource-loader-v0:${fabric_version}"
+	]
+	defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+	defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
+	defineModule 'crowbar', ['core', "fapi:fabric-api-base:${fabric_version}"]
+	defineModule 'keygen', ['core']
+	defineModule 'dessicant', ['core']
+	defineModule 'deferral', []
+	defineModule 'machination', ['core',
+		"fapi:fabric-lifecycle-events-v1:${fabric_version}",
+		"fapi:fabric-resource-loader-v0:${fabric_version}"
+	]
+	defineModule 'util', ['core']
+	defineModule 'ripple', ['core']
+	defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
+	defineModule 'mesh', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
+	defineModule 'aqi', ['core']
+}
 
 if (System.getenv("MODRINTH_TOKEN")) {
 	modrinth {

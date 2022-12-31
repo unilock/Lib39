@@ -8,12 +8,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.unascribed.lib39.core.mixinsupport.AutoMixinEligible;
 import com.unascribed.lib39.fractal.api.ItemSubGroup;
 import com.unascribed.lib39.fractal.quack.ItemGroupParent;
 import com.unascribed.lib39.fractal.quack.SubTabLocation;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen.CreativeScreenHandler;
@@ -23,8 +23,11 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-@Environment(EnvType.CLIENT)
 @Mixin(CreativeInventoryScreen.class)
+@AutoMixinEligible(
+		unlessConfigSet="platform 1.19.3",
+		inEnvType=EnvType.CLIENT
+	)
 public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements SubTabLocation {
 	
 	public MixinCreativeInventoryScreen(CreativeScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {
@@ -35,22 +38,22 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 	private float scrollPosition;
 	
 	@Shadow
-	public abstract int getSelectedTab();
+	public abstract int method_2469();
 	
 	private int lib39Fractal$x, lib39Fractal$y, lib39Fractal$w, lib39Fractal$h;
 	
 	@Inject(at=@At(value="INVOKE", target="net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen.drawMouseoverTooltip(Lnet/minecraft/client/util/math/MatrixStack;II)V"),
 			method="render")
 	public void lib39Fractal$render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		ItemGroup selected = ItemGroup.GROUPS[getSelectedTab()];
+		ItemGroup selected = ItemGroup.field_7921[method_2469()];
 		ItemGroupParent parent = (ItemGroupParent)selected;
 		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			if (!selected.shouldRenderName()) {
 				ItemGroup child = parent.lib39Fractal$getSelectedChild();
-				float x = textRenderer.draw(matrices, selected.getTranslationKey(), this.x+8, this.y+6, 4210752);
+				float x = textRenderer.draw(matrices, selected.getName(), this.x+8, this.y+6, 4210752);
 				if (child != null) {
 					x = textRenderer.draw(matrices, " ", x, this.y+6, 4210752);
-					x = textRenderer.draw(matrices, child.getTranslationKey(), x, this.y+6, 4210752);
+					x = textRenderer.draw(matrices, child.getName(), x, this.y+6, 4210752);
 				}
 			}
 			int ofs = 5;
@@ -67,7 +70,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 				drawTexture(matrices, x-tw, y, 0, bgV, tw+ofs, 11, 70, 22);
 				drawTexture(matrices, this.x, y, 64, bgV, 6, 11, 70, 22);
 				RenderSystem.setShaderTexture(0, new Identifier("lib39-fractal", "textures/tinyfont.png"));
-				String str = child.getTranslationKey().getString();
+				String str = child.getName().getString();
 				for (int i = str.length()-1; i >= 0; i--) {
 					char c = str.charAt(i);
 					if (c > 0x7F) continue;
@@ -88,7 +91,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 	
 	@Inject(at=@At("HEAD"), method="mouseClicked", cancellable=true)
 	public void lib39Fractal$mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
-		ItemGroup selected = ItemGroup.GROUPS[getSelectedTab()];
+		ItemGroup selected = ItemGroup.field_7921[method_2469()];
 		ItemGroupParent parent = (ItemGroupParent)selected;
 		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			int x = lib39Fractal$x;
@@ -98,7 +101,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 				if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+11) {
 					parent.lib39Fractal$setSelectedChild(child);
 					handler.itemList.clear();
-					selected.appendStacks(handler.itemList);
+					selected.method_7738(handler.itemList);
 					this.scrollPosition = 0.0F;
 					handler.scrollItems(0.0F);
 					ci.setReturnValue(true);

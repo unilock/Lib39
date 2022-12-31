@@ -1,6 +1,6 @@
 package com.unascribed.lib39.phantom.quack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.unascribed.lib39.phantom.api.PhaseableWorld;
 

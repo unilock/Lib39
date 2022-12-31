@@ -2,6 +2,7 @@ package com.unascribed.lib39.machination.logic;
 
 import java.util.List;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.recipe.PistonSmashingRecipe;
 
 import net.minecraft.entity.AreaEffectCloudEntity;
@@ -28,7 +29,7 @@ public class SmashCloudLogic {
 					cloud.setRadius(cloud.getRadius() - 0.25f);
 					if (cloud.getRadius() < 0.25f) cloud.discard();
 					Vec3d center = box.getCenter();
-					world.playSound(null, center.x, center.y, center.z, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1, 1);
+					P39.worlds().playSound(world, null, center.x, center.y, center.z, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1, 1);
 					return r;
 				}
 			}
