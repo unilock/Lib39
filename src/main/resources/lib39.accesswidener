@@ -1,12 +1,5 @@
 accessWidener v2 named
 
-accessible method lib39/DummyEntry gesundheit ()V
-
-mutable field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;
-accessible field net/minecraft/client/particle/ParticleManager particleAtlasTexture Lnet/minecraft/client/texture/SpriteAtlasTexture;
-
-accessible method lib39/DummyEntry end ()V
-
 
 accessible method lib39/DummyEntry waypoint ()V
 

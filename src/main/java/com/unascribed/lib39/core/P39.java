@@ -2,6 +2,7 @@ package com.unascribed.lib39.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -130,8 +131,20 @@ public class P39 {
 		Registry<StatusEffect> statusEffect();
 		Registry<RecipeType<?>> recipeType();
 		Registry<RecipeSerializer<?>> recipeSerializer();
-		RegistryKey<Registry<Biome>> biomeRegistry();
-		<T> Tag<T> tag(Registry<T> registry, Identifier id);
+		
+		RegistryKey<Registry<Biome>> biomeRegistryKey();
+		
+		<T> Tag<T> getTag(Registry<T> registry, Identifier id);
+		<T> void register(Registry<T> registry, Identifier id, T value);
+
+		<T> T get(Registry<T> registry, Identifier id);
+		<T> T get(Registry<T> registry, int rawId);
+		<T> Optional<T> getOrEmpty(Registry<T> registry, Identifier id);
+		
+		<T> Identifier getId(Registry<T> registry, T t);
+		<T> int getRawId(Registry<T> registry, T t);
+		
+		SoundEvent createSoundEvent(Identifier id);
 	}
 	
 	public interface ResourcesPort {

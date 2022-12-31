@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
@@ -92,6 +93,7 @@ class P39Impl {
 		public P39.WorldsPort worlds() {
 			return new P39.WorldsPort() {
 				
+				@SuppressWarnings({ "unchecked", "rawtypes" })
 				private static final Function<ThreadedAnvilChunkStorage, Long2ObjectLinkedOpenHashMap<ChunkHolder>> chunkHolders =
 						(Function)ReflectionHelper.of(MethodHandles.lookup(), ThreadedAnvilChunkStorage.class)
 							.obtainGetter(Long2ObjectLinkedOpenHashMap.class, "chunkHolders", "field_17220");
@@ -155,12 +157,12 @@ class P39Impl {
 				}
 
 				@Override
-				public RegistryKey<Registry<Biome>> biomeRegistry() {
+				public RegistryKey<Registry<Biome>> biomeRegistryKey() {
 					return Registry.BIOME_KEY;
 				}
 
 				@Override
-				public <T> Tag<T> tag(Registry<T> registry, Identifier id) {
+				public <T> Tag<T> getTag(Registry<T> registry, Identifier id) {
 					var tag = registry.getTag(TagKey.of(registry.getKey(), id)).get();
 					return new Tag<T>() {
 
@@ -169,6 +171,7 @@ class P39Impl {
 							return Iterables.transform(tag, h -> h.value());
 						}
 
+						@SuppressWarnings({ "deprecation", "rawtypes", "unchecked" })
 						@Override
 						public boolean has(T t) {
 							if (t == null) throw new NullPointerException();
@@ -180,6 +183,41 @@ class P39Impl {
 							return tag.contains(holder);
 						}
 					};
+				}
+				
+				@Override
+				public SoundEvent createSoundEvent(Identifier id) {
+					return new SoundEvent(id);
+				}
+				
+				@Override
+				public <T> void register(Registry<T> registry, Identifier id, T value) {
+					Registry.register(registry, id, value);
+				}
+
+				@Override
+				public <T> T get(Registry<T> registry, Identifier id) {
+					return registry.get(id);
+				}
+
+				@Override
+				public <T> T get(Registry<T> registry, int rawId) {
+					return registry.get(rawId);
+				}
+
+				@Override
+				public <T> Optional<T> getOrEmpty(Registry<T> registry, Identifier id) {
+					return registry.getOrEmpty(id);
+				}
+
+				@Override
+				public <T> Identifier getId(Registry<T> registry, T t) {
+					return registry.getId(t);
+				}
+
+				@Override
+				public <T> int getRawId(Registry<T> registry, T t) {
+					return registry.getRawId(t);
 				}
 				
 			};

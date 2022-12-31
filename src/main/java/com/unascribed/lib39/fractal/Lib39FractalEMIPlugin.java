@@ -16,8 +16,7 @@ public class Lib39FractalEMIPlugin implements EmiPlugin {
 	public void register(EmiRegistry registry) {
 		registry.addExclusionArea(CreativeInventoryScreen.class, (screen, out) -> {
 			ItemGroup selected = P39.screens().getSelectedItemGroup(screen);
-			ItemGroupParent parent = (ItemGroupParent)selected;
-			if (screen instanceof SubTabLocation stl && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
+			if (selected instanceof ItemGroupParent parent && screen instanceof SubTabLocation stl && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 				out.accept(new Bounds(stl.lib39Fractal$getX(), stl.lib39Fractal$getY(), stl.lib39Fractal$getW(), stl.lib39Fractal$getH()));
 			}
 		});

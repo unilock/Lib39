@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 
 import org.apache.logging.log4j.util.TriConsumer;
 
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.core.api.AutoRegistry.RegisteredAs;
 import com.unascribed.lib39.core.api.util.LatchHolder;
 import com.unascribed.lib39.core.api.util.LatchRegistryEntry;
@@ -54,7 +55,7 @@ class BaseAutoRegistry {
 	public <T> void autoRegister(Registry<T> registry, Class<?> holdingClass, Class<? super T> type) {
 		eachRegisterableField(holdingClass, type, RegisteredAs.class, (f, v, ann) -> {
 			Identifier id = deriveId(f, ann);
-			Registry.register(registry, id, (T)v);
+			P39.registries().register(registry, id, (T)v);
 			assignHolder(registry, holdingClass, f.getName()+"_HOLDER", id, LatchHolder.class);
 			assignHolder(registry, holdingClass, f.getName()+"_ENTRY", id, LatchRegistryEntry.class);
 		});

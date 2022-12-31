@@ -22,8 +22,7 @@ public class Lib39FractalJEIPlugin implements IModPlugin {
 			@Override
 			public List<Rect2i> getGuiExtraAreas(CreativeInventoryScreen screen) {
 				ItemGroup selected = P39.screens().getSelectedItemGroup(screen);
-				ItemGroupParent parent = (ItemGroupParent)selected;
-				if (screen instanceof SubTabLocation stl && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
+				if (selected instanceof ItemGroupParent parent && screen instanceof SubTabLocation stl && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 					return List.of(new Rect2i(stl.lib39Fractal$getX(), stl.lib39Fractal$getY(), stl.lib39Fractal$getW(), stl.lib39Fractal$getH()));
 				}
 				return List.of();

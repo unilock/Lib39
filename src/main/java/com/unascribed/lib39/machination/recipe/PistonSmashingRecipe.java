@@ -157,9 +157,10 @@ public class PistonSmashingRecipe implements Recipe<Inventory> {
 					} else {
 						iter = cloud.get("effects").getAsJsonArray();
 					}
+					var r = P39.registries();
 					for (JsonElement ele : iter) {
 						JsonObject enObj = ele.getAsJsonObject();
-						StatusEffect effect = P39.registries().statusEffect().get(Identifier.tryParse(enObj.get("effect").getAsString()));
+						StatusEffect effect = r.get(r.statusEffect(), Identifier.tryParse(enObj.get("effect").getAsString()));
 						if (effect == null) continue;
 						int amplifier = JsonHelper.getInt(enObj, "amplifier", 0);
 						int duration = JsonHelper.getInt(enObj, "duration");

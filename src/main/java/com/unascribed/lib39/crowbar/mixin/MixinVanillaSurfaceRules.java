@@ -39,7 +39,7 @@ public class MixinVanillaSurfaceRules {
 				mthd.accept(en.getEntrypoint(), (id, bs) -> {
 					rule.sequence().add(0,
 							SurfaceRules.condition(
-								SurfaceRules.biome(RegistryKey.of(P39.registries().biomeRegistry(), id)),
+								SurfaceRules.biome(RegistryKey.of(P39.registries().biomeRegistryKey(), id)),
 								SurfaceRules.block(bs)
 							));
 				});

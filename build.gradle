@@ -362,7 +362,6 @@ evaluationDependsOnChildren()
 afterEvaluate {
 	defineModule 'core', []
 	defineModule 'lockpick', ['core']
-	defineModule 'gesundheit', ['core']
 	defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:?"]
 	defineModule 'tunnel', ['core']
 	defineModule 'phantom', ['core']

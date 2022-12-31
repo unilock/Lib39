@@ -25,9 +25,10 @@ public class MixinItemStack {
 
 	@Inject(at=@At(value="INVOKE", target="net/minecraft/item/Item.appendTooltip(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Ljava/util/List;Lnet/minecraft/client/item/TooltipContext;)V"),
 			method="getTooltip", locals=LocalCapture.CAPTURE_FAILHARD)
-	public void getTooltip(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> ci, List<Text> tooltip) {
+	public void lib39Dessicant$getTooltip(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> ci, List<Text> tooltip) {
 		ItemStack self = (ItemStack)(Object)this;
-		if (DessicantData.optedInNamespaces.contains(P39.registries().item().getId(self.getItem()).getNamespace())) {
+		var r = P39.registries();
+		if (DessicantData.optedInNamespaces.contains(r.getId(r.item(), self.getItem()).getNamespace())) {
 			int i = 1;
 			while (I18n.hasTranslation(self.getTranslationKey()+".tip."+i)) {
 				tooltip.add(P39.text().translatable(self.getTranslationKey()+".tip."+i));

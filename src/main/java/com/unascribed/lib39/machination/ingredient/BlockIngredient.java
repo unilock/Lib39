@@ -45,16 +45,18 @@ public class BlockIngredient implements Predicate<Block> {
 	public void write(PacketByteBuf out) {
 		List<Block> all = getMatchingBlocks();
 		out.writeVarInt(all.size());
+		var r = P39.registries();
 		for (Block b : all) {
-			out.writeVarInt(P39.registries().block().getRawId(b));
+			out.writeVarInt(r.getRawId(r.block(), b));
 		}
 	}
 	
 	public static BlockIngredient read(PacketByteBuf in) {
 		int amt = in.readVarInt();
 		BlockIngredient out = new BlockIngredient();
+		var r = P39.registries();
 		for (int i = 0; i < amt; i++) {
-			out.exacts.add(P39.registries().block().get(in.readVarInt()));
+			out.exacts.add(r.get(r.block(), in.readVarInt()));
 		}
 		return out;
 	}
@@ -74,10 +76,11 @@ public class BlockIngredient implements Predicate<Block> {
 	private static void readInto(BlockIngredient out, JsonElement ele) {
 		if (!ele.isJsonObject()) throw new IllegalArgumentException("Expected object, got "+ele);
 		JsonObject obj = ele.getAsJsonObject();
+		var r = P39.registries();
 		if (obj.has("block")) {
-			out.exacts.add(P39.registries().block().get(Identifier.tryParse(obj.get("block").getAsString())));
+			out.exacts.add(r.get(r.block(), Identifier.tryParse(obj.get("block").getAsString())));
 		} else if (obj.has("tag")) {
-			out.tags.add(P39.registries().tag(P39.registries().block(), Identifier.tryParse(obj.get("tag").getAsString())));
+			out.tags.add(r.getTag(r.block(), Identifier.tryParse(obj.get("tag").getAsString())));
 		} else {
 			throw new IllegalArgumentException("Don't know how to parse "+ele+" without a block or tag value");
 		}

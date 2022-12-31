@@ -44,8 +44,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 			method="render")
 	public void lib39Fractal$render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		ItemGroup selected = P39.screens().getSelectedItemGroup((CreativeInventoryScreen)(Object)this);
-		ItemGroupParent parent = (ItemGroupParent)selected;
-		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
+		if (selected instanceof ItemGroupParent parent && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			if (!selected.shouldRenderName()) {
 				ItemGroup child = parent.lib39Fractal$getSelectedChild();
 				float x = textRenderer.draw(matrices, selected.getName(), this.x+8, this.y+6, 4210752);
@@ -90,8 +89,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 	@Inject(at=@At("HEAD"), method="mouseClicked", cancellable=true)
 	public void lib39Fractal$mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
 		ItemGroup selected = P39.screens().getSelectedItemGroup((CreativeInventoryScreen)(Object)this);
-		ItemGroupParent parent = (ItemGroupParent)selected;
-		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
+		if (selected instanceof ItemGroupParent parent && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			int x = lib39Fractal$x;
 			int y = lib39Fractal$y;
 			int w = lib39Fractal$w;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -71,7 +72,7 @@ class P39Impl {
 			return new P39.MetaPort() {
 				@Override
 				public String target() {
-					return "1.19.2";
+					return "1.19.3";
 				}
 			};
 		}
@@ -97,6 +98,7 @@ class P39Impl {
 		public P39.WorldsPort worlds() {
 			return new P39.WorldsPort() {
 				
+				@SuppressWarnings({ "unchecked", "rawtypes" })
 				private static final Function<ThreadedChunkManager, Long2ObjectLinkedOpenHashMap<ChunkHolder>> chunkHolders =
 						(Function)ReflectionHelper.of(MethodHandles.lookup(), ThreadedChunkManager.class)
 							.obtainGetter(Long2ObjectLinkedOpenHashMap.class, "chunkHolders", "field_17220");
@@ -160,12 +162,12 @@ class P39Impl {
 				}
 
 				@Override
-				public RegistryKey<Registry<Biome>> biomeRegistry() {
+				public RegistryKey<Registry<Biome>> biomeRegistryKey() {
 					return RegistryKeys.BIOME;
 				}
 
 				@Override
-				public <T> P39.Tag<T> tag(Registry<T> registry, Identifier id) {
+				public <T> P39.Tag<T> getTag(Registry<T> registry, Identifier id) {
 					var tag = registry.getTag(TagKey.of(registry.getKey(), id)).get();
 					return new P39.Tag<T>() {
 
@@ -174,9 +176,11 @@ class P39Impl {
 							return Iterables.transform(tag, h -> h.value());
 						}
 
+						@SuppressWarnings({ "deprecation", "unchecked" })
 						@Override
 						public boolean has(T t) {
 							if (t == null) throw new NullPointerException();
+							@SuppressWarnings("rawtypes")
 							Holder holder = null;
 							if (t instanceof Block b) holder = b.getBuiltInRegistryHolder();
 							if (t instanceof Item i) holder = i.getBuiltInRegistryHolder();
@@ -185,6 +189,41 @@ class P39Impl {
 							return tag.contains(holder);
 						}
 					};
+				}
+				
+				@Override
+				public SoundEvent createSoundEvent(Identifier id) {
+					return SoundEvent.createVariableRangeEvent(id);
+				}
+				
+				@Override
+				public <T> void register(Registry<T> registry, Identifier id, T value) {
+					Registry.register(registry, id, value);
+				}
+
+				@Override
+				public <T> T get(Registry<T> registry, Identifier id) {
+					return registry.get(id);
+				}
+
+				@Override
+				public <T> T get(Registry<T> registry, int rawId) {
+					return registry.get(rawId);
+				}
+
+				@Override
+				public <T> Optional<T> getOrEmpty(Registry<T> registry, Identifier id) {
+					return registry.getOrEmpty(id);
+				}
+
+				@Override
+				public <T> Identifier getId(Registry<T> registry, T t) {
+					return registry.getId(t);
+				}
+
+				@Override
+				public <T> int getRawId(Registry<T> registry, T t) {
+					return registry.getRawId(t);
 				}
 				
 			};

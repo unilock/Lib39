@@ -2,16 +2,14 @@ package com.unascribed.lib39.fractal.mixin;
 
 import java.util.List;
 
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.unascribed.lib39.core.mixinsupport.AutoMixinEligible;
+import com.unascribed.lib39.fractal.Lib39FractalReflect;
 import com.unascribed.lib39.fractal.api.ItemSubGroup;
 import com.unascribed.lib39.fractal.quack.ItemGroupParent;
 
@@ -62,26 +60,14 @@ public class MixinItemGroup implements ItemGroupParent {
 
 	// from Polymer
 	private static ItemGroup[] LIB39FRACTAL$GROUPS_OLD;
-	@Mutable @Shadow @Final
-	public static ItemGroup[] field_7921;
 
 	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.field_7921:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
-			method="<init>", require=0)
+			method="<init>", require=1)
 	private void lib39Fractal$replaceArrayToSkipAdding(int index, String id, CallbackInfo ci) {
 		Object self = this;
 		if (self instanceof ItemSubGroup) {
-			LIB39FRACTAL$GROUPS_OLD = field_7921;
-			field_7921 = new ItemGroup[1];
-		}
-	}
-
-	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.GROUPS:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
-			method="<init>", require=0)
-	private void lib39Fractal$replaceArrayToSkipAddingDeobf(int index, String id, CallbackInfo ci) {
-		Object self = this;
-		if (self instanceof ItemSubGroup) {
-			LIB39FRACTAL$GROUPS_OLD = field_7921;
-			field_7921 = new ItemGroup[1];
+			LIB39FRACTAL$GROUPS_OLD = Lib39FractalReflect.GET_GROUPS.get();
+			Lib39FractalReflect.SET_GROUPS.accept(new ItemGroup[1]);
 		}
 	}
 
@@ -90,7 +76,7 @@ public class MixinItemGroup implements ItemGroupParent {
 	private void lib39Fractal$unreplaceArray(int index, String id, CallbackInfo ci) {
 		Object self = this;
 		if (self instanceof ItemSubGroup) {
-			field_7921 = LIB39FRACTAL$GROUPS_OLD;
+			Lib39FractalReflect.SET_GROUPS.accept(LIB39FRACTAL$GROUPS_OLD);
 		}
 	}
 	

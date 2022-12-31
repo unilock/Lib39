@@ -150,8 +150,9 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			int multiDelay = JsonHelper.getInt(obj, "multiDelay", 1);
 			String soundId = JsonHelper.getString(obj, "sound", null);
 			SoundEvent sound = null;
+			var r = P39.registries();
 			if (soundId != null) {
-				sound = P39.registries().soundEvent().get(new Identifier(soundId));
+				sound = r.get(r.soundEvent(), new Identifier(soundId));
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -181,7 +182,8 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			int multiDelay = buf.readVarInt();
 			SoundEvent sound = null;
 			if (buf.readBoolean()) {
-				sound = P39.registries().soundEvent().get(buf.readVarInt());
+				var r = P39.registries();
+				sound = r.get(r.soundEvent(), buf.readVarInt());
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -201,7 +203,8 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			buf.writeVarInt(recipe.time);
 			buf.writeVarInt(recipe.multiDelay);
 			buf.writeBoolean(recipe.sound != null);
-			if (recipe.sound != null) buf.writeVarInt(P39.registries().soundEvent().getRawId(recipe.sound));
+			var r = P39.registries();
+			if (recipe.sound != null) buf.writeVarInt(r.getRawId(r.soundEvent(), recipe.sound));
 		}
 		
 	}

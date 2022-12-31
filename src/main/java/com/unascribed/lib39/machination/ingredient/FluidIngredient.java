@@ -45,16 +45,18 @@ public class FluidIngredient implements Predicate<Fluid> {
 	public void write(PacketByteBuf out) {
 		List<Fluid> all = getMatchingFluids();
 		out.writeVarInt(all.size());
+		var r = P39.registries();
 		for (Fluid f : all) {
-			out.writeVarInt(P39.registries().fluid().getRawId(f));
+			out.writeVarInt(r.getRawId(r.fluid(), f));
 		}
 	}
 	
 	public static FluidIngredient read(PacketByteBuf in) {
 		int amt = in.readVarInt();
 		FluidIngredient out = new FluidIngredient();
+		var r = P39.registries();
 		for (int i = 0; i < amt; i++) {
-			out.exacts.add(P39.registries().fluid().get(in.readVarInt()));
+			out.exacts.add(r.get(r.fluid(), in.readVarInt()));
 		}
 		return out;
 	}
@@ -74,10 +76,11 @@ public class FluidIngredient implements Predicate<Fluid> {
 	private static void readInto(FluidIngredient out, JsonElement ele) {
 		if (!ele.isJsonObject()) throw new IllegalArgumentException("Expected object, got "+ele);
 		JsonObject obj = ele.getAsJsonObject();
+		var r = P39.registries();
 		if (obj.has("fluid")) {
-			out.exacts.add(P39.registries().fluid().get(Identifier.tryParse(obj.get("fluid").getAsString())));
+			out.exacts.add(r.get(r.fluid(), Identifier.tryParse(obj.get("fluid").getAsString())));
 		} else if (obj.has("tag")) {
-			out.tags.add(P39.registries().tag(P39.registries().fluid(), Identifier.tryParse(obj.get("tag").getAsString())));
+			out.tags.add(r.getTag(r.fluid(), Identifier.tryParse(obj.get("tag").getAsString())));
 		} else {
 			throw new IllegalArgumentException("Don't know how to parse "+ele+" without a fluid or tag value");
 		}
