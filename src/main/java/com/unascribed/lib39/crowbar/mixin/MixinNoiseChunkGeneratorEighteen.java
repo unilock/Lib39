@@ -2,7 +2,6 @@ package com.unascribed.lib39.crowbar.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -16,11 +15,11 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 
 @Mixin(NoiseChunkGenerator.class)
-@AutoMixinEligible(unlessConfigSet="platform 1.18.2")
-public abstract class MixinNoiseChunkGenerator {
-	
+@AutoMixinEligible(ifConfigSet="platform 1.18.2")
+public abstract class MixinNoiseChunkGeneratorEighteen {
+
 	@Inject(at=@At("TAIL"), method={"buildSurface", "method_12110"}, remap=false)
-	public void lib39Crowbar$buildSurface(ChunkRegion region, StructureManager structureManager, @Coerce Object randomState, Chunk chunk, CallbackInfo ci) {
+	public void lib39Crowbar$buildSurface(ChunkRegion region, StructureManager structureManager, Chunk chunk, CallbackInfo ci) {
 		WorldGenerationEvents.AFTER_BUILD_SURFACE.invoker().buildSurface(new GeneratorContext(region, structureManager, chunk));
 	}
 	

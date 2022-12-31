@@ -38,7 +38,7 @@ public class MixinWorldRenderer {
 	@Shadow
 	private ClientWorld world;
 	
-	@Inject(method="method_22710", remap=false,
+	@Inject(method={"render", "method_22710"}, remap=false,
 			at=@At(value="CONSTANT", args="stringValue=blockentities", ordinal=0))
 	private void lib39Aqi$afterEntities(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, @Coerce Object mat, CallbackInfo ci) {
 		if (transparencyShader != null) return;
@@ -52,7 +52,7 @@ public class MixinWorldRenderer {
 		}
 	}
 	
-	@ModifyConstant(method="method_22710", remap=false,
+	@ModifyConstant(method={"render", "method_22710"}, remap=false,
 		constant=@Constant(stringValue="particles", ordinal=1))
 	private String lib39Aqi$beforeParticles(String orig) {
 		if (transparencyShader != null) return orig;
@@ -60,7 +60,7 @@ public class MixinWorldRenderer {
 		return "lib39-aqi:translucent_particles";
 	}
 	
-	@Inject(method="method_22710", remap=false,
+	@Inject(method={"render", "method_22710"}, remap=false,
 		at=@At(value="INVOKE", target="net/minecraft/client/particle/ParticleManager.renderParticles(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;F)V",
 				remap=true, shift=Shift.AFTER))
 	private void lib39Aqi$afterParticles(CallbackInfo ci) {

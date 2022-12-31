@@ -1,11 +1,13 @@
 package com.unascribed.lib39.core;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector4f;
@@ -44,6 +46,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.pack.metadata.ResourceMetadataReader;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
@@ -192,8 +195,18 @@ class P39Impl {
 			return new P39.ResourcesPort() {
 
 				@Override
+				public @Nullable Resource get(ResourceFactory factory, Identifier id) throws IOException {
+					return factory.getResource(id).orElse(null);
+				}
+
+				@Override
 				public <T> T readMetadata(Resource resource, ResourceMetadataReader<T> reader) throws IOException {
 					return resource.getMetadata().readMetadata(reader).orElse(null);
+				}
+				
+				@Override
+				public InputStream open(Resource resource) throws IOException {
+					return resource.open();
 				}
 				
 			};

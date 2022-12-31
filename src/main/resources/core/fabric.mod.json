@@ -25,6 +25,9 @@
 		"fabricloader": ">=0.7.4",
 		"minecraft": "^${mcversion}"
 	},
+	"breaks": {
+		"yttr": "<7.638"
+	},
 	"custom": {
 		"modmenu": {
 			"badges": ["library"],

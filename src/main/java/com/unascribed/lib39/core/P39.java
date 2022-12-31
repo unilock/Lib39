@@ -1,7 +1,10 @@
 package com.unascribed.lib39.core;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -27,6 +30,7 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.pack.metadata.ResourceMetadataReader;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -131,7 +135,9 @@ public class P39 {
 	}
 	
 	public interface ResourcesPort {
-		<T> T readMetadata(Resource resource, ResourceMetadataReader<T> reader) throws IOException;
+		@Nullable Resource get(ResourceFactory factory, Identifier id) throws IOException;
+		<T> @Nullable T readMetadata(Resource resource, ResourceMetadataReader<T> reader) throws IOException;
+		InputStream open(Resource resource) throws IOException;
 	}
 	
 	public interface ParsingPort {

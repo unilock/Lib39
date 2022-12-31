@@ -22,7 +22,7 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.7.4",
-		"minecraft": "^^${mcversion}",
+		"minecraft": "${mcversion}",
 		"fabric-resource-loader-v0": "*",
 		"lib39-core": "^${version}"
 	},

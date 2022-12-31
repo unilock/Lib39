@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.core.mixinsupport.AutoMixinEligible;
 import com.unascribed.lib39.fractal.api.ItemSubGroup;
 import com.unascribed.lib39.fractal.quack.ItemGroupParent;
@@ -37,15 +38,12 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 	@Shadow
 	private float scrollPosition;
 	
-	@Shadow
-	public abstract int method_2469();
-	
 	private int lib39Fractal$x, lib39Fractal$y, lib39Fractal$w, lib39Fractal$h;
 	
 	@Inject(at=@At(value="INVOKE", target="net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen.drawMouseoverTooltip(Lnet/minecraft/client/util/math/MatrixStack;II)V"),
 			method="render")
 	public void lib39Fractal$render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		ItemGroup selected = ItemGroup.field_7921[method_2469()];
+		ItemGroup selected = P39.screens().getSelectedItemGroup((CreativeInventoryScreen)(Object)this);
 		ItemGroupParent parent = (ItemGroupParent)selected;
 		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			if (!selected.shouldRenderName()) {
@@ -91,7 +89,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 	
 	@Inject(at=@At("HEAD"), method="mouseClicked", cancellable=true)
 	public void lib39Fractal$mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> ci) {
-		ItemGroup selected = ItemGroup.field_7921[method_2469()];
+		ItemGroup selected = P39.screens().getSelectedItemGroup((CreativeInventoryScreen)(Object)this);
 		ItemGroupParent parent = (ItemGroupParent)selected;
 		if (parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			int x = lib39Fractal$x;

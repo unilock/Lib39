@@ -240,7 +240,7 @@ subprojects { p ->
 			rootProject.file("build/tmp/fatjar/${p.minecraft_version}").mkdirs()
 			rootProject.file("build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json").text = gson.toJson(fatJarFmj)
 		}
-		classifier ''
+		classifier 'all'
 		version "${rootProject.version}+${p.minecraft_version}"
 		from 'src/main/resources/lib39.png'
 		from "build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json"
@@ -261,7 +261,7 @@ def defineModule = { name, depModules ->
 			dependsOn rootProject.remapJar
 			dependsOn p.tasks['remapJar']
 			destinationDirectory.set(rootProject.file("build/libs/modules-${p.minecraft_version}"))
-			classifier name
+			baseName "lib39-${name}"
 			version "${rootProject.version}+${p.minecraft_version}"
 			[rootProject.remapJar, p.tasks['remapJar']].each { rJ ->
 				from(zipTree(rJ.archivePath)) {
@@ -303,7 +303,8 @@ def defineModule = { name, depModules ->
 		def srcT = rootProject.tasks.create("${name}SourcesJar${p.minecraft_version}", Jar) {
 			dependsOn rootProject.remapSourcesJar
 			dependsOn p.remapSourcesJar
-			classifier name+'-sources'
+			baseName "lib39-${name}"
+			classifier 'sources'
 			destinationDirectory.set(rootProject.file("build/libs/sources-${p.minecraft_version}"))
 			version "${rootProject.version}+${p.minecraft_version}"
 			[rootProject.remapSourcesJar, p.tasks['remapSourcesJar']].each { rSJ ->
@@ -346,7 +347,7 @@ def defineModule = { name, depModules ->
 					}
 					if (spec[0] == 'fapi') {
 						spec[0] = 'net.fabricmc.fabric-api'
-						spec[2] = p.fabricApi.moduleVersion(spec[1], spec[2])
+						spec[2] = p.fabricApi.moduleVersion(spec[1], spec[2] == '?' ? p.fabric_version : spec[2])
 					}
 					dep.appendNode('groupId', spec[0])
 					dep.appendNode('artifactId', spec[1])
@@ -362,29 +363,29 @@ afterEvaluate {
 	defineModule 'core', []
 	defineModule 'lockpick', ['core']
 	defineModule 'gesundheit', ['core']
-	defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
+	defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:?"]
 	defineModule 'tunnel', ['core']
 	defineModule 'phantom', ['core']
 	defineModule 'waypoint', ['core',
-		"fapi:fabric-transitive-access-wideners-v1:${fabric_version}",
-		"fapi:fabric-lifecycle-events-v1:${fabric_version}",
-		"fapi:fabric-rendering-v1:${fabric_version}",
-		"fapi:fabric-resource-loader-v0:${fabric_version}"
+		"fapi:fabric-transitive-access-wideners-v1:?",
+		"fapi:fabric-lifecycle-events-v1:?",
+		"fapi:fabric-rendering-v1:?",
+		"fapi:fabric-resource-loader-v0:?"
 	]
-	defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:${fabric_version}"]
-	defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
-	defineModule 'crowbar', ['core', "fapi:fabric-api-base:${fabric_version}"]
+	defineModule 'weld', ['core', "fapi:fabric-resource-loader-v0:?"]
+	defineModule 'sandman', ['core', "fapi:fabric-lifecycle-events-v1:?"]
+	defineModule 'crowbar', ['core', "fapi:fabric-api-base:?"]
 	defineModule 'keygen', ['core']
 	defineModule 'dessicant', ['core']
 	defineModule 'deferral', []
 	defineModule 'machination', ['core',
-		"fapi:fabric-lifecycle-events-v1:${fabric_version}",
-		"fapi:fabric-resource-loader-v0:${fabric_version}"
+		"fapi:fabric-lifecycle-events-v1:?",
+		"fapi:fabric-resource-loader-v0:?"
 	]
 	defineModule 'util', ['core']
 	defineModule 'ripple', ['core']
-	defineModule 'recoil', ['core', "fapi:fabric-api-base:${fabric_version}", "fapi:fabric-networking-api-v1:${fabric_version}"]
-	defineModule 'mesh', ['core', "fapi:fabric-lifecycle-events-v1:${fabric_version}"]
+	defineModule 'recoil', ['core', "fapi:fabric-api-base:?", "fapi:fabric-networking-api-v1:?"]
+	defineModule 'mesh', ['core', "fapi:fabric-lifecycle-events-v1:?"]
 	defineModule 'aqi', ['core']
 }
 
@@ -397,7 +398,6 @@ if (System.getenv("MODRINTH_TOKEN")) {
 		versionType = 'release'
 		changelog = file('CHANGELOG.md').text
 		uploadFile = fatJar
-		additionalFiles = uploadAdditionalFiles
 		gameVersions = ['1.19.1', '1.19.2']
 		loaders = ['fabric', 'quilt']
 		detectLoaders = false
@@ -420,12 +420,6 @@ if (System.getenv("CURSE_TOKEN")) {
 
 			mainArtifact(fatJar) {
 				displayName = 'v'+project.version
-			}
-
-			uploadAdditionalFiles.reverseEach { task ->
-				addArtifact(task) {
-					displayName = 'Single Module: '+task.classifier.substring(0, 1).toUpperCase()+task.classifier.substring(1)
-				}
 			}
 		}
 		options {

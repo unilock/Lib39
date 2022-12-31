@@ -48,8 +48,8 @@ public class MixinSoundLoader {
 			String fpath = path;
 			ci.setReturnValue(CompletableFuture.supplyAsync(() -> {
 				try {
-					Resource resource = lib39$factory.getResourceOrThrow(id);
-					InputStream inputStream = resource.open();
+					Resource resource = P39.resources().get(lib39$factory, id);
+					InputStream inputStream = P39.resources().open(resource);
 					DelegateFactory factory;
 					IBXMResourceMetadata meta = P39.resources().readMetadata(resource, IBXMResourceMetadata.READER);
 					boolean isAmiga = fpath.endsWith(".mod");

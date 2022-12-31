@@ -1,8 +1,12 @@
 package com.unascribed.lib39.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import java.util.function.Function;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -35,6 +39,7 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.pack.metadata.ResourceMetadataReader;
 import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
@@ -185,8 +190,18 @@ class P39Impl {
 			return new P39.ResourcesPort() {
 
 				@Override
-				public <T> T readMetadata(Resource resource, ResourceMetadataReader<T> reader) {
+				public @Nullable Resource get(ResourceFactory factory, Identifier id) throws IOException {
+					return factory.getResource(id);
+				}
+				
+				@Override
+				public <T> @Nullable T readMetadata(Resource resource, ResourceMetadataReader<T> reader) {
 					return resource.getMetadata(reader);
+				}
+				
+				@Override
+				public InputStream open(Resource resource) throws IOException {
+					return resource.getInputStream();
 				}
 				
 			};
@@ -245,7 +260,7 @@ class P39Impl {
 				@Override
 				@Environment(EnvType.CLIENT)
 				public void upload(VertexBuffer vb, BufferBuilder vc) {
-					vb.bind();
+					vc.end();
 					vb.upload(vc);
 				}
 

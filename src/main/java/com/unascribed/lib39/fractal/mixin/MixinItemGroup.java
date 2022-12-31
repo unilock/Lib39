@@ -28,7 +28,7 @@ public class MixinItemGroup implements ItemGroupParent {
 	private final List<ItemSubGroup> lib39Fractal$children = Lists.newArrayList();
 	private ItemSubGroup lib39Fractal$selectedChild = null;
 
-	@Inject(at=@At("HEAD"), method="method_7738", cancellable=true)
+	@Inject(at=@At("HEAD"), method={"appendStacks","method_7738"}, remap=false, cancellable=true)
 	public void lib39$appendStacksHead(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$selectedChild != null) {
 			lib39Fractal$selectedChild.method_7738(stacks);
@@ -36,7 +36,7 @@ public class MixinItemGroup implements ItemGroupParent {
 		}
 	}
 	
-	@Inject(at=@At("TAIL"), method="method_7738", cancellable=true)
+	@Inject(at=@At("TAIL"), method={"appendStacks","method_7738"}, remap=false, cancellable=true)
 	public void appendStacksTail(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$children != null) {
 			for (ItemSubGroup child : lib39Fractal$children) {
@@ -66,8 +66,18 @@ public class MixinItemGroup implements ItemGroupParent {
 	public static ItemGroup[] field_7921;
 
 	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.field_7921:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
-			method="<init>")
+			method="<init>", require=0)
 	private void lib39Fractal$replaceArrayToSkipAdding(int index, String id, CallbackInfo ci) {
+		Object self = this;
+		if (self instanceof ItemSubGroup) {
+			LIB39FRACTAL$GROUPS_OLD = field_7921;
+			field_7921 = new ItemGroup[1];
+		}
+	}
+
+	@Inject(at=@At(value="FIELD", target="net/minecraft/item/ItemGroup.GROUPS:[Lnet/minecraft/item/ItemGroup;", shift=Shift.BEFORE),
+			method="<init>", require=0)
+	private void lib39Fractal$replaceArrayToSkipAddingDeobf(int index, String id, CallbackInfo ci) {
 		Object self = this;
 		if (self instanceof ItemSubGroup) {
 			LIB39FRACTAL$GROUPS_OLD = field_7921;
