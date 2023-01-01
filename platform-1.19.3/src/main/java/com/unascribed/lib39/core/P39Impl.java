@@ -281,7 +281,7 @@ class P39Impl {
 
 				@Override
 				public Iterable<BakedQuad> getQuads(BakedModel bm, BlockState state, Direction face, World world) {
-					return bm.getQuads(state, face, world.random);
+					return bm.getQuads(state, face, world == null ? null : world.random);
 				}
 
 				@Override
