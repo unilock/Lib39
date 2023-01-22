@@ -341,7 +341,7 @@ def defineModule = { name, depModules ->
 				def deps = xml.asNode().appendNode('dependencies')
 				depModules.each {
 					def dep = deps.appendNode('dependency')
-					def spec = ['com.unascribed', 'lib39-'+it, "${project.version}+${p.minecraft_version}"]
+					def spec = ['com.unascribed', 'lib39-'+it, "${rootProject.version}+${p.minecraft_version}"]
 					if (it.contains(':')) {
 						spec = it.split(":")
 					}

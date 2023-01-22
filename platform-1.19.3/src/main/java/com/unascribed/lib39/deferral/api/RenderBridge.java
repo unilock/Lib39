@@ -1,5 +1,6 @@
 package com.unascribed.lib39.deferral.api;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.FloatBuffer;
 import java.util.function.Supplier;
@@ -53,11 +54,22 @@ public class RenderBridge extends GL21 {
 		glPopMatrix();
 	}
 	
-	private static final Supplier<Vector3f[]> shaderLightDirections = ReflectionHelper.of(MethodHandles.lookup(), RenderSystem.class)
-			.obtainStaticGetter(Vector3f[].class, "shaderLightDirections");
+	private static final MethodHandle shaderLightDirections; static {
+		try {
+			shaderLightDirections = MethodHandles.privateLookupIn(RenderSystem.class, MethodHandles.lookup())
+					.findStaticGetter(Vector3f[].class, "shaderLightDirections", RenderSystem.class);
+		} catch (Exception e) {
+			throw new AssertionError(e);
+		}
+	}
 	
 	public static void glCopyMCLight() {
-		Vector3f[] lights = shaderLightDirections.get();
+		Vector3f[] lights;
+		try {
+			lights = (Vector3f[]) shaderLightDirections.invokeExact();
+		} catch (Throwable e) {
+			throw new AssertionError(e);
+		}
 		glPushMatrix();
 		glLoadIdentity();
 		glEnable(GL_LIGHT0);

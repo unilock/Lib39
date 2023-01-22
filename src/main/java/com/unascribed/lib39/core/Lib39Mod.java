@@ -1,6 +1,7 @@
 package com.unascribed.lib39.core;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.unascribed.lib39.core.api.ClientModPostInitializer;
 import com.unascribed.lib39.core.api.DedicatedServerModPostInitializer;
@@ -39,34 +40,26 @@ public class Lib39Mod implements ModInitializer, ClientModInitializer, Dedicated
 		onClientPostInitialize();
 	}
 
-	private void onPostInitialize() {
-		for (var ec : FabricLoader.getInstance().getEntrypointContainers("lib39:postinit", ModPostInitializer.class)) {
+	private static <T> void runEntrypoint(String key, Class<T> clazz, Consumer<T> cons) {
+		for (var ec : FabricLoader.getInstance().getEntrypointContainers(key, clazz)) {
 			try {
-				ec.getEntrypoint().onPostInitialize();
+				cons.accept(ec.getEntrypoint());
 			} catch (Throwable t) {
-				throw new RuntimeException("'"+ec.getProvider().getMetadata().getId()+"' threw an exception during postinitialization!", t);
+				throw new RuntimeException("'"+ec.getProvider().getMetadata().getId()+"' threw an exception during "+key+"!", t);
 			}
 		}
+	}
+
+	private void onPostInitialize() {
+		runEntrypoint("lib39:postinit", ModPostInitializer.class, ModPostInitializer::onPostInitialize);
 	}
 
 	private void onClientPostInitialize() {
-		for (var ec: FabricLoader.getInstance().getEntrypointContainers("lib39:postinit_client", ClientModPostInitializer.class)) {
-			try {
-				ec.getEntrypoint().onPostInitializeClient();
-			} catch (Throwable t) {
-				throw new RuntimeException("'"+ec.getProvider().getMetadata().getId()+"' threw an exception during client postinitialization!", t);
-			}
-		}
+		runEntrypoint("lib39:postinit_client", ClientModPostInitializer.class, ClientModPostInitializer::onPostInitializeClient);
 	}
 
 	private void onServerPostInitialize() {
-		for (var ec: FabricLoader.getInstance().getEntrypointContainers("lib39:postinit_server", DedicatedServerModPostInitializer.class)) {
-			try {
-				ec.getEntrypoint().onPostInitializeServer();
-			} catch (Throwable t) {
-				throw new RuntimeException("'"+ec.getProvider().getMetadata().getId()+"' threw an exception during server postinitialization!", t);
-			}
-		}
+		runEntrypoint("lib39:postinit_server", DedicatedServerModPostInitializer.class, DedicatedServerModPostInitializer::onPostInitializeServer);
 	}
 
 }
