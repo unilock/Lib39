@@ -54,7 +54,7 @@ public class RenderBridge extends GL21 {
 	private static final MethodHandle shaderLightDirections; static {
 		try {
 			shaderLightDirections = MethodHandles.privateLookupIn(RenderSystem.class, MethodHandles.lookup())
-					.findStaticGetter(Vec3f[].class, "shaderLightDirections", RenderSystem.class);
+					.findStaticGetter(RenderSystem.class, "shaderLightDirections", Vec3f[].class);
 		} catch (Exception e) {
 			throw new AssertionError(e);
 		}

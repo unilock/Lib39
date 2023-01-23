@@ -3,14 +3,11 @@ package com.unascribed.lib39.deferral.api;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.FloatBuffer;
-import java.util.function.Supplier;
-
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL21;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.unascribed.lib39.core.api.util.ReflectionHelper;
 import com.unascribed.lib39.deferral.Lib39Deferral;
 import net.minecraft.client.util.math.MatrixStack;
 
@@ -57,7 +54,7 @@ public class RenderBridge extends GL21 {
 	private static final MethodHandle shaderLightDirections; static {
 		try {
 			shaderLightDirections = MethodHandles.privateLookupIn(RenderSystem.class, MethodHandles.lookup())
-					.findStaticGetter(Vector3f[].class, "shaderLightDirections", RenderSystem.class);
+					.findStaticGetter(RenderSystem.class, "shaderLightDirections", Vector3f[].class);
 		} catch (Exception e) {
 			throw new AssertionError(e);
 		}
