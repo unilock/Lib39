@@ -14,6 +14,7 @@ import com.google.common.base.Suppliers;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -61,7 +62,9 @@ public class P39 {
 		P39.RegistriesPort registries();
 		P39.ResourcesPort resources();
 		P39.ParsingPort parsing();
+		@Environment(EnvType.CLIENT)
 		P39.RenderingPort rendering();
+		@Environment(EnvType.CLIENT)
 		P39.ScreenPort screens();
 	}
 	
@@ -73,8 +76,18 @@ public class P39 {
 	private static final Supplier<RegistriesPort> REGISTRIES = Suppliers.memoize(P39Impl.FACTORY::registries);
 	private static final Supplier<ResourcesPort> RESOURCES = Suppliers.memoize(P39Impl.FACTORY::resources);
 	private static final Supplier<ParsingPort> PARSING = Suppliers.memoize(P39Impl.FACTORY::parsing);
-	private static final Supplier<RenderingPort> RENDERING = Suppliers.memoize(P39Impl.FACTORY::rendering);
-	private static final Supplier<ScreenPort> SCREENS = Suppliers.memoize(P39Impl.FACTORY::screens);
+	private static final Supplier<RenderingPort> RENDERING;
+	private static final Supplier<ScreenPort> SCREENS;
+	
+	static {
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			RENDERING = Suppliers.memoize(P39Impl.FACTORY::rendering);
+			SCREENS = Suppliers.memoize(P39Impl.FACTORY::screens);
+		} else {
+			RENDERING = null;
+			SCREENS = null;
+		}
+	}
 
 	public static P39.MetaPort meta() {
 		return META.get();
@@ -100,10 +113,12 @@ public class P39 {
 		return PARSING.get();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public static P39.RenderingPort rendering() {
 		return RENDERING.get();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public static P39.ScreenPort screens() {
 		return SCREENS.get();
 	}
