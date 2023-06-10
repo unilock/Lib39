@@ -11,7 +11,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformation.Mode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
@@ -35,7 +34,7 @@ public class BlockEmiStack extends ItemEmiStack {
 			matrices.scale(16, -16, 16);
 			P39.rendering().rotate(matrices, -90, 1, 0, 0);
 			matrices.push();
-			MinecraftClient.getInstance().getItemRenderer().renderItem(getItemStack(), Mode.NONE, light, overlay, matrices, vcp, 0);
+			P39.rendering().renderItem(getItemStack(), light, overlay, matrices, vcp, 0);
 			matrices.pop();
 			vcp.draw();
 			matrices.pop();

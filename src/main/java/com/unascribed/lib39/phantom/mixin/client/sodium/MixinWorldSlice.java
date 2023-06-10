@@ -32,14 +32,14 @@ public class MixinWorldSlice {
 	@Dynamic
 	private int baseZ;
 	
-	@Inject(at=@At("TAIL"), method="init", require=0)
+	@Inject(at=@At("TAIL"), method="init", require=0, remap=false)
 	public void lib39Phantom$init(@Coerce Object builder, World world, ChunkSectionPos chunkPos, WorldChunk[] chunks, CallbackInfo ci) {
 		if (world instanceof PhantomWorld) {
 			lib39Phantom$world = (PhantomWorld)world;
 		}
 	}
 	
-	@Inject(at=@At("TAIL"), method="<init>", require=0)
+	@Inject(at=@At("TAIL"), method="<init>", require=0, remap=false)
 	public void lib39Phantom$init(World world, CallbackInfo ci) {
 		if (world instanceof PhantomWorld) {
 			lib39Phantom$world = (PhantomWorld)world;

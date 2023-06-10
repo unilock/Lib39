@@ -27,7 +27,7 @@ public abstract class MixinServerPlayerEntityScreenHandlerListener {
 
 	private ServerPlayerEntity lib39$player;
 
-	@Inject(at=@At("RETURN"), method="<init>")
+	@Inject(at=@At("RETURN"), method="<init>", remap=false)
 	public void construct(ServerPlayerEntity player, CallbackInfo ci) {
 		lib39$player = player;
 	}

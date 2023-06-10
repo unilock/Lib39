@@ -7,6 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -307,7 +312,17 @@ class P39Impl {
 				public void draw(VertexBuffer buf, MatrixStack matrices, ShaderProgram shader) {
 					buf.setShader(matrices.peek().getModel(), RenderSystem.getProjectionMatrix(), shader);
 				}
-				
+
+				@Override
+				public void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
+					DrawableHelper.drawTexture(matrices, x, y, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
+				}
+
+				@Override
+				public void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed) {
+					MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.NONE, light, overlay, matrices, vcp, 0);
+
+				}
 			};
 		}
 		

@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -181,6 +184,8 @@ public class P39 {
 		
 		void upload(VertexBuffer vb, BufferBuilder vc);
 		void draw(VertexBuffer buf, MatrixStack matrices, ShaderProgram shader);
+		void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight);
+		void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed);
 	}
 
 	@Environment(EnvType.CLIENT)

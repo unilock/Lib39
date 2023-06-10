@@ -8,6 +8,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
@@ -299,7 +303,16 @@ class P39Impl {
 				public void rotate(MatrixStack matrices, float deg, float x, float y, float z) {
 					matrices.multiply(new Quaternionf(new AxisAngle4f(deg*MathHelper.RADIANS_PER_DEGREE, x, y, z)));
 				}
-				
+
+				@Override
+				public void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
+					//stubbed until EMI gets to 1.20 and we figure out what to do from there
+				}
+
+				@Override
+				public void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed) {
+					MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.NONE, light, overlay, matrices, vcp, null, 0);
+				}
 			};
 		}
 		
