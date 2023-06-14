@@ -22,9 +22,9 @@ public abstract class MixinItemEntity extends Entity {
 
 	@Inject(at=@At("TAIL"), method="tick")
 	public void lib39Machination$tick(CallbackInfo ci) {
-		if (world instanceof WetWorld ww) {
+		if (getWorld() instanceof WetWorld ww) {
 			BlockPos pos = getBlockPos();
-			if (!world.getFluidState(pos).isEmpty()) {
+			if (!getWorld().getFluidState(pos).isEmpty()) {
 				ww.lib39Machination$getSoakingMap().put(pos, (ItemEntity)(Object)this);
 			}
 		}

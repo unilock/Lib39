@@ -30,10 +30,10 @@ public class MixinCraftingResultSlot {
 	@Inject(at=@At("HEAD"), method="onCrafted(Lnet/minecraft/item/ItemStack;)V")
 	protected void lib39Core$onCrafted(ItemStack stack, CallbackInfo ci) {
 		if (player == null) return;
-		if (player.world.isClient) return;
-		Optional<CraftingRecipe> recipe = player.world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, player.world);
+		if (player.getWorld().isClient) return;
+		Optional<CraftingRecipe> recipe = player.getWorld().getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, player.getWorld());
 		if (recipe.isPresent() && Lib39Mod.craftingSounds.containsKey(recipe.get().getId())) {
-			P39.worlds().playSound(player.world, null, player.getX(), player.getY(), player.getZ(),
+			P39.worlds().playSound(player.getWorld(), null, player.getX(), player.getY(), player.getZ(),
 					Lib39Mod.craftingSounds.get(recipe.get().getId()), player.getSoundCategory(), 1, 1);
 		}
 	}

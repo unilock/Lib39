@@ -94,7 +94,7 @@ public abstract class Message {
 		if (async) {
 			handle(sender);
 		} else {
-			((ServerWorld)sender.world).getServer().execute(() -> handle(sender));
+			((ServerWorld)sender.getWorld()).getServer().execute(() -> handle(sender));
 		}
 	}
 	
@@ -116,8 +116,8 @@ public abstract class Message {
 	 */
 	public void sendToAllWatching(Entity e) {
 		if (env == EnvType.SERVER) wrongSide();
-		if (e.world instanceof ServerWorld) {
-			ServerWorld srv = (ServerWorld) e.world;
+		if (e.getWorld() instanceof ServerWorld) {
+			ServerWorld srv = (ServerWorld) e.getWorld();
 			CustomPayloadS2CPacket packet = toClientboundVanillaPacket();
 			srv.getChunkManager().sendToNearbyPlayers(e, packet);
 		}

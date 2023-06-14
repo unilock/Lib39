@@ -38,7 +38,7 @@ public abstract class MixinServerPlayerEntityScreenHandlerListener {
 			var r = P39.registries();
 			Identifier id = r.getId(r.item(), stack.getItem());
 			lib39$player.unlockRecipes(DessicantData.discoveries.get(id).stream()
-				.map(lib39$player.world.getRecipeManager()::get)
+				.map(lib39$player.getWorld().getRecipeManager()::get)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.collect(Collectors.toList()));

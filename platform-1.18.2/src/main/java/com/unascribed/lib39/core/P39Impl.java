@@ -12,6 +12,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -118,7 +119,11 @@ class P39Impl {
 				public void playSound(World world, PlayerEntity except, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
 					world.playSound(except, x, y, z, sound, category, volume, pitch);
 				}
-				
+
+				@Override
+				public boolean isReceivingRedstonePower(World world, BlockPos pos) {
+					return world.isReceivingRedstonePower(pos);
+				}
 			};
 		}
 		

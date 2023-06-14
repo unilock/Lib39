@@ -31,10 +31,10 @@ public abstract class MixinLivingEntity extends Entity {
 	
 	@Inject(at=@At("TAIL"), method="tick")
 	public void lib39Phantom$tick(CallbackInfo ci) {
-		if (world.isClient) return;
-		if (world instanceof PhantomWorld) {
-			PhantomWorld yw = (PhantomWorld)world;
-			if (onGround && fallDistance <= 0) {
+		if (getWorld().isClient) return;
+		if (getWorld() instanceof PhantomWorld) {
+			PhantomWorld yw = (PhantomWorld)getWorld();
+			if (isOnGround() && fallDistance <= 0) {
 				lib39Phantom$customDamageSource = null;
 			} else if (lib39Phantom$customDamageSource == null) {
 				BlockPos bp = getBlockPos();

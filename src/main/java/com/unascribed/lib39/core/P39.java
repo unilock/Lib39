@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -139,6 +140,7 @@ public class P39 {
 	public interface WorldsPort {
 		void playSound(World world, PlayerEntity except, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch);
 		Iterable<WorldChunk> getLoadedChunks(ServerWorld world);
+		boolean isReceivingRedstonePower(World world, BlockPos pos);
 	}
 	
 	public interface RegistriesPort {

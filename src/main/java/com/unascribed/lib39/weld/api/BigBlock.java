@@ -190,7 +190,6 @@ public abstract class BigBlock extends Block {
 		}
 	}
 
-	@Override
 	public PistonBehavior getPistonBehavior(BlockState state) {
 		return PistonBehavior.BLOCK;
 	}
@@ -223,7 +222,7 @@ public abstract class BigBlock extends Block {
 
 	public static boolean isReceivingRedstonePower(World world, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof BigBlock)) {
-			return world.isReceivingRedstonePower(pos);
+			return P39.worlds().isReceivingRedstonePower(world, pos);
 		}
 		BigBlock b = (BigBlock)state.getBlock();
 		int oX = pos.getX()-b.getX(state);
@@ -234,7 +233,7 @@ public abstract class BigBlock extends Block {
 			for (int y = 0; y < b.getYSize(state); y++) {
 				for (int z = 0; z < b.getZSize(state); z++) {
 					bp.set(oX+x, oY+y, oZ+z);
-					if (world.isReceivingRedstonePower(bp)) {
+					if (P39.worlds().isReceivingRedstonePower(world, bp)) {
 						return true;
 					}
 				}
