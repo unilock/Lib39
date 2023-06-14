@@ -167,7 +167,7 @@ public class HaloRenderer {
 						}
 					scratch.pop();
 				}
-				VertexBuffer vb = buffers.computeIfAbsent(csp, blah -> new VertexBuffer());
+				VertexBuffer vb = buffers.computeIfAbsent(csp, blah -> P39.rendering().createVertexBuffer());
 				P39.rendering().upload(vb, vc);
 				buffers.put(csp, vb);
 				boundingBoxes.put(csp, bounds);

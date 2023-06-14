@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
@@ -123,6 +124,16 @@ class P39Impl {
 				@Override
 				public boolean isReceivingRedstonePower(World world, BlockPos pos) {
 					return world.isReceivingRedstonePower(pos);
+				}
+
+				@Override
+				public BlockPos flooredBlockPos(double x, double y, double z) {
+					return new BlockPos(x, y, z);
+				}
+
+				@Override
+				public boolean isFallingDamageType(DamageSource src) {
+					return src == DamageSource.FALL;
 				}
 			};
 		}
@@ -326,6 +337,11 @@ class P39Impl {
 				@Override
 				public void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed) {
 					MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.NONE, light, overlay, matrices, vcp, 0);
+				}
+
+				@Override
+				public VertexBuffer createVertexBuffer() {
+					return new VertexBuffer();
 				}
 			};
 		}

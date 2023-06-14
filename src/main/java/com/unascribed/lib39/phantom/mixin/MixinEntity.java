@@ -1,5 +1,6 @@
 package com.unascribed.lib39.phantom.mixin;
 
+import com.unascribed.lib39.core.P39;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,7 +66,7 @@ public abstract class MixinEntity {
 			ordinal=0, method="updateSubmergedInWaterState")
 	public FluidState lib39Phantom$replaceFluidStateForSubmerge(FluidState in) {
 		if (in.isEmpty()) return in;
-		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(new BlockPos(getX(), getEyeY()-0.1111111119389534, getZ()))) {
+		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(P39.worlds().flooredBlockPos(getX(), getEyeY() - 0.1111111119389534, getZ()))) {
 			return Fluids.EMPTY.getDefaultState();
 		}
 		return in;

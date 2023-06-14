@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
@@ -141,6 +142,8 @@ public class P39 {
 		void playSound(World world, PlayerEntity except, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch);
 		Iterable<WorldChunk> getLoadedChunks(ServerWorld world);
 		boolean isReceivingRedstonePower(World world, BlockPos pos);
+		BlockPos flooredBlockPos(double x, double y, double z);
+		boolean isFallingDamageType(DamageSource src);
 	}
 	
 	public interface RegistriesPort {
@@ -188,6 +191,8 @@ public class P39 {
 		void draw(VertexBuffer buf, MatrixStack matrices, ShaderProgram shader);
 		void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight);
 		void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed);
+
+		VertexBuffer createVertexBuffer();
 	}
 
 	@Environment(EnvType.CLIENT)

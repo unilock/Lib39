@@ -1,5 +1,6 @@
 package com.unascribed.lib39.phantom.mixin;
 
+import com.unascribed.lib39.core.P39;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,7 +51,7 @@ public abstract class MixinLivingEntity extends Entity {
 	
 	@ModifyVariable(at=@At("HEAD"), method="damage", argsOnly=true, ordinal=0)
 	public DamageSource lib39Phantom$modifyDamageSource(DamageSource src) {
-		if (src == DamageSource.FALL && lib39Phantom$customDamageSource != null) {
+		if (P39.worlds().isFallingDamageType(src) && lib39Phantom$customDamageSource != null) {
 			return lib39Phantom$customDamageSource;
 		}
 		return src;
