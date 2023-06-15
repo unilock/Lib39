@@ -21,6 +21,7 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.ShapedRecipe;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
@@ -60,8 +61,13 @@ public class PistonSmashingRecipe implements Recipe<Inventory> {
 		return catalyst;
 	}
 
-	@Override
+	// Pre 1.20
 	public ItemStack getOutput() {
+		return output;
+	}
+
+	// 1.20
+	public ItemStack method_8110(DynamicRegistryManager registryManager) {
 		return output;
 	}
 	
@@ -90,9 +96,14 @@ public class PistonSmashingRecipe implements Recipe<Inventory> {
 		return false;
 	}
 
-	@Override
+	// Pre 1.20
 	public ItemStack craft(Inventory inv) {
 		return output.copy();
+	}
+
+	// 1.20
+	public ItemStack method_8116(Inventory inv, DynamicRegistryManager manager) {
+		return getOutput().copy();
 	}
 
 	@Override

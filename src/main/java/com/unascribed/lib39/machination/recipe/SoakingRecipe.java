@@ -3,6 +3,7 @@ package com.unascribed.lib39.machination.recipe;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import net.minecraft.registry.DynamicRegistryManager;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
@@ -74,14 +75,28 @@ public class SoakingRecipe implements Recipe<Inventory> {
 		return false;
 	}
 
-	@Override
+	// Both craft() methods override the same, depending on version.
+
+	// Pre 1.20
 	public ItemStack craft(Inventory inv) {
 		return getOutput().copy();
 	}
-	
-	@Override
+
+	// 1.20
+	public ItemStack method_8116(Inventory inv, DynamicRegistryManager manager) {
+		return getOutput().copy();
+	}
+
+	// Both getOutput() methods here override the same, depending on version.
+
+	// Pre 1.20
 	public ItemStack getOutput() {
 		return result.map(is -> is, bs -> new ItemStack(bs.getBlock()));
+	}
+
+	// 1.20
+	public ItemStack method_8110(DynamicRegistryManager registryManager) {
+		return getOutput();
 	}
 
 	@Override
@@ -131,7 +146,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			Either<ItemStack, DefaultedList<Ingredient>> ingredients;
 			if (obj.has("ingredients")) {
 				ingredients = Either.right(DefaultedList.copyOf(Ingredient.EMPTY, StreamSupport.stream(obj.get("ingredients").getAsJsonArray().spliterator(), false)
-						.map(Ingredient::fromJson)
+						.map(Ingredient::method_52177)
 						.collect(Collectors.toList()).toArray(new Ingredient[0])));
 			} else if (obj.has("single_ingredient")) {
 				ingredients = Either.left(ShapedRecipe.outputFromJson(obj.getAsJsonObject("single_ingredient")));
