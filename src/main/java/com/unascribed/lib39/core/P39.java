@@ -190,6 +190,9 @@ public class P39 {
 		
 		void upload(VertexBuffer vb, BufferBuilder vc);
 		void draw(VertexBuffer buf, MatrixStack matrices, ShaderProgram shader);
+		default void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int textureWidth, int textureHeight) {
+			drawTexture(matrices, x, y, width, height, u, v, width, height, textureWidth, textureHeight);
+		}
 		void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight);
 		void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed);
 		int drawText(TextRenderer renderer, MatrixStack matrices, String text, float x, float y, int color);

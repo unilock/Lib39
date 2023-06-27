@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -19,12 +19,11 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector4f;
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.unascribed.lib39.core.api.util.ReflectionHelper;
@@ -326,7 +325,29 @@ class P39Impl {
 
 				@Override
 				public void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
-					//stubbed until EMI gets to 1.20 and we figure out what to do from there
+					// Direct rendering ported out of GuiGraphics
+					
+					int x1 = x;
+					int x2 = x + width;
+					int y1 = y;
+					int y2 = y + height;
+
+
+					float u1 = (u + 0.0F) / (float)textureWidth;
+					float u2 = (u + (float)regionWidth) / (float)textureWidth;
+					float v1 = (v + 0.0F) / (float)textureHeight;
+					float v2 = (v + (float)regionHeight) / (float)textureHeight;
+
+					int z = 0;
+
+					Matrix4f matrix4f = matrices.peek().getModel();
+					BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
+					bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+					bufferBuilder.vertex(matrix4f, (float)x1, (float)y1, (float)z).uv(u1, v1).next();
+					bufferBuilder.vertex(matrix4f, (float)x1, (float)y2, (float)z).uv(u1, v2).next();
+					bufferBuilder.vertex(matrix4f, (float)x2, (float)y2, (float)z).uv(u2, v2).next();
+					bufferBuilder.vertex(matrix4f, (float)x2, (float)y1, (float)z).uv(u2, v1).next();
+					BufferRenderer.drawWithShader(bufferBuilder.end());
 				}
 
 				@Override

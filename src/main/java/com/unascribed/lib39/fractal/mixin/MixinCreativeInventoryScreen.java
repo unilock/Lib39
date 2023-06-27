@@ -65,8 +65,8 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 				RenderSystem.setShaderTexture(0, new Identifier("lib39-fractal", "textures/subtab.png"));
 				boolean childSelected = child == parent.lib39Fractal$getSelectedChild();
 				int bgV = childSelected ? 11 : 0;
-				drawTexture(matrices, x-tw, y, 0, bgV, tw+ofs, 11, 70, 22);
-				drawTexture(matrices, this.x, y, 64, bgV, 6, 11, 70, 22);
+				P39.rendering().drawTexture(matrices, x-tw, y, 0, bgV, tw+ofs, 11, 70, 22);
+				P39.rendering().drawTexture(matrices, this.x, y, 64, bgV, 6, 11, 70, 22);
 				RenderSystem.setShaderTexture(0, new Identifier("lib39-fractal", "textures/tinyfont.png"));
 				String str = child.getName().getString();
 				for (int i = str.length()-1; i >= 0; i--) {
@@ -75,7 +75,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 					int u = (c%16)*4;
 					int v = (c/16)*6;
 					RenderSystem.setShaderColor(0, 0, 0, 1);
-					drawTexture(matrices, x, y+3, u, v, 4, 6, 64, 48);
+					P39.rendering().drawTexture(matrices, x, y+3, u, v, 4, 6, 64, 48);
 					x -= 4;
 				}
 				x = this.x-ofs;
