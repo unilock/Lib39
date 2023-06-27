@@ -35,46 +35,67 @@ public class ReflectionHelper<T> {
 	
 	
 	public <V> Supplier<V> obtainStaticGetter(Class<V> type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findStaticGetter(clazz, name, type),
 				handle -> rethrowing(() -> (V)handle.invoke()));
 	}
 	public <V> Consumer<V> obtainStaticSetter(Class<V> type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findStaticSetter(clazz, name, type),
 				handle -> rethrowing((v) -> { handle.invoke(v); }));
 	}
 	
 	public <V> Function<T, V> obtainGetter(Class<V> type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findGetter(clazz, name, type),
 				handle -> rethrowing((t) -> (V)handle.invoke(t)));
 	}
 	public <V> BiConsumer<T, V> obtainSetter(Class<V> type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findSetter(clazz, name, type),
 				handle -> rethrowing((t, v) -> handle.invoke(t, v)));
 	}
 
 	
 	public <V> MethodHandle obtainStatic(MethodType type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findStatic(clazz, name, type),
 				handle -> handle);
 	}
+
+	public <V> MethodHandle tryObtainStatic(MethodType type, String... names) {
+		return obtain(clazz, names, true,
+				name -> lk.findStatic(clazz, name, type),
+				handle -> handle);
+	}
+
+
 	public <V> MethodHandle obtainVirtual(MethodType type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
 				name -> lk.findVirtual(clazz, name, type),
 				handle -> handle);
 	}
+
+	public <V> MethodHandle tryObtainVirtual(MethodType type, String... names) {
+		return obtain(clazz, names, true,
+				name -> lk.findVirtual(clazz, name, type),
+				handle -> handle);
+	}
+
 	public <V> MethodHandle obtainSpecial(MethodType type, String... names) {
-		return obtain(clazz, names,
+		return obtain(clazz, names, false,
+				name -> lk.findSpecial(clazz, name, type, lk.lookupClass()),
+				handle -> handle);
+	}
+
+	public <V> MethodHandle tryObtainSpecial(MethodType type, String... names) {
+		return obtain(clazz, names, false,
 				name -> lk.findSpecial(clazz, name, type, lk.lookupClass()),
 				handle -> handle);
 	}
 	
 
-	private static <T, R> R obtain(Class<?> clazz, String[] names,
+	private static <T, R> R obtain(Class<?> clazz, String[] names, boolean failureOk,
 			ExceptableFunction<String, MethodHandle> lookup, ExceptableFunction<MethodHandle, R> constructor) {
 		try {
 			for (String name : names) {
@@ -82,7 +103,12 @@ public class ReflectionHelper<T> {
 					return constructor.apply(lookup.apply(name));
 				} catch (NoSuchFieldException e) {}
 			}
-			throw new NoSuchFieldError("Could not find a field by any of the names given in "+clazz+": "+Arrays.toString(names));
+
+			if (!failureOk) {
+				throw new NoSuchFieldError("Could not find a field by any of the names given in "+clazz+": "+Arrays.toString(names));
+			}
+
+			return null;
 		} catch (Throwable t) {
 			throw new AssertionError(t);
 		}

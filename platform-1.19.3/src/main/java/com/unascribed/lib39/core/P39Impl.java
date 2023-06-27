@@ -80,7 +80,7 @@ class P39Impl {
 			return new P39.MetaPort() {
 				@Override
 				public String target() {
-					return "1.19.3";
+					return "1.20";
 				}
 			};
 		}

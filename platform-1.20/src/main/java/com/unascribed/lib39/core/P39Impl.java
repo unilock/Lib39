@@ -326,7 +326,7 @@ class P39Impl {
 				@Override
 				public void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 					// Direct rendering ported out of GuiGraphics
-					
+
 					int x1 = x;
 					int x2 = x + width;
 					int y1 = y;

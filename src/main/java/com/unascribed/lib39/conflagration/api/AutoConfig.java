@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.unascribed.lib39.conflagration.Lib39ConflagrationInit;
 import com.unascribed.lib39.conflagration.api.qdcss.QDCSS;
@@ -308,7 +309,7 @@ public abstract class AutoConfig {
 		@Override
 		@Environment(EnvType.CLIENT)
 		public Optional<ButtonWidget> createWidget(Text desc, int x, int y, int width, int height, Boolean currentValue, Consumer<Boolean> updateCallback) {
-			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(currentValue ? "options.on" : "options.off"), b -> {}) {
+			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(currentValue ? "options.on" : "options.off"), b -> {}, Supplier::get) {
 				private boolean value = currentValue;
 				
 				@Override
@@ -353,7 +354,7 @@ public abstract class AutoConfig {
 		public Optional<ButtonWidget> createWidget(Text desc, int x, int y, int width, int height, E currentValue, Consumer<E> updateCallback) {
 			Iterator<E> cycle = Iterators.cycle(clazz.getEnumConstants());
 			Iterators.find(cycle, t -> t == currentValue);
-			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(translationKey+"."+Ascii.toLowerCase(currentValue.name())), b -> {}) {
+			var w = new ButtonWidget(x, y, width, height, P39.text().translatable(translationKey+"."+Ascii.toLowerCase(currentValue.name())), b -> {}, Supplier::get) {
 				private E value = currentValue;
 				
 				@Override

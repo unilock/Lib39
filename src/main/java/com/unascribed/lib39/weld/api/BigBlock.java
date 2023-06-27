@@ -1,10 +1,15 @@
 package com.unascribed.lib39.weld.api;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import com.unascribed.lib39.core.api.util.ReflectionHelper;
+import net.minecraft.class_8567;
 import org.jetbrains.annotations.Nullable;
 
 import com.unascribed.lib39.core.P39;
@@ -36,6 +41,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 public abstract class BigBlock extends Block {
+	private static final MethodHandle getDroppedStacks = ReflectionHelper.of(MethodHandles.lookup(), Block.class)
+			.tryObtainVirtual(MethodType.methodType(List.class, BlockState.class, Builder.class),
+					"getDroppedStacks", "method_9560");
 
 	public final Optional<IntProperty> xProp, yProp, zProp;
 	private final int xSize, ySize, zSize;
@@ -194,10 +202,21 @@ public abstract class BigBlock extends Block {
 		return PistonBehavior.BLOCK;
 	}
 	
-	@Override
+//	Pre 1.20 override
 	public List<ItemStack> getDroppedStacks(BlockState state, Builder builder) {
 		if (getX(state) != 0 || getY(state) != 0 || getZ(state) != 0) return ImmutableList.of();
-		return super.getDroppedStacks(state, builder);
+		try {
+			return (List<ItemStack>) getDroppedStacks.invoke(state, builder);
+		} catch (Throwable e) {
+			throw new RuntimeException("No Exception expected here", e);
+		}
+	}
+
+	// 1.20+ override
+	@Override
+	public List<ItemStack> method_9560(BlockState state, class_8567.class_8568 builder) {
+		if (getX(state) != 0 || getY(state) != 0 || getZ(state) != 0) return ImmutableList.of();
+		return super.method_9560(state, builder);
 	}
 	
 	public void alterDroppedEntity(BlockPos pos, BlockState state, ItemEntity entity) {
