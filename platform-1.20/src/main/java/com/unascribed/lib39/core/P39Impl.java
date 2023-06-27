@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.mojang.blaze3d.vertex.Tessellator;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.damage.DamageSource;
@@ -330,6 +332,16 @@ class P39Impl {
 				@Override
 				public void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed) {
 					MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.NONE, light, overlay, matrices, vcp, null, 0);
+				}
+
+				@Override
+				public int drawText(TextRenderer renderer, MatrixStack matrices, String text, float x, float y, int color) {
+					VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBufferBuilder());
+					int i = renderer.draw(text, x, y, color, false, matrices.peek().getModel(), immediate, TextRenderer.TextLayerType.NORMAL, 0, 15728880, renderer.isRightToLeft());
+
+					immediate.draw();
+
+					return i;
 				}
 
 				@Override

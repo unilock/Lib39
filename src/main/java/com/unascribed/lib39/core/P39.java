@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.entity.damage.DamageSource;
@@ -191,6 +192,7 @@ public class P39 {
 		void draw(VertexBuffer buf, MatrixStack matrices, ShaderProgram shader);
 		void drawTexture(MatrixStack matrices, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight);
 		void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed);
+		int drawText(TextRenderer renderer, MatrixStack matrices, String text, float x, float y, int color);
 
 		VertexBuffer createVertexBuffer();
 	}

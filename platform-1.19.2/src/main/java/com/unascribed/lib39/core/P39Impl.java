@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -337,6 +338,11 @@ class P39Impl {
 				@Override
 				public void renderItem(ItemStack stack, int light, int overlay, MatrixStack matrices, VertexConsumerProvider vcp, int seed) {
 					MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.NONE, light, overlay, matrices, vcp, 0);
+				}
+
+				@Override
+				public int drawText(TextRenderer renderer, MatrixStack matrices, String text, float x, float y, int color) {
+					return renderer.draw(matrices, text, x, y, color);
 				}
 
 				@Override

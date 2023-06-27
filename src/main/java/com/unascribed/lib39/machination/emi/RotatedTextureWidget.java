@@ -3,6 +3,7 @@ package com.unascribed.lib39.machination.emi;
 import com.unascribed.lib39.core.P39;
 
 import dev.emi.emi.api.widget.TextureWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
@@ -18,8 +19,10 @@ public class RotatedTextureWidget extends TextureWidget {
 		this.axisY = axisY;
 		this.axisZ = axisZ;
 	}
-	
-	@Override
+
+	// FIXME: pre 1.20
+
+//	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		matrices.push();
 		matrices.translate(x, y, 0);
@@ -27,8 +30,22 @@ public class RotatedTextureWidget extends TextureWidget {
 		P39.rendering().rotate(matrices, ang, axisX, axisY, axisZ);
 		matrices.translate(-width/2, -height/2, 0);
 		matrices.translate(-x, -y, 0);
-		super.render(matrices, mouseX, mouseY, delta);
+		// TODO: methodhandle
+//		super.render(matrices, mouseX, mouseY, delta);
 		matrices.pop();
 	}
 
+
+	@Override
+	public void method_25394(GuiGraphics draw, int mouseX, int mouseY, float delta) {
+		MatrixStack matrices = draw.method_51448();
+		matrices.push();
+		matrices.translate(x, y, 0);
+		matrices.translate(width/2, height/2, 0);
+		P39.rendering().rotate(matrices, ang, axisX, axisY, axisZ);
+		matrices.translate(-width/2, -height/2, 0);
+		matrices.translate(-x, -y, 0);
+		super.method_25394(draw, mouseX, mouseY, delta);
+		matrices.pop();
+	}
 }

@@ -143,7 +143,7 @@ dependencies {
 	}
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
-	modCompileOnly "dev.emi:emi:0.3.1+1.19"
+	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.20.1"
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:9.1.520"
 	// the API jar doesn't get remapped by Loom because it doesn't have a fabric.mod.json
 	modCompileOnly("mezz.jei:jei-1.19.1-fabric:11.2.0.244") { transitive = false }
