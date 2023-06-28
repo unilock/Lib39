@@ -42,7 +42,7 @@ import net.minecraft.world.WorldAccess;
 
 public abstract class BigBlock extends Block {
 	private static final MethodHandle getDroppedStacks = ReflectionHelper.of(MethodHandles.lookup(), Block.class)
-			.tryObtainVirtual(MethodType.methodType(List.class, BlockState.class, Builder.class),
+			.tryObtainVirtual(MethodType.methodType(List.class, Block.class, BlockState.class, Builder.class),
 					"getDroppedStacks", "method_9560");
 
 	public final Optional<IntProperty> xProp, yProp, zProp;
@@ -206,9 +206,10 @@ public abstract class BigBlock extends Block {
 	public List<ItemStack> getDroppedStacks(BlockState state, Builder builder) {
 		if (getX(state) != 0 || getY(state) != 0 || getZ(state) != 0) return ImmutableList.of();
 		try {
-			return (List<ItemStack>) getDroppedStacks.invoke(state, builder);
+			// super.getDroppedStacks
+			return (List<ItemStack>) getDroppedStacks.invoke(this, state, builder);
 		} catch (Throwable e) {
-			throw new RuntimeException("No Exception expected here", e);
+			throw new RuntimeException("No exception expected here", e);
 		}
 	}
 

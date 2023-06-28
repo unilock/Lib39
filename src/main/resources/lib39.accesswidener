@@ -15,3 +15,17 @@ accessible method lib39/DummyEntry crowbar ()V
 accessible class net/minecraft/world/gen/surfacebuilder/SurfaceRules$SequenceMaterialRule
 
 accessible method lib39/DummyEntry end ()V
+
+
+accessible method lib39/DummyEntry fractal ()V
+
+# 1.19.3
+accessible method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$Location;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntrySupplier;)V
+
+# 1.20
+accessible method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$VerticalPosition;ILnet/minecraft/item/ItemGroup$Type;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$EntrySupplier;)V
+
+# intersection
+accessible method net/minecraft/item/ItemGroup <init> (Lnet/minecraft/item/ItemGroup$class_7915;ILnet/minecraft/item/ItemGroup$class_7916;Lnet/minecraft/text/Text;Ljava/util/function/Supplier;Lnet/minecraft/item/ItemGroup$class_7914;)V
+
+accessible method lib39/DummyEntry end ()V

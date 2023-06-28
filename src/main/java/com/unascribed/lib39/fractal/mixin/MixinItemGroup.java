@@ -20,7 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
 @Mixin(ItemGroup.class)
-@AutoMixinEligible(unlessConfigSet="platform 1.19.3")
+@AutoMixinEligible(unlessConfigSet={"platform 1.19.3", "platform 1.20"})
 public class MixinItemGroup implements ItemGroupParent {
 
 	private final List<ItemSubGroup> lib39Fractal$children = Lists.newArrayList();
@@ -29,16 +29,16 @@ public class MixinItemGroup implements ItemGroupParent {
 	@Inject(at=@At("HEAD"), method={"appendStacks","method_7738"}, remap=false, cancellable=true)
 	public void lib39$appendStacksHead(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$selectedChild != null) {
-			lib39Fractal$selectedChild.method_7738(stacks);
+			Lib39FractalReflect.appendStacks(lib39Fractal$selectedChild, stacks);
 			ci.cancel();
 		}
 	}
-	
+
 	@Inject(at=@At("TAIL"), method={"appendStacks","method_7738"}, remap=false, cancellable=true)
 	public void appendStacksTail(DefaultedList<ItemStack> stacks, CallbackInfo ci) {
 		if (lib39Fractal$children != null) {
 			for (ItemSubGroup child : lib39Fractal$children) {
-				child.method_7738(stacks);
+				Lib39FractalReflect.appendStacks(child, stacks);
 			}
 		}
 	}

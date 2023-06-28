@@ -1,5 +1,6 @@
 package com.unascribed.lib39.fractal.mixin;
 
+import com.unascribed.lib39.fractal.Lib39FractalReflect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +27,7 @@ import net.minecraft.util.Identifier;
 
 @Mixin(CreativeInventoryScreen.class)
 @AutoMixinEligible(
-		unlessConfigSet="platform 1.19.3",
+		unlessConfigSet={"platform 1.19.3", "platform 1.20"},
 		inEnvType=EnvType.CLIENT
 	)
 public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScreen<CreativeInventoryScreen.CreativeScreenHandler> implements SubTabLocation {
@@ -37,7 +38,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 
 	@Shadow
 	private float scrollPosition;
-	
+
 	private int lib39Fractal$x, lib39Fractal$y, lib39Fractal$w, lib39Fractal$h;
 	
 	@Inject(at=@At(value="INVOKE", target="net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen.drawMouseoverTooltip(Lnet/minecraft/client/util/math/MatrixStack;II)V"),
@@ -98,7 +99,7 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 				if (mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+11) {
 					parent.lib39Fractal$setSelectedChild(child);
 					handler.itemList.clear();
-					selected.method_7738(handler.itemList);
+					Lib39FractalReflect.appendStacks(selected, handler.itemList);
 					this.scrollPosition = 0.0F;
 					handler.scrollItems(0.0F);
 					ci.setReturnValue(true);

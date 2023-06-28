@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.unascribed.lib39.fractal.api.ItemSubGroup;
+import com.unascribed.lib39.fractal.quack.ItemGroupParent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
@@ -362,7 +364,6 @@ class P39Impl {
 				public ItemGroup getSelectedItemGroup(CreativeInventoryScreen screen) {
 					return ItemGroup.GROUPS[screen.getSelectedTab()];
 				}
-				
 			};
 		}
 	};
