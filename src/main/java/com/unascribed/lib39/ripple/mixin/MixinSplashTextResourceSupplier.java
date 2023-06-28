@@ -29,7 +29,7 @@ public class MixinSplashTextResourceSupplier {
 		SplashTextHandler.modifyNormalSplashes(splashTexts);
 	}
 	
-	@Inject(at=@At("HEAD"), method="get", cancellable=true)
+	@Inject(at=@At("HEAD"), method="method_18174", cancellable=true)
 	public void lib39Core$get(CallbackInfoReturnable<String> ci) {
 		String initial = ci.getReturnValue();
 		String replaced = SplashTextHandler.replaceSplash(splashTexts.size(), initial);
