@@ -1,8 +1,10 @@
 {
 	"schemaVersion": 1,
-	"id": "lib39-dev",
-	"version": "9.9.9",
-	"name": "Lib39 Dev",
-	"description": "Lib39 test mod in a dev environment, also Loom happiness insurance.",
-	"accessWidener": "lib39.accesswidener"
+	"id": "lib39",
+	"name": "Lib39",
+	"version": "${version}+${mcversion}",
+	"description": "A library of useful tidbits originating in Yttr.",
+	"icon": "lib39.png",
+	"license": "MIT",
+	"environment": "*"
 }

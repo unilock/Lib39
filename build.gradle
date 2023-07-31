@@ -102,6 +102,7 @@ tasks.validateAccessWidener {
 
 processResources {
 	inputs.property "version", project.version
+	inputs.property "mcversion", minecraft_version
 
 	filesMatching("**/fabric.mod.json") {
 		expand "version": project.version,
@@ -152,142 +153,129 @@ import com.google.gson.JsonArray;
 
 def gson = new GsonBuilder().setPrettyPrinting().create()
 
-def fatJarJars = new HashMap()
+def fatJarJars = new JsonArray()
+
+def fatJarFmj = new JsonObject()
+fatJarFmj.addProperty("schemaVersion", 1)
+fatJarFmj.addProperty("id", "lib39")
+fatJarFmj.addProperty("name", "Lib39")
+fatJarFmj.addProperty("version", "${rootProject.version}+${minecraft_version}")
+fatJarFmj.addProperty("description", "A library of useful tidbits originating in Yttr.")
+fatJarFmj.addProperty("icon", "lib39.png")
+fatJarFmj.addProperty("license", "MIT")
+fatJarFmj.addProperty("environment", "*")
+fatJarFmj.add("jars", fatJarJars)
+rootProject.build.dependsOn(rootProject.tasks.create("fatJar", Jar) {
+	doFirst {
+		rootProject.file("build/tmp/fatjar/").mkdirs()
+		rootProject.file("build/tmp/fatjar/fabric.mod.json").text = gson.toJson(fatJarFmj)
+	}
+	classifier 'all'
+	version "${rootProject.version}+${minecraft_version}"
+	from 'src/main/resources/lib39.png'
+	from "build/tmp/fatjar/fabric.mod.json"
+})
 
 
-subprojects { p ->
-	fatJarJars.put(p.minecraft_version, new JsonArray())
-	def fatJarFmj = new JsonObject()
-	fatJarFmj.addProperty("schemaVersion", 1)
-	fatJarFmj.addProperty("id", "lib39")
-	fatJarFmj.addProperty("name", "Lib39")
-	fatJarFmj.addProperty("version", "${rootProject.version}+${p.minecraft_version}")
-	fatJarFmj.addProperty("description", "A library of useful tidbits originating in Yttr.")
-	fatJarFmj.addProperty("icon", "lib39.png")
-	fatJarFmj.addProperty("license", "MIT")
-	fatJarFmj.addProperty("environment", "*")
-	fatJarFmj.add("jars", fatJarJars.get(p.minecraft_version))
-	rootProject.build.dependsOn(rootProject.tasks.create("fatJar${p.minecraft_version}", Jar) {
-		doFirst {
-			rootProject.file("build/tmp/fatjar/${p.minecraft_version}").mkdirs()
-			rootProject.file("build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json").text = gson.toJson(fatJarFmj)
-		}
-		classifier 'all'
-		version "${rootProject.version}+${p.minecraft_version}"
-		from 'src/main/resources/lib39.png'
-		from "build/tmp/fatjar/${p.minecraft_version}/fabric.mod.json"
-	})
-}
 
-def uploadAdditionalFiles = new HashMap()
+def uploadAdditionalFiles = []
 
 tasks.remapJar.finalizedBy splitRefmap
 
 def defineModule = { name, depModules ->
 	def Name = name.substring(0, 1).toUpperCase(Locale.ROOT)+name.substring(1)
-	subprojects { p ->
-		if (!uploadAdditionalFiles.containsKey(p.minecraft_version)) {
-			uploadAdditionalFiles.put(p.minecraft_version, [])
-		}
-		def t = rootProject.tasks.create("${name}Jar${p.minecraft_version}", Jar) {
-			dependsOn rootProject.remapJar
-			dependsOn p.tasks['remapJar']
-			destinationDirectory.set(rootProject.file("build/libs/modules-${p.minecraft_version}"))
-			baseName "lib39-${name}"
-			version "${rootProject.version}+${p.minecraft_version}"
-			[rootProject.remapJar, p.tasks['remapJar']].each { rJ ->
-				from(zipTree(rJ.archivePath)) {
-					include 'META-INF/**'
-					include 'com/unascribed/lib39/'+name+'/**'
-					include name+'/**'
-					include 'lib39.png'
-					includeEmptyDirs = false
-					duplicatesStrategy 'include'
-					eachFile {
-						if (it.path.startsWith(name+"/")) {
-							it.path = it.path.substring(name.length()+1)
-						}
-					}
-					filesMatching("**/fabric.mod.json") {
-						expand "mcversion": p.minecraft_version
-					}
+	def t = rootProject.tasks.create("${name}Jar", Jar) {
+		dependsOn rootProject.remapJar
+		destinationDirectory.set(rootProject.file("build/libs/modules"))
+		baseName "lib39-${name}"
+		version "${rootProject.version}+${minecraft_version}"
+		from(zipTree(rootProject.remapJar.archivePath)) {
+			include 'META-INF/**'
+			include 'com/unascribed/lib39/'+name+'/**'
+			include name+'/**'
+			include 'lib39.png'
+			includeEmptyDirs = false
+			duplicatesStrategy 'include'
+			eachFile {
+				if (it.path.startsWith(name+"/")) {
+					it.path = it.path.substring(name.length()+1)
 				}
 			}
-		}
-		rootProject.tasks['build'].dependsOn t
-		t.finalizedBy(rootProject.tasks.create('amend'+Name+'Jar'+p.minecraft_version) {
-			dependsOn t
-			doFirst {
-				amender(t.archivePath)
-			}
-		})
-	
-		def fJ = rootProject.tasks["fatJar${p.minecraft_version}"]
-		fJ.dependsOn(t)
-		fJ.from(t.archivePath) {
-			into 'META-INF/jars'
-		}
-		uploadAdditionalFiles.get(p.minecraft_version).add(t)
-		def jarObj = new JsonObject()
-		jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
-		fatJarJars.get(p.minecraft_version).add(jarObj)
-	
-		def srcT = rootProject.tasks.create("${name}SourcesJar${p.minecraft_version}", Jar) {
-			dependsOn rootProject.remapSourcesJar
-			dependsOn p.remapSourcesJar
-			baseName "lib39-${name}"
-			classifier 'sources'
-			destinationDirectory.set(rootProject.file("build/libs/sources-${p.minecraft_version}"))
-			version "${rootProject.version}+${p.minecraft_version}"
-			[rootProject.remapSourcesJar, p.tasks['remapSourcesJar']].each { rSJ ->
-				from(zipTree(rSJ.archivePath)) {
-					include 'META-INF/**'
-					include 'com/unascribed/lib39/'+name+'/**'
-					include name+'/**'
-					include 'lib39.png'
-					includeEmptyDirs = false
-					duplicatesStrategy 'include'
-					eachFile {
-						if (it.path.startsWith(name+"/")) {
-							it.path = it.path.substring(name.length()+1)
-						}
-					}
-				}
+			filesMatching("**/fabric.mod.json") {
+				expand "mcversion": '1.20.1'
 			}
 		}
-	
-		loom.disableDeprecatedPomGeneration(publishing.publications.create("${name}${p.minecraft_version}", MavenPublication) {
-			groupId 'com.unascribed'
-			artifactId 'lib39-'+name
-			version "${rootProject.version}+${p.minecraft_version}"
-			artifact(t.archivePath) {
-				classifier ''
-				builtBy t
-			}
-			artifact(srcT.archivePath) {
-				classifier 'sources'
-				builtBy srcT
-			}
-	
-			pom.withXml { xml ->
-				def deps = xml.asNode().appendNode('dependencies')
-				depModules.each {
-					def dep = deps.appendNode('dependency')
-					def spec = ['com.unascribed', 'lib39-'+it, "${rootProject.version}+${p.minecraft_version}"]
-					if (it.contains(':')) {
-						spec = it.split(":")
-					}
-					if (spec[0] == 'fapi') {
-						spec[0] = 'net.fabricmc.fabric-api'
-						spec[2] = p.fabricApi.moduleVersion(spec[1], spec[2] == '?' ? p.fabric_version : spec[2])
-					}
-					dep.appendNode('groupId', spec[0])
-					dep.appendNode('artifactId', spec[1])
-					dep.appendNode('version', spec[2])
-				}
-			}
-		})
 	}
+	rootProject.tasks['build'].dependsOn t
+	t.finalizedBy(rootProject.tasks.create('amend'+Name+'Jar') {
+		dependsOn t
+		doFirst {
+			amender(t.archivePath)
+		}
+	})
+
+	def fJ = rootProject.tasks["fatJar"]
+	fJ.dependsOn(t)
+	fJ.from(t.archivePath) {
+		into 'META-INF/jars'
+	}
+	uploadAdditionalFiles.add(t)
+	def jarObj = new JsonObject()
+	jarObj.addProperty("file", "META-INF/jars/"+t.archiveFileName.get())
+	fatJarJars.add(jarObj)
+
+	def srcT = rootProject.tasks.create("${name}SourcesJar", Jar) {
+		dependsOn rootProject.remapSourcesJar
+		baseName "lib39-${name}"
+		classifier 'sources'
+		destinationDirectory.set(rootProject.file("build/libs/sources"))
+		version "${rootProject.version}+${minecraft_version}"
+		from(zipTree(rootProject.remapSourcesJar.archivePath)) {
+			include 'META-INF/**'
+			include 'com/unascribed/lib39/'+name+'/**'
+			include name+'/**'
+			include 'lib39.png'
+			includeEmptyDirs = false
+			duplicatesStrategy 'include'
+			eachFile {
+				if (it.path.startsWith(name+"/")) {
+					it.path = it.path.substring(name.length()+1)
+				}
+			}
+		}
+	}
+
+	loom.disableDeprecatedPomGeneration(publishing.publications.create("${name}${minecraft_version}", MavenPublication) {
+		groupId 'com.unascribed'
+		artifactId 'lib39-'+name
+		version "${rootProject.version}+${minecraft_version}"
+		artifact(t.archivePath) {
+			classifier ''
+			builtBy t
+		}
+		artifact(srcT.archivePath) {
+			classifier 'sources'
+			builtBy srcT
+		}
+
+		pom.withXml { xml ->
+			def deps = xml.asNode().appendNode('dependencies')
+			depModules.each {
+				def dep = deps.appendNode('dependency')
+				def spec = ['com.unascribed', 'lib39-'+it, "${rootProject.version}+${minecraft_version}"]
+				if (it.contains(':')) {
+					spec = it.split(":")
+				}
+				if (spec[0] == 'fapi') {
+					spec[0] = 'net.fabricmc.fabric-api'
+					spec[2] = fabricApi.moduleVersion(spec[1], spec[2] == '?' ? fabric_version : spec[2])
+				}
+				dep.appendNode('groupId', spec[0])
+				dep.appendNode('artifactId', spec[1])
+				dep.appendNode('version', spec[2])
+			}
+		}
+	})
 }
 
 evaluationDependsOnChildren()
