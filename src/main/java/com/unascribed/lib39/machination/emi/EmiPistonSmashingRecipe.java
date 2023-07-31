@@ -15,6 +15,7 @@ import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class EmiPistonSmashingRecipe implements EmiRecipe {
@@ -30,7 +31,7 @@ public class EmiPistonSmashingRecipe implements EmiRecipe {
 		this.id = r.getId();
 		this.input = r.getInput().getMatchingBlocks();
 		this.catalysts = r.getCatalyst().getMatchingBlocks();
-		this.output = EmiStack.of(r.getOutput());
+		this.output = EmiStack.of(r.getResult(null));
 		this.cloudColor = r.getCloudColor();
 		ItemStack multCloudOutput = r.getCloudOutput().copy();
 		multCloudOutput.setCount(multCloudOutput.getCount()*r.getCloudSize());
@@ -113,9 +114,10 @@ public class EmiPistonSmashingRecipe implements EmiRecipe {
 		if (!cloudOutput.isEmpty()) {
 			widgets.add(new ColoredTextureWidget(POTION_BUBBLE, x, 6, 8, 8, 0, 0, 8, 8, 8, 8, cloudColor));
 			x += 12;
+			Object[] args = {};
 			widgets.addSlot(cloudOutput, x, 0)
 				.recipeContext(this)
-				.appendTooltip(P39.text().translatable("emi.category.lib39-machination.piston_smashing.cloud_output_hint"));
+				.appendTooltip(Text.translatable("emi.category.lib39-machination.piston_smashing.cloud_output_hint", args));
 			x += 20;
 		}
 	}

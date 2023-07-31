@@ -32,6 +32,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public final class NetworkContext {
@@ -125,7 +126,7 @@ public final class NetworkContext {
 				m.doHandleServer(handler.player);
 			} catch (Throwable t) {
 				Lib39Log.warn("Exception thrown during packet handling, kicking player", t);
-				handler.disconnect(P39.text().literal("Internal server error"));
+				handler.disconnect(Text.literal("Internal server error"));
 			}
 			return true;
 		}

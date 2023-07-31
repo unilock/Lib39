@@ -9,9 +9,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.dessicant.DessicantData;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -35,8 +35,7 @@ public abstract class MixinServerPlayerEntityScreenHandlerListener {
 	@Inject(at=@At("HEAD"), method={"onSlotUpdate", "method_7635"}, remap=false)
 	public void lib39Dessicant$onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack, CallbackInfo ci) {
 		if (!(handler.getSlot(slotId) instanceof CraftingResultSlot) && handler == lib39$player.playerScreenHandler) {
-			var r = P39.registries();
-			Identifier id = r.getId(r.item(), stack.getItem());
+			Identifier id = Registries.ITEM.getId(stack.getItem());
 			lib39$player.unlockRecipes(DessicantData.discoveries.get(id).stream()
 				.map(lib39$player.getWorld().getRecipeManager()::get)
 				.filter(Optional::isPresent)

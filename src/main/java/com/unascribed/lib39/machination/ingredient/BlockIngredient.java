@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.block.Block;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 public class BlockIngredient implements Predicate<Block> {
@@ -45,18 +46,16 @@ public class BlockIngredient implements Predicate<Block> {
 	public void write(PacketByteBuf out) {
 		List<Block> all = getMatchingBlocks();
 		out.writeVarInt(all.size());
-		var r = P39.registries();
 		for (Block b : all) {
-			out.writeVarInt(r.getRawId(r.block(), b));
+			out.writeVarInt(Registries.BLOCK.getRawId(b));
 		}
 	}
 	
 	public static BlockIngredient read(PacketByteBuf in) {
 		int amt = in.readVarInt();
 		BlockIngredient out = new BlockIngredient();
-		var r = P39.registries();
 		for (int i = 0; i < amt; i++) {
-			out.exacts.add(r.get(r.block(), in.readVarInt()));
+			out.exacts.add(Registries.BLOCK.get(in.readVarInt()));
 		}
 		return out;
 	}
@@ -76,11 +75,10 @@ public class BlockIngredient implements Predicate<Block> {
 	private static void readInto(BlockIngredient out, JsonElement ele) {
 		if (!ele.isJsonObject()) throw new IllegalArgumentException("Expected object, got "+ele);
 		JsonObject obj = ele.getAsJsonObject();
-		var r = P39.registries();
 		if (obj.has("block")) {
-			out.exacts.add(r.get(r.block(), Identifier.tryParse(obj.get("block").getAsString())));
+			out.exacts.add(Registries.BLOCK.get(Identifier.tryParse(obj.get("block").getAsString())));
 		} else if (obj.has("tag")) {
-			out.tags.add(r.getTag(r.block(), Identifier.tryParse(obj.get("tag").getAsString())));
+			out.tags.add(P39.getTag(Registries.BLOCK, Identifier.tryParse(obj.get("tag").getAsString())));
 		} else {
 			throw new IllegalArgumentException("Don't know how to parse "+ele+" without a block or tag value");
 		}

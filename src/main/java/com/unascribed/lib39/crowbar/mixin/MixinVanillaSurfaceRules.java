@@ -11,6 +11,7 @@ import com.unascribed.lib39.crowbar.api.SurfaceRuleModifier;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.surfacebuilder.SurfaceRules;
 import net.minecraft.world.gen.surfacebuilder.SurfaceRules.SequenceMaterialRule;
@@ -39,7 +40,7 @@ public class MixinVanillaSurfaceRules {
 				mthd.accept(en.getEntrypoint(), (id, bs) -> {
 					rule.sequence().add(0,
 							SurfaceRules.condition(
-								SurfaceRules.biome(RegistryKey.of(P39.registries().biomeRegistryKey(), id)),
+								SurfaceRules.biome(RegistryKey.of(RegistryKeys.BIOME, id)),
 								SurfaceRules.block(bs)
 							));
 				});

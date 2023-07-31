@@ -2,7 +2,6 @@ package com.unascribed.lib39.sandman;
 
 import java.util.Set;
 
-import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.sandman.api.TicksAlwaysItem;
 import com.unascribed.lib39.sandman.mixin.AccessorHorseBaseEntity;
 import com.unascribed.lib39.sandman.mixin.AccessorLootableContainerBlockEntity;
@@ -30,7 +29,7 @@ public class TickAlwaysItemHandler {
 
 	public static void startServerWorldTick(ServerWorld world) {
 		var rnd = ThreadLocalRandom.current();
-		for (var wc : P39.worlds().getLoadedChunks(world)) {
+		for (var wc : Lib39Sandman.getLoadedChunks(world)) {
 			if (rnd.nextInt(40) == 0) {
 				var bes = wc.getBlockEntities();
 				if (bes != null) {

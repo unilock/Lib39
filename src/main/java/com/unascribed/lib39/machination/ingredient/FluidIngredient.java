@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 
 import net.minecraft.fluid.Fluid;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 public class FluidIngredient implements Predicate<Fluid> {
@@ -45,18 +46,16 @@ public class FluidIngredient implements Predicate<Fluid> {
 	public void write(PacketByteBuf out) {
 		List<Fluid> all = getMatchingFluids();
 		out.writeVarInt(all.size());
-		var r = P39.registries();
 		for (Fluid f : all) {
-			out.writeVarInt(r.getRawId(r.fluid(), f));
+			out.writeVarInt(Registries.FLUID.getRawId(f));
 		}
 	}
 	
 	public static FluidIngredient read(PacketByteBuf in) {
 		int amt = in.readVarInt();
 		FluidIngredient out = new FluidIngredient();
-		var r = P39.registries();
 		for (int i = 0; i < amt; i++) {
-			out.exacts.add(r.get(r.fluid(), in.readVarInt()));
+			out.exacts.add(Registries.FLUID.get(in.readVarInt()));
 		}
 		return out;
 	}
@@ -76,11 +75,10 @@ public class FluidIngredient implements Predicate<Fluid> {
 	private static void readInto(FluidIngredient out, JsonElement ele) {
 		if (!ele.isJsonObject()) throw new IllegalArgumentException("Expected object, got "+ele);
 		JsonObject obj = ele.getAsJsonObject();
-		var r = P39.registries();
 		if (obj.has("fluid")) {
-			out.exacts.add(r.get(r.fluid(), Identifier.tryParse(obj.get("fluid").getAsString())));
+			out.exacts.add(Registries.FLUID.get(Identifier.tryParse(obj.get("fluid").getAsString())));
 		} else if (obj.has("tag")) {
-			out.tags.add(r.getTag(r.fluid(), Identifier.tryParse(obj.get("tag").getAsString())));
+			out.tags.add(P39.getTag(Registries.FLUID, Identifier.tryParse(obj.get("tag").getAsString())));
 		} else {
 			throw new IllegalArgumentException("Don't know how to parse "+ele+" without a fluid or tag value");
 		}

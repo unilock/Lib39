@@ -1,11 +1,8 @@
 package com.unascribed.lib39.machination.emi;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.texture.NativeImage;
-import com.unascribed.lib39.core.P39;
 import dev.emi.emi.api.widget.TextureWidget;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
@@ -20,33 +17,13 @@ public class ColoredTextureWidget extends TextureWidget {
 
 
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderColor(getBlue(color)/255f, getGreen(color)/255f, getRed(color)/255f, getAlpha(color)/255f);
-		RenderSystem.setShaderTexture(0, this.texture);
-		P39.rendering().drawTexture(matrices, x, y, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
+	}
+
+	@Override
+	public void render(GuiGraphics draw, int mouseX, int mouseY, float delta) {
+		RenderSystem.setShaderColor((color >> 16 & 0xFF)/255f, (color >> 8 & 0xFF)/255f, (color >> 0 & 0xFF)/255f, (color >> 24 & 0xFF)/255f);
+		draw.drawTexture(this.texture, x, y, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
 		RenderSystem.setShaderColor(1, 1, 1, 1);
 	}
-
-	// Soft override for 1.20
-	public void method_25394(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-		render(guiGraphics.method_51448(), mouseX, mouseY, delta);
-	}
-
-	// Doesn't exist cross version, so copy it over
-
-	private static int getAlpha(int color) {
-		return color >> 24 & 0xFF;
-	}
-
-	private static int getRed(int color) {
-		return color >> 0 & 0xFF;
-	}
-
-	private static int getGreen(int color) {
-		return color >> 8 & 0xFF;
-	}
-
-	private static int getBlue(int color) {
-		return color >> 16 & 0xFF;
-	}
+	
 }

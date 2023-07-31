@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -51,7 +52,7 @@ public abstract class MixinLivingEntity extends Entity {
 	
 	@ModifyVariable(at=@At("HEAD"), method="damage", argsOnly=true, ordinal=0)
 	public DamageSource lib39Phantom$modifyDamageSource(DamageSource src) {
-		if (P39.worlds().isFallingDamageType(src) && lib39Phantom$customDamageSource != null) {
+		if (src.getTypeHolder().isIn(DamageTypeTags.IS_FALL) && lib39Phantom$customDamageSource != null) {
 			return lib39Phantom$customDamageSource;
 		}
 		return src;

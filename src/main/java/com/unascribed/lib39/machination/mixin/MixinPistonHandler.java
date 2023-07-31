@@ -23,6 +23,7 @@ import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -58,14 +59,14 @@ public class MixinPistonHandler {
 							cloud.setColor(r.getCloudColor());
 							cloud.setRadius(r.getCloudSize()/4f);
 							cloud.setDuration(100);
-							cloud.setCustomName(P39.text().literal(SmashCloudLogic.MAGIC+r.getId()));
+							cloud.setCustomName(Text.literal(SmashCloudLogic.MAGIC+r.getId()));
 							for (StatusEffectInstance sei : r.getCloudEffects()) {
 								cloud.addEffect(sei);
 							}
 							world.spawnEntity(cloud);
 						}
-						if (!r.getOutput().isEmpty()) {
-							ItemStack stack = r.craft(null);
+						if (!r.getResult(world.getRegistryManager()).isEmpty()) {
+							ItemStack stack = r.craft(null, world.getRegistryManager());
 							ItemEntity item = new ItemEntity(world, moving.getX()+0.5, moving.getY()+ofs, moving.getZ()+0.5, stack);
 							var rnd = ThreadLocalRandom.current();
 							item.setVelocity(rnd.nextGaussian()/8, (ofs-0.5)/6, rnd.nextGaussian()/8);

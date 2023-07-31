@@ -4,16 +4,20 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
-import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.machination.Lib39Machination;
 import com.unascribed.lib39.machination.ingredient.FluidIngredient;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
@@ -75,28 +79,14 @@ public class SoakingRecipe implements Recipe<Inventory> {
 		return false;
 	}
 
-	// Both craft() methods override the same, depending on version.
-
-	// Pre 1.20
-	public ItemStack craft(Inventory inv) {
-		return getOutput().copy();
+	@Override
+	public ItemStack craft(Inventory inv, DynamicRegistryManager mgr) {
+		return getResult(mgr).copy();
 	}
-
-	// 1.20
-	public ItemStack method_8116(Inventory inv, DynamicRegistryManager manager) {
-		return getOutput().copy();
-	}
-
-	// Both getOutput() methods here override the same, depending on version.
-
-	// Pre 1.20
-	public ItemStack getOutput() {
-		return result.map(is -> is, bs -> new ItemStack(bs.getBlock()));
-	}
-
-	// 1.20
-	public ItemStack method_8110(DynamicRegistryManager registryManager) {
-		return getOutput();
+	
+	@Override
+	public ItemStack getResult(DynamicRegistryManager mgr) {
+		return getResult(mgr);
 	}
 
 	@Override
@@ -146,7 +136,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			Either<ItemStack, DefaultedList<Ingredient>> ingredients;
 			if (obj.has("ingredients")) {
 				ingredients = Either.right(DefaultedList.copyOf(Ingredient.EMPTY, StreamSupport.stream(obj.get("ingredients").getAsJsonArray().spliterator(), false)
-						.map(Ingredient::method_52177)
+						.map(Ingredient::fromJson)
 						.collect(Collectors.toList()).toArray(new Ingredient[0])));
 			} else if (obj.has("single_ingredient")) {
 				ingredients = Either.left(ShapedRecipe.outputFromJson(obj.getAsJsonObject("single_ingredient")));
@@ -159,15 +149,18 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			if (resultJson.has("item")) {
 				result = Either.left(ShapedRecipe.outputFromJson(resultJson));
 			} else {
-				result = Either.right(P39.parsing().parseBlockState(resultJson.get("block").getAsString()));
+				try {
+					result = Either.right(BlockArgumentParser.parseForBlock(Registries.BLOCK.asLookup(), new StringReader(resultJson.get("block").getAsString()), false).blockState());
+				} catch (CommandSyntaxException e) {
+					throw new IllegalArgumentException(e);
+				}
 			}
 			int time = JsonHelper.getInt(obj, "time", 0);
 			int multiDelay = JsonHelper.getInt(obj, "multiDelay", 1);
 			String soundId = JsonHelper.getString(obj, "sound", null);
 			SoundEvent sound = null;
-			var r = P39.registries();
 			if (soundId != null) {
-				sound = r.get(r.soundEvent(), new Identifier(soundId));
+				sound = Registries.SOUND_EVENT.get(new Identifier(soundId));
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -197,8 +190,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			int multiDelay = buf.readVarInt();
 			SoundEvent sound = null;
 			if (buf.readBoolean()) {
-				var r = P39.registries();
-				sound = r.get(r.soundEvent(), buf.readVarInt());
+				sound = Registries.SOUND_EVENT.get(buf.readVarInt());
 			}
 			return new SoakingRecipe(id, group, ingredients, catalyst, result, time, multiDelay, sound);
 		}
@@ -218,8 +210,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 			buf.writeVarInt(recipe.time);
 			buf.writeVarInt(recipe.multiDelay);
 			buf.writeBoolean(recipe.sound != null);
-			var r = P39.registries();
-			if (recipe.sound != null) buf.writeVarInt(r.getRawId(r.soundEvent(), recipe.sound));
+			if (recipe.sound != null) buf.writeVarInt(Registries.SOUND_EVENT.getRawId(recipe.sound));
 		}
 		
 	}

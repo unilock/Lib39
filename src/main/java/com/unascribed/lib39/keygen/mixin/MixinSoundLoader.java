@@ -48,10 +48,10 @@ public class MixinSoundLoader {
 			String fpath = path;
 			ci.setReturnValue(CompletableFuture.supplyAsync(() -> {
 				try {
-					Resource resource = P39.resources().get(lib39$factory, id);
-					InputStream inputStream = P39.resources().open(resource);
+					Resource resource = lib39$factory.getResource(id).orElse(null);
+					InputStream inputStream = resource.open();
 					DelegateFactory factory;
-					IBXMResourceMetadata meta = P39.resources().readMetadata(resource, IBXMResourceMetadata.READER);
+					IBXMResourceMetadata meta = resource.getMetadata().readMetadata(IBXMResourceMetadata.READER).orElse(null);
 					boolean isAmiga = fpath.endsWith(".mod");
 					InterpolationMode defaultMode = isAmiga ? InterpolationMode.LINEAR : InterpolationMode.SINC;
 					if (meta != null) {

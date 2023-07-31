@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.unascribed.lib39.core.mixinsupport.AutoMixinEligible;
 import com.unascribed.lib39.crowbar.api.WorldGenerationEvents;
 import com.unascribed.lib39.crowbar.api.WorldGenerationEvents.GeneratorContext;
 
@@ -16,7 +15,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 
 @Mixin(NoiseChunkGenerator.class)
-@AutoMixinEligible(unlessConfigSet="platform 1.18.2")
 public abstract class MixinNoiseChunkGenerator {
 	
 	@Inject(at=@At("TAIL"), method={"buildSurface", "method_12110"}, remap=false)

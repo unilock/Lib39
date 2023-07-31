@@ -11,7 +11,7 @@ buildscript {
 }
 plugins {
 	id 'fabric-loom' version '1.0-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.8.0'
+	id 'io.github.juuxel.loom-vineflower' version '1.11.0'
 	id 'maven-publish'
 	id 'eclipse'
 }
@@ -41,6 +41,7 @@ repositories {
 		url 'https://maven.quiltmc.org/repository/release'
 		content {
 			includeGroup 'org.quiltmc'
+			includeGroup 'org.quiltmc.unpick'
 		}
 	}
 	maven {
@@ -60,93 +61,24 @@ repositories {
 		}
 	}
 	maven {
-		url "https://dvs1.progwml6.com/files/maven/"
+		url "https://maven.blamejared.com/"
 		content {
 			includeGroup 'mezz.jei'
 		}
 	}
 }
 
-import net.fabricmc.mappingio.tree.MappingTree
-import net.fabricmc.mappingio.tree.MappingTree.ClassMapping
-import net.fabricmc.mappingio.tree.MappingTree.MethodArgMapping
-import net.fabricmc.mappingio.tree.MemoryMappingTree
-import net.fabricmc.mappingio.MappedElementKind
-import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor
-import net.fabricmc.mappingio.format.Tiny2Writer
-import com.google.common.collect.Multiset
-import com.google.common.collect.HashMultiset
-
-task generateIntersectionMappings {
-	outputs.file file('.gradle/intersection-mappings-2.tiny')
-	doFirst {
-		def mappings = []
-		subprojects { p ->
-			mappings.add(p.loom.mappingsProvider.mappings)
-		}
-		def out = new MemoryMappingTree()
-		def count = mappings.size()
-		def seen = HashMultiset.create()
-		def classes = new HashMap()
-		out.visitHeader()
-		out.visitNamespaces("intermediary", ["named"])
-		out.visitContent()
-		mappings.each { MemoryMappingTree mp ->
-			mp.classes.each { ClassMapping c ->
-				// this api is HORRIBLE. GOD
-				if (seen.add("class:${c.getDstName(0)}", 1) == count-1) {
-					out.visitClass(c.getDstName(0))
-					out.visitDstName(MappedElementKind.CLASS, 0, c.getDstName(1))
-					out.visitComment(MappedElementKind.CLASS, c.comment)
-					out.visitElementContent(MappedElementKind.CLASS)
-				}
-				c.methods.each { MemoryMappingTree.MethodEntry m ->
-					if (seen.add("method:${c.getDstName(0)}:${m.getDstName(0)}${m.getDstDesc(0)}", 1) == count-1) {
-						out.visitMethod(m.getDstName(0), m.getDstDesc(0))
-						out.visitDstName(MappedElementKind.METHOD, 0, m.getDstName(1))
-						out.visitDstDesc(MappedElementKind.METHOD, 0, m.getDstDesc(1))
-						out.visitComment(MappedElementKind.METHOD, m.comment)
-						out.visitElementContent(MappedElementKind.METHOD)
-						m.args.each { MethodArgMapping a ->
-							out.visitMethodArg(a.argPosition, a.lvIndex, a.getDstName(0))
-							out.visitDstName(MappedElementKind.METHOD_ARG, 0, a.getDstName(1))
-							out.visitComment(MappedElementKind.METHOD_ARG, a.comment)
-							out.visitElementContent(MappedElementKind.METHOD_ARG)
-						}
-					}
-				}
-				c.fields.each { MemoryMappingTree.FieldEntry f ->
-					if (seen.add("field:${c.getDstName(0)}:${f.getDstName(0)}${f.getDstDesc(0)}", 1) == count-1) {
-						out.visitField(f.getDstName(0), f.getDstDesc(0))
-						out.visitDstName(MappedElementKind.FIELD, 0, f.getDstName(1))
-						out.visitDstDesc(MappedElementKind.FIELD, 0, f.getDstDesc(1))
-						out.visitComment(MappedElementKind.FIELD, f.comment)
-						out.visitElementContent(MappedElementKind.FIELD)
-					}
-				}
-			}
-		}
-		out.visitEnd()
-		file('.gradle/intersection-mappings-2.tiny').withWriter { w ->
-			def writer = new Tiny2Writer(w, false)
-			out.accept(writer)
-		}
-	}
-}
-tasks.compileJava.dependsOn generateIntersectionMappings
-
 
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings loom.layered {
-		mappings(file('.gradle/intersection-mappings-2.tiny'))
-	}
+	mappings "org.quiltmc:quilt-mappings:${mappings_version}:intermediary-v2"
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
 	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.20.1"
 	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:9.1.520"
 	// the API jar doesn't get remapped by Loom because it doesn't have a fabric.mod.json
-	modCompileOnly("mezz.jei:jei-1.19.1-fabric:11.2.0.244") { transitive = false }
+	modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.2.0.23") { transitive = false }
+	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.20.1"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
@@ -397,7 +329,7 @@ if (System.getenv("MODRINTH_TOKEN")) {
 		versionType = 'release'
 		changelog = file('CHANGELOG.md').text
 		uploadFile = fatJar
-		gameVersions = ['1.19.1', '1.19.2']
+		gameVersions = ['1.20', '1.20.1']
 		loaders = ['fabric', 'quilt']
 		detectLoaders = false
 	}
@@ -412,8 +344,8 @@ if (System.getenv("CURSE_TOKEN")) {
 			changelogType = 'markdown'
 			changelog = file('CHANGELOG.md')
 
-			addGameVersion '1.19.1'
-			addGameVersion '1.19.2'
+			addGameVersion '1.20'
+			addGameVersion '1.20.1'
 			addGameVersion 'Fabric'
 			addGameVersion 'Quilt'
 

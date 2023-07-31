@@ -29,7 +29,7 @@ public class SmashCloudLogic {
 					cloud.setRadius(cloud.getRadius() - 0.25f);
 					if (cloud.getRadius() < 0.25f) cloud.discard();
 					Vec3d center = box.getCenter();
-					P39.worlds().playSound(world, null, center.x, center.y, center.z, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, 1, 1);
+					world.playSound(null, center.x, center.y, center.z, SoundEvents.ITEM_BOTTLE_FILL_DRAGONBREATH, SoundCategory.NEUTRAL, (float) 1, (float) 1);
 					return r;
 				}
 			}

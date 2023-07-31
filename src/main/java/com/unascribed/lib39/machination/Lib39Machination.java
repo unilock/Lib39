@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.registry.Registries;
 
 public class Lib39Machination implements ModInitializer {
 
@@ -28,8 +29,8 @@ public class Lib39Machination implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
-		autoreg.autoRegister(P39.registries().recipeType(), RecipeTypes.class, RecipeType.class);
-		autoreg.autoRegister(P39.registries().recipeSerializer(), RecipeSerializers.class, RecipeSerializer.class);
+		autoreg.autoRegister(Registries.RECIPE_TYPE, RecipeTypes.class, RecipeType.class);
+		autoreg.autoRegister(Registries.RECIPE_SERIALIZER, RecipeSerializers.class, RecipeSerializer.class);
 		
 		ServerTickEvents.START_WORLD_TICK.register(SoakingHandler::startServerWorldTick);
 		ServerTickEvents.END_WORLD_TICK.register(SoakingHandler::endServerWorldTick);

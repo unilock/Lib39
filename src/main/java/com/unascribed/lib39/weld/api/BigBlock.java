@@ -1,15 +1,9 @@
 package com.unascribed.lib39.weld.api;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Predicate;
 
-import com.unascribed.lib39.core.api.util.ReflectionHelper;
-import net.minecraft.class_8567;
 import org.jetbrains.annotations.Nullable;
 
 import com.unascribed.lib39.core.P39;
@@ -27,7 +21,7 @@ import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContext.Builder;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -41,10 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
 public abstract class BigBlock extends Block {
-	private static final MethodHandle getDroppedStacks = ReflectionHelper.of(MethodHandles.lookup(), Block.class)
-			.tryObtainVirtual(MethodType.methodType(List.class, Block.class, BlockState.class, Builder.class),
-					"getDroppedStacks", "method_9560");
-
 	public final Optional<IntProperty> xProp, yProp, zProp;
 	private final int xSize, ySize, zSize;
 	
@@ -176,16 +166,7 @@ public abstract class BigBlock extends Block {
 	}
 	
 	@Override
-	public void method_9588(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
-		_scheduledTick(state, world, pos);
-	}
-	
-	// @Override
-	public void method_9588(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		_scheduledTick(state, world, pos);
-	}
-	
-	private void _scheduledTick(BlockState state, ServerWorld world, BlockPos pos) {
+	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, RandomGenerator random) {
 		for (Direction dir : Direction.values()) {
 			BlockState expected = getExpectedNeighbor(state, dir);
 			if (expected != null) {
@@ -202,22 +183,10 @@ public abstract class BigBlock extends Block {
 		return PistonBehavior.BLOCK;
 	}
 	
-//	Pre 1.20 override
-	public List<ItemStack> getDroppedStacks(BlockState state, Builder builder) {
-		if (getX(state) != 0 || getY(state) != 0 || getZ(state) != 0) return ImmutableList.of();
-		try {
-			// super.getDroppedStacks
-			return (List<ItemStack>) getDroppedStacks.invoke(this, state, builder);
-		} catch (Throwable e) {
-			throw new RuntimeException("No exception expected here", e);
-		}
-	}
-
-	// 1.20+ override
 	@Override
-	public List<ItemStack> method_9560(BlockState state, class_8567.class_8568 builder) {
+	public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
 		if (getX(state) != 0 || getY(state) != 0 || getZ(state) != 0) return ImmutableList.of();
-		return super.method_9560(state, builder);
+		return super.getDroppedStacks(state, builder);
 	}
 	
 	public void alterDroppedEntity(BlockPos pos, BlockState state, ItemEntity entity) {
@@ -237,12 +206,12 @@ public abstract class BigBlock extends Block {
 		double x = (pos.getX()-b.getX(state))+(b.getXSize(state)/2D);
 		double y = (pos.getY()-b.getY(state))+(b.getYSize(state)/2D);
 		double z = (pos.getZ()-b.getZ(state))+(b.getZSize(state)/2D);
-		P39.worlds().playSound(world, player, x, y, z, event, cat, vol, pitch);
+		world.playSound(player, x, y, z, event, cat, vol, pitch);
 	}
 
 	public static boolean isReceivingRedstonePower(World world, BlockPos pos, BlockState state) {
 		if (!(state.getBlock() instanceof BigBlock)) {
-			return P39.worlds().isReceivingRedstonePower(world, pos);
+			return world.isReceivingRedstonePower(pos);
 		}
 		BigBlock b = (BigBlock)state.getBlock();
 		int oX = pos.getX()-b.getX(state);
@@ -253,7 +222,7 @@ public abstract class BigBlock extends Block {
 			for (int y = 0; y < b.getYSize(state); y++) {
 				for (int z = 0; z < b.getZSize(state); z++) {
 					bp.set(oX+x, oY+y, oZ+z);
-					if (P39.worlds().isReceivingRedstonePower(world, bp)) {
+					if (world.isReceivingRedstonePower(bp)) {
 						return true;
 					}
 				}
