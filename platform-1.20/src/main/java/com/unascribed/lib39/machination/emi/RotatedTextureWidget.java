@@ -8,8 +8,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
 public class RotatedTextureWidget extends TextureWidget {
-	// Will be replaced by a per-version implementation
-
 	private final float ang, axisX, axisY, axisZ;
 	
 	public RotatedTextureWidget(Identifier texture, int x, int y, int width, int height, int u, int v, int regionWidth, int regionHeight, int textureWidth, int textureHeight,
@@ -22,15 +20,15 @@ public class RotatedTextureWidget extends TextureWidget {
 	}
 
 	@Override
-	public void method_25394(GuiGraphics draw, int mouseX, int mouseY, float delta) {
-		MatrixStack matrices = draw.method_51448();
+	public void render(GuiGraphics draw, int mouseX, int mouseY, float delta) {
+		MatrixStack matrices = draw.getMatrices();
 		matrices.push();
 		matrices.translate(x, y, 0);
 		matrices.translate(width/2, height/2, 0);
 		P39.rendering().rotate(matrices, ang, axisX, axisY, axisZ);
 		matrices.translate(-width/2, -height/2, 0);
 		matrices.translate(-x, -y, 0);
-		super.method_25394(draw, mouseX, mouseY, delta);
+		super.render(draw, mouseX, mouseY, delta);
 		matrices.pop();
 	}
 }

@@ -50,6 +50,7 @@ dependencies {
 		mappings(file('../fixups.tiny'))
 	}
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.19.2"
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 	

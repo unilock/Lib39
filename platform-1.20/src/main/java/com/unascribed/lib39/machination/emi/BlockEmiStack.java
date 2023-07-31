@@ -3,7 +3,6 @@ package com.unascribed.lib39.machination.emi;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tessellator;
 import com.unascribed.lib39.core.P39;
-
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.render.EmiRender;
@@ -19,8 +18,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
 public class BlockEmiStack extends ItemEmiStack {
-	// Will be replaced by a per-version implementation
-
 	public BlockEmiStack(Block block) {
 		super(new ItemStack(block));
 	}
@@ -29,7 +26,7 @@ public class BlockEmiStack extends ItemEmiStack {
 	public void render(GuiGraphics draw, int x, int y, float delta, int flags) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 
-		MatrixStack matrices = draw.method_51448();
+		MatrixStack matrices = draw.getMatrices();
 		MinecraftClient client = MinecraftClient.getInstance();
 		ItemStack stack = getItemStack();
 		if ((flags & 1) != 0) {

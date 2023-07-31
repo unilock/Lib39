@@ -1,39 +1,30 @@
 package com.unascribed.lib39.machination.emi;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tessellator;
 import com.unascribed.lib39.core.P39;
-
-import dev.emi.emi.EmiPort;
-import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.render.EmiRender;
 import dev.emi.emi.api.stack.ItemEmiStack;
-import dev.emi.emi.runtime.EmiDrawContext;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
 public class BlockEmiStack extends ItemEmiStack {
-	// Will be replaced by a per-version implementation
-
 	public BlockEmiStack(Block block) {
 		super(new ItemStack(block));
 	}
 
 	@Override
-	public void render(GuiGraphics draw, int x, int y, float delta, int flags) {
-		EmiDrawContext context = EmiDrawContext.wrap(draw);
-
-		MatrixStack matrices = draw.method_51448();
+	public void render(MatrixStack matrices, int x, int y, float delta, int flags) {
 		MinecraftClient client = MinecraftClient.getInstance();
 		ItemStack stack = getItemStack();
 		if ((flags & 1) != 0) {
-			VertexConsumerProvider.Immediate vcp = VertexConsumerProvider.immediate(Tessellator.getInstance().getBufferBuilder());
+			VertexConsumerProvider.Immediate vcp = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
 			int light = LightmapTextureManager.pack(15, 15);
 			int overlay = OverlayTexture.DEFAULT_UV;
 			RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -42,24 +33,21 @@ public class BlockEmiStack extends ItemEmiStack {
 			matrices.scale(16, -16, 16);
 			P39.rendering().rotate(matrices, -90, 1, 0, 0);
 			matrices.push();
-			P39.rendering().renderItem(getItemStack(), light, overlay, matrices, vcp, 0);
+			MinecraftClient.getInstance().getItemRenderer().renderItem(getItemStack(), ModelTransformation.Mode.NONE, light, overlay, matrices, vcp, 0);
 			matrices.pop();
 			vcp.draw();
 			matrices.pop();
 		}
 
 		if ((flags & 2) != 0) {
-			String count = "";
-			if (amount != 1) {
-				count += amount;
-			}
-			EmiRenderHelper.renderAmount(context, x, y, EmiPort.literal(count));
+			client.getItemRenderer().renderGuiItemOverlay(client.textRenderer, stack, x, y, "");
 		}
 
 		if ((flags & 8) != 0) {
-			EmiRender.renderRemainderIcon(this, draw, x, y);
+			EmiRender.renderRemainderIcon(this, matrices, x, y);
 		}
 	}
+
 
 	@Override
 	public boolean isUnbatchable() {

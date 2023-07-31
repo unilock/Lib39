@@ -48,7 +48,6 @@ public abstract class MixinCreativeInventoryScreen extends AbstractInventoryScre
 		if (selected instanceof ItemGroupParent parent && parent.lib39Fractal$getChildren() != null && !parent.lib39Fractal$getChildren().isEmpty()) {
 			if (!selected.shouldRenderName()) {
 				ItemGroup child = parent.lib39Fractal$getSelectedChild();
-				// TODO [jas]: is getString() correct?
 				float x = P39.rendering().drawText(textRenderer, matrices, selected.getName().getString(), this.x+8, this.y+6, 4210752);
 				if (child != null) {
 					x = P39.rendering().drawText(textRenderer, matrices, " ", x, this.y+6, 4210752);

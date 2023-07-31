@@ -27,7 +27,6 @@ import net.minecraft.util.Identifier;
 
 @Mixin(AbstractBlock.class)
 public class MixinAbstractBlock {
-
 	// TODO [jas]: Pre 1.20
 
 //	@Inject(at=@At("RETURN"), method="getDroppedStacks", cancellable=true)
