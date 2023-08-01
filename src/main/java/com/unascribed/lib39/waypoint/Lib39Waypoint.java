@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
@@ -20,7 +19,8 @@ public class Lib39Waypoint implements ClientModInitializer {
 		ClientTickEvents.START_CLIENT_TICK.register(mc -> HaloRenderer.tick());
 		WorldRenderEvents.AFTER_ENTITIES.register(HaloRenderer::render);
 		
-		ModelPredicateProviderRegistry.register(Blocks.AIR.asItem(), new Identifier("lib39", "halo"), (stack, world, entity, seed) -> {
+		ModelPredicateProviderRegistry.register(new Identifier("lib39", "halo"), (stack, world, entity, seed) -> {
+			System.out.println(stack+" "+retrievingHalo);
 			return retrievingHalo ? 1 : 0;
 		});
 		
