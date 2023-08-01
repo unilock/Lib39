@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.unascribed.lib39.keygen.Lib39Keygen;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sound.Sound;
@@ -21,8 +23,7 @@ public class MixinSound {
 	
 	@Inject(at=@At("HEAD"), method="getLocation", cancellable=true)
 	public void lib39Keygen$getLocation(CallbackInfoReturnable<Identifier> ci) {
-		if (id.getPath().endsWith(".xm") || id.getPath().endsWith(".s3m") || id.getPath().endsWith(".mod") ||
-				id.getPath().endsWith(".xm.bz2") || id.getPath().endsWith(".s3m.bz2") || id.getPath().endsWith(".mod.bz2")) {
+		if (Lib39Keygen.isModuleFile(id)) {
 			ci.setReturnValue(new Identifier(id.getNamespace(), "sounds/"+id.getPath()));
 		}
 	}

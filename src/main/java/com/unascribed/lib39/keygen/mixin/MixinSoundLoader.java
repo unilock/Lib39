@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.keygen.IBXMAudioStream;
 import com.unascribed.lib39.keygen.IBXMAudioStream.InterpolationMode;
 import com.unascribed.lib39.keygen.IBXMResourceMetadata;
+import com.unascribed.lib39.keygen.Lib39Keygen;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,18 +41,16 @@ public class MixinSoundLoader {
 
 	@Inject(at=@At("HEAD"), method="loadStreamed", cancellable=true)
 	public void lib39Keygen$loadStreamed(Identifier id, boolean repeatInstantly, CallbackInfoReturnable<CompletableFuture<AudioStream>> ci) {
-		String path = id.getPath();
-		boolean bz2 = path.endsWith(".bz2");
-		if (bz2) path = path.substring(0, path.length()-4);
-		if (path.endsWith(".xm") || path.endsWith(".s3m") || path.endsWith(".mod")) {
-			String fpath = path;
+		if (Lib39Keygen.isModuleFile(id)) {
+			String path = id.getPath();
+			boolean bz2 = path.endsWith(".bz2");
 			ci.setReturnValue(CompletableFuture.supplyAsync(() -> {
 				try {
 					Resource resource = lib39$factory.getResource(id).orElse(null);
 					InputStream inputStream = resource.open();
 					DelegateFactory factory;
 					IBXMResourceMetadata meta = resource.getMetadata().readMetadata(IBXMResourceMetadata.READER).orElse(null);
-					boolean isAmiga = fpath.endsWith(".mod");
+					boolean isAmiga = path.endsWith(".mod") || path.endsWith(".mod.bz2");
 					InterpolationMode defaultMode = isAmiga ? InterpolationMode.LINEAR : InterpolationMode.SINC;
 					if (meta != null) {
 						factory = in -> IBXMAudioStream.create(in, meta.getMode() == null ? defaultMode : meta.getMode(), meta.isStereo());
