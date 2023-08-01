@@ -20,7 +20,6 @@ public class Lib39Waypoint implements ClientModInitializer {
 		WorldRenderEvents.AFTER_ENTITIES.register(HaloRenderer::render);
 		
 		ModelPredicateProviderRegistry.register(new Identifier("lib39", "halo"), (stack, world, entity, seed) -> {
-			System.out.println(stack+" "+retrievingHalo);
 			return retrievingHalo ? 1 : 0;
 		});
 		
