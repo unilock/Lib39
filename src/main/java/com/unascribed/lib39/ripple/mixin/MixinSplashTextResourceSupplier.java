@@ -13,6 +13,7 @@ import com.unascribed.lib39.ripple.impl.SplashTextHandler;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.profiler.Profiler;
@@ -29,12 +30,12 @@ public class MixinSplashTextResourceSupplier {
 		SplashTextHandler.modifyNormalSplashes(splashTexts);
 	}
 	
-	@Inject(at=@At("HEAD"), method="method_18174", cancellable=true)
-	public void lib39Core$get(CallbackInfoReturnable<String> ci) {
-		String initial = ci.getReturnValue();
+	@Inject(at=@At("RETURN"), method="get", cancellable=true)
+	public void lib39Core$get(CallbackInfoReturnable<SplashTextRenderer> ci) {
+		String initial = ci.getReturnValue() == null ? null : ((AccessorSplashTextRenderer)ci.getReturnValue()).lib39Ripple$getSplashText();
 		String replaced = SplashTextHandler.replaceSplash(splashTexts.size(), initial);
 		if (replaced != initial) {
-			ci.setReturnValue(replaced);
+			ci.setReturnValue(new SplashTextRenderer(replaced));
 		}
 	}
 	

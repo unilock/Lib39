@@ -2,9 +2,9 @@ package com.unascribed.lib39.recoil.api;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 
 public final class RecoilEvents {
@@ -68,10 +68,9 @@ public final class RecoilEvents {
 		/**
 		 * Called when the crosshairs are being rendered. No render setup has been done yet - if
 		 * you want inverse-color rendering, you'll need to set it up yourself.
-		 * @param matrices the matrix stack
 		 * @return {@code true} to suppress vanilla crosshairs rendering
 		 */
-		boolean onRenderCrosshairs(MatrixStack matrices);
+		boolean onRenderCrosshairs(GuiGraphics ctx);
 	}
 	
 	private RecoilEvents() {}

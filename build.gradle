@@ -202,7 +202,7 @@ def defineModule = { name, depModules ->
 				}
 			}
 			filesMatching("**/fabric.mod.json") {
-				expand "mcversion": '1.20.1'
+				expand "mcversion": minecraft_version
 			}
 		}
 	}
@@ -282,7 +282,6 @@ evaluationDependsOnChildren()
 afterEvaluate {
 	defineModule 'core', []
 	defineModule 'lockpick', ['core']
-	defineModule 'fractal', ['core', "fapi:fabric-resource-loader-v0:?"]
 	defineModule 'tunnel', ['core']
 	defineModule 'phantom', ['core']
 	defineModule 'waypoint', ['core',

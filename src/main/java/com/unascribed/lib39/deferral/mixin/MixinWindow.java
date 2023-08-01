@@ -34,7 +34,7 @@ import net.fabricmc.loader.api.FabricLoader;
 @Mixin(Window.class)
 public class MixinWindow {
 
-	@Inject(at=@At(value="INVOKE", target="org/lwjgl/glfw/GLFW.glfwCreateWindow(IILjava/lang/CharSequence;JJ)J"),
+	@Inject(at=@At(value="INVOKE", target="org/lwjgl/glfw/GLFW.glfwCreateWindow(IILjava/lang/CharSequence;JJ)J", remap=false),
 			method="<init>")
 	private void lib39Deferral$modifyGlfwHints(CallbackInfo ci) {
 		if (Platform.get() == Platform.MACOSX) {

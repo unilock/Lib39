@@ -18,7 +18,7 @@ import net.minecraft.util.Language;
 public class MixinLanguage {
 
 	@Inject(at=@At(value="INVOKE", target="com/google/gson/JsonObject.entrySet()Ljava/util/Set;"),
-			method="load", cancellable=true, locals=LocalCapture.CAPTURE_FAILHARD)
+			method="load(Ljava/io/InputStream;Ljava/util/function/BiConsumer;)V", cancellable=true, locals=LocalCapture.CAPTURE_FAILHARD)
 	private static void load(InputStream inputStream, BiConsumer<String, String> entryConsumer, CallbackInfo ci,
 			JsonObject obj) {
 		if (obj.has("lib39:enable_enhanced_lang")) {

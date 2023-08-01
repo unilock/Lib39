@@ -16,7 +16,7 @@ public class MixinInGameHud {
 
 	@Inject(at=@At("HEAD"), method="renderCrosshair", cancellable=true)
 	private void lib39recoil$renderCrosshair(GuiGraphics state, CallbackInfo ci) {
-		if (RecoilEvents.RENDER_CROSSHAIRS.invoker().onRenderCrosshairs(state.getMatrices())) {
+		if (RecoilEvents.RENDER_CROSSHAIRS.invoker().onRenderCrosshairs(state)) {
 			ci.cancel();
 		}
 	}
