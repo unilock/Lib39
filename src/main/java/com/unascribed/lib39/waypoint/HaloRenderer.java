@@ -3,6 +3,7 @@ package com.unascribed.lib39.waypoint;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
@@ -14,14 +15,12 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormats;
-import com.unascribed.lib39.core.P39;
 import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
 import com.unascribed.lib39.util.api.MysticSet;
 import com.unascribed.lib39.waypoint.api.HaloBlockEntity;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -35,6 +34,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -55,14 +55,23 @@ public class HaloRenderer {
 	private static final Multimap<ChunkSectionPos, BlockEntity> lampsBySection = Multimaps.newSetMultimap(new Object2ObjectOpenHashMap<>(), ReferenceOpenHashSet::new);
 	private static final Map<ChunkSectionPos, VertexBuffer> buffers = new Object2ObjectOpenHashMap<>();
 	private static final Map<ChunkSectionPos, Box> boundingBoxes = new Object2ObjectOpenHashMap<>();
+	private static final Multimap<ChunkSectionPos, Sprite> sprites = Multimaps.newSetMultimap(new Object2ObjectOpenHashMap<>(), ReferenceOpenHashSet::new);
 
 	public static void clearCache() {
 		buffers.values().forEach(VertexBuffer::close);
 		buffers.clear();
 		boundingBoxes.clear();
+		sprites.clear();
 	}
 
-	public static void render(World world, MatrixStack matrices, VertexConsumer vc, BlockState state, int color, @Nullable Direction facing, @Nullable BlockPos pos) {
+	public static void render(World world, MatrixStack matrices, VertexConsumer vc, BlockState state,
+			int color, @Nullable Direction facing, @Nullable BlockPos pos) {
+		render(world, matrices, vc, state, color, facing, pos, s -> {});
+	}
+	
+	public static void render(World world, MatrixStack matrices, VertexConsumer vc, BlockState state,
+			int color, @Nullable Direction facing, @Nullable BlockPos pos,
+			Consumer<Sprite> spriteMemoizer) {
 		if (color == 0) color = 0x222222;
 		float r = ((color >> 16)&0xFF)/255f;
 		float g = ((color >> 8)&0xFF)/255f;
@@ -107,17 +116,19 @@ public class HaloRenderer {
 				case UP: x = 180; break;
 			}
 			matrices.translate(0.5, 0.5, 0.5);
-			matrices.multiply(new Quaternionf(new AxisAngle4f((float) y*MathHelper.RADIANS_PER_DEGREE, (float) 0, (float) 1, (float) 0)));
-			matrices.multiply(new Quaternionf(new AxisAngle4f((float) x*MathHelper.RADIANS_PER_DEGREE, (float) 1, (float) 0, (float) 0)));
+			matrices.multiply(new Quaternionf(new AxisAngle4f(y*MathHelper.RADIANS_PER_DEGREE, 0, 1, 0)));
+			matrices.multiply(new Quaternionf(new AxisAngle4f(x*MathHelper.RADIANS_PER_DEGREE, 1, 0, 0)));
 			matrices.translate(-0.5, -0.5, -0.5);
 		}
 
 		for (BakedQuad bq : bm.getQuads(state, null, world == null ? null : world.random)) {
+			spriteMemoizer.accept(bq.getSprite());
 			dvc.bakedQuad(matrices.peek(), bq, r, g, b, 0, 0);
 		}
 		for (Direction dir : Direction.values()) {
 			if (pos == null || Block.shouldDrawSide(state, MinecraftClient.getInstance().world, pos, dir, pos.offset(dir))) {
 				for (BakedQuad bq : bm.getQuads(state, dir, world == null ? null : world.random)) {
+					spriteMemoizer.accept(bq.getSprite());
 					dvc.bakedQuad(matrices.peek(), bq, r, g, b, 0, 0);
 				}
 			}
@@ -144,6 +155,7 @@ public class HaloRenderer {
 			MatrixStack scratch = new MatrixStack();
 			for (ChunkSectionPos csp : needsRebuild.mundane()) {
 				Collection<BlockEntity> l = lampsBySection.get(csp);
+				sprites.removeAll(csp);
 				if (l.isEmpty()) {
 					if (buffers.containsKey(csp)) {
 						buffers.remove(csp).close();
@@ -162,7 +174,7 @@ public class HaloRenderer {
 						int color = ((HaloBlockEntity)be).getGlowColor();
 						BlockState state = be.getCachedState();
 						Direction facing = ((HaloBlockEntity)be).getFacing();
-						render(mc.world, scratch, vc, state, color, facing, be.getPos());
+						render(mc.world, scratch, vc, state, color, facing, be.getPos(), s -> sprites.put(csp, s));
 						Box myBox = new Box(be.getPos()).expand(0.5);
 						if (bounds == null) {
 							bounds = myBox;
@@ -178,6 +190,7 @@ public class HaloRenderer {
 				boundingBoxes.put(csp, bounds);
 			}
 			wrc.profiler().swap("render");
+			sprites.values().forEach(SodiumAccess.markSpriteActive);
 			MatrixStack matrices = wrc.matrixStack();
 			matrices.push();
 			Vec3d cam = wrc.camera().getPos();

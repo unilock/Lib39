@@ -30,6 +30,15 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+sourceSets {
+	dummy {
+		compileClasspath += sourceSets.main.compileClasspath
+	}
+	main {
+		compileClasspath += sourceSets.dummy.output
+	}
+}
+
 repositories {
 	maven {
 		url 'https://repo.unascribed.com'

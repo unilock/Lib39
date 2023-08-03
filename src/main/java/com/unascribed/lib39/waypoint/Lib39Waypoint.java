@@ -1,10 +1,13 @@
 package com.unascribed.lib39.waypoint;
 
+import com.unascribed.lib39.waypoint.compat.WaypointSodiumCompat;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
@@ -34,6 +37,10 @@ public class Lib39Waypoint implements ClientModInitializer {
 				return new Identifier("lib39", "clear_render_cache");
 			}
 		});
+		
+		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+			WaypointSodiumCompat.init();
+		}
 	}
 
 }
