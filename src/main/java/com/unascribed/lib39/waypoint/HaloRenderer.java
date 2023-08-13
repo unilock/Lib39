@@ -143,7 +143,7 @@ public class HaloRenderer {
 
 	public static void render(WorldRenderContext wrc) {
 		if (driverIsBuggy == null) {
-			driverIsBuggy = Pattern.compile("NVIDIA 39[0-9]\\.").matcher(RenderSystem.getBackendDescription()).find();
+			driverIsBuggy = Pattern.compile("NVIDIA 39[0-9]\\.").matcher(RenderSystem.getApiDescription()).find();
 			if (driverIsBuggy) {
 				clearCache();
 				Lib39Log.error("====================== Lib39 Waypoint Error ======================");
