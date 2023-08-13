@@ -2,6 +2,7 @@ package com.unascribed.lib39.sandman;
 
 import java.util.Set;
 
+import com.unascribed.lib39.core.Lib39Log;
 import com.unascribed.lib39.sandman.api.TicksAlwaysItem;
 import com.unascribed.lib39.sandman.mixin.AccessorHorseBaseEntity;
 import com.unascribed.lib39.sandman.mixin.AccessorLootableContainerBlockEntity;
@@ -27,7 +28,14 @@ import net.minecraft.util.TypeFilter;
 
 public class TickAlwaysItemHandler {
 
+	public static final boolean DISABLED = Boolean.getBoolean("lib39.disable-sandman");
+	
+	static {
+		if (DISABLED) Lib39Log.warn("Disabling Sandman, as you requested. I hope you're running a large-scale convention and breaking behavior is worth the performance!");
+	}
+	
 	public static void startServerWorldTick(ServerWorld world) {
+		if (DISABLED) return;
 		var rnd = ThreadLocalRandom.current();
 		for (var wc : Lib39Sandman.getLoadedChunks(world)) {
 			if (rnd.nextInt(40) == 0) {
