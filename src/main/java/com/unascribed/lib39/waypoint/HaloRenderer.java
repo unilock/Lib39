@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4f;
@@ -15,6 +16,7 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormats;
+import com.unascribed.lib39.core.Lib39Log;
 import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
 import com.unascribed.lib39.util.api.MysticSet;
 import com.unascribed.lib39.waypoint.api.HaloBlockEntity;
@@ -136,8 +138,25 @@ public class HaloRenderer {
 
 		matrices.pop();
 	}
+	
+	private static Boolean driverIsBuggy;
 
 	public static void render(WorldRenderContext wrc) {
+		if (driverIsBuggy == null) {
+			driverIsBuggy = Pattern.compile("NVIDIA 39[0-9]\\.").matcher(RenderSystem.getBackendDescription()).find();
+			if (driverIsBuggy) {
+				clearCache();
+				Lib39Log.error("====================== Lib39 Waypoint Error ======================");
+				Lib39Log.error("       Your graphics driver is known to be buggy with VBOs.       ");
+				Lib39Log.error("    To avoid a game crash, Lib39 Waypoint is disabling itself.    ");
+				Lib39Log.error("  Any mods which utilize its features will not render correctly!  ");
+				Lib39Log.error("  DO NOT REPORT BUGS RELATED TO HALO RENDERING ON THIS COMPUTER.  ");
+				Lib39Log.error("==================================================================");
+			}
+		}
+		if (driverIsBuggy) {
+			return;
+		}
 		wrc.profiler().swap("lib39-waypoint");
 		if (!lampsBySection.isEmpty()) {
 			wrc.profiler().push("prepare");
@@ -197,7 +216,7 @@ public class HaloRenderer {
 			matrices.translate(-cam.x, -cam.y, -cam.z);
 			for (ChunkSectionPos pos : buffers.keySet()) {
 				Box box = boundingBoxes.get(pos);
-				if (box != null && wrc.frustum().isVisible(box)) {
+				if (box != null && wrc.frustum().isVisible(box) && wrc.worldRenderer().isChunkBuilt(pos.getMinPos())) {
 					matrices.push();
 						matrices.translate(pos.getMinX(), pos.getMinY(), pos.getMinZ());
 						VertexBuffer buf = buffers.get(pos);
@@ -234,6 +253,7 @@ public class HaloRenderer {
 	
 
 	public static void tick() {
+		if (driverIsBuggy == Boolean.TRUE) return;
 		mc.getProfiler().swap("lib39-waypoint");
 		if (mc.world != null) {
 			Profiler p = mc.getProfiler();
