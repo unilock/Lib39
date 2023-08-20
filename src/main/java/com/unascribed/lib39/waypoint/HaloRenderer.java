@@ -2,7 +2,6 @@ package com.unascribed.lib39.waypoint;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -18,22 +17,21 @@ import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormats;
 import com.unascribed.lib39.core.Lib39Log;
 import com.unascribed.lib39.util.api.DelegatingVertexConsumer;
-import com.unascribed.lib39.util.api.MysticSet;
 import com.unascribed.lib39.waypoint.api.HaloBlockEntity;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.longs.Long2ReferenceMap;
+import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArraySet;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
@@ -52,12 +50,12 @@ public class HaloRenderer {
 
 	private static final MinecraftClient mc = MinecraftClient.getInstance();
 	
-	private static final Map<BlockPos, BlockEntity> lampsByBlock = new Object2ObjectOpenHashMap<>();
-	private static final Map<BlockEntity, Object> lastState = new Object2ObjectOpenHashMap<>();
-	private static final Multimap<ChunkSectionPos, BlockEntity> lampsBySection = Multimaps.newSetMultimap(new Object2ObjectOpenHashMap<>(), ReferenceOpenHashSet::new);
-	private static final Map<ChunkSectionPos, VertexBuffer> buffers = new Object2ObjectOpenHashMap<>();
-	private static final Map<ChunkSectionPos, Box> boundingBoxes = new Object2ObjectOpenHashMap<>();
-	private static final Multimap<ChunkSectionPos, Sprite> sprites = Multimaps.newSetMultimap(new Object2ObjectOpenHashMap<>(), ReferenceOpenHashSet::new);
+	private static final Long2ReferenceMap<BlockEntity> lampsByBlock = new Long2ReferenceOpenHashMap<>();
+	private static final Reference2ReferenceMap<BlockEntity, Object> lastState = new Reference2ReferenceOpenHashMap<>();
+	private static final Long2ReferenceMultimap<BlockEntity> lampsBySection = new Long2ReferenceMultimap<>();
+	private static final Long2ReferenceMap<VertexBuffer> buffers = new Long2ReferenceOpenHashMap<>();
+	private static final Long2ReferenceMap<Box> boundingBoxes = new Long2ReferenceOpenHashMap<>();
+	private static final Long2ReferenceMultimap<Sprite> sprites = new Long2ReferenceMultimap<>();
 
 	public static void clearCache() {
 		buffers.values().forEach(VertexBuffer::close);
@@ -160,53 +158,60 @@ public class HaloRenderer {
 		wrc.profiler().swap("lib39-waypoint");
 		if (!lampsBySection.isEmpty()) {
 			wrc.profiler().push("prepare");
-			MysticSet<ChunkSectionPos> needsRebuild = MysticSet.of();
+			LongSet needsRebuild = null;
 			for (BlockEntity be : lampsBySection.values()) {
 				if (!(be instanceof HaloBlockEntity)) continue;
 				Object s = ((HaloBlockEntity)be).getStateObject();
-				ChunkSectionPos csp = ChunkSectionPos.from(be.getPos());
+				long csp = ChunkSectionPos.toLong(be.getPos());
 				if (lastState.get(be) != s || !buffers.containsKey(csp)) {
 					lastState.put(be, s);
-					needsRebuild = needsRebuild.add(csp);
+					if (needsRebuild == null) {
+						needsRebuild = new LongArraySet();
+					}
+					needsRebuild.add(csp);
 				}
 			}
 			wrc.profiler().swap("rebuild");
 			MatrixStack scratch = new MatrixStack();
-			for (ChunkSectionPos csp : needsRebuild.mundane()) {
-				Collection<BlockEntity> l = lampsBySection.get(csp);
-				sprites.removeAll(csp);
-				if (l.isEmpty()) {
-					if (buffers.containsKey(csp)) {
-						buffers.remove(csp).close();
-						boundingBoxes.remove(csp);
-					}
-					continue;
-				}
-				Box bounds = null;
-				// POSITION_TEXTURE_COLOR_NORMAL is one of the few generic shaders with fog support
-				BufferBuilder vc = new BufferBuilder(24 * VertexFormats.POSITION_TEXTURE_COLOR_NORMAL.getVertexSize() * l.size());
-				vc.begin(DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_NORMAL);
-				for (BlockEntity be : l) {
-					if (!(be instanceof HaloBlockEntity) || !((HaloBlockEntity)be).shouldRenderHalo()) continue;
-					scratch.push();
-						scratch.translate(be.getPos().getX()-csp.getMinX(), be.getPos().getY()-csp.getMinY(), be.getPos().getZ()-csp.getMinZ());
-						int color = ((HaloBlockEntity)be).getGlowColor();
-						BlockState state = be.getCachedState();
-						Direction facing = ((HaloBlockEntity)be).getFacing();
-						render(mc.world, scratch, vc, state, color, facing, be.getPos(), s -> sprites.put(csp, s));
-						Box myBox = new Box(be.getPos()).expand(0.5);
-						if (bounds == null) {
-							bounds = myBox;
-						} else {
-							bounds = bounds.union(myBox);
+			if (needsRebuild != null) {
+				LongIterator iter = needsRebuild.iterator();
+				while (iter.hasNext()) {
+					long csp = iter.nextLong();
+					Collection<BlockEntity> l = lampsBySection.get(csp);
+					sprites.removeAll(csp);
+					if (l.isEmpty()) {
+						if (buffers.containsKey(csp)) {
+							buffers.remove(csp).close();
+							boundingBoxes.remove(csp);
 						}
-					scratch.pop();
+						continue;
+					}
+					Box bounds = null;
+					// POSITION_TEXTURE_COLOR_NORMAL is one of the few generic shaders with fog support
+					BufferBuilder vc = new BufferBuilder(24 * VertexFormats.POSITION_TEXTURE_COLOR_NORMAL.getVertexSize() * l.size());
+					vc.begin(DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_NORMAL);
+					for (BlockEntity be : l) {
+						if (!(be instanceof HaloBlockEntity) || !((HaloBlockEntity)be).shouldRenderHalo()) continue;
+						scratch.push();
+							scratch.translate(be.getPos().getX()-minX(csp), be.getPos().getY()-minY(csp), be.getPos().getZ()-minZ(csp));
+							int color = ((HaloBlockEntity)be).getGlowColor();
+							BlockState state = be.getCachedState();
+							Direction facing = ((HaloBlockEntity)be).getFacing();
+							render(mc.world, scratch, vc, state, color, facing, be.getPos(), s -> sprites.put(csp, s));
+							Box myBox = new Box(be.getPos()).expand(0.5);
+							if (bounds == null) {
+								bounds = myBox;
+							} else {
+								bounds = bounds.union(myBox);
+							}
+						scratch.pop();
+					}
+					VertexBuffer vb = buffers.computeIfAbsent(csp, blah -> new VertexBuffer(VertexBuffer.Usage.STATIC));
+					vb.bind();
+					vb.upload(vc.end());
+					buffers.put(csp, vb);
+					boundingBoxes.put(csp, bounds);
 				}
-				VertexBuffer vb = buffers.computeIfAbsent(csp, blah -> new VertexBuffer(VertexBuffer.Usage.STATIC));
-				vb.bind();
-				vb.upload(vc.end());
-				buffers.put(csp, vb);
-				boundingBoxes.put(csp, bounds);
 			}
 			wrc.profiler().swap("render");
 			sprites.values().forEach(SodiumAccess.markSpriteActive);
@@ -214,39 +219,53 @@ public class HaloRenderer {
 			matrices.push();
 			Vec3d cam = wrc.camera().getPos();
 			matrices.translate(-cam.x, -cam.y, -cam.z);
-			for (ChunkSectionPos pos : buffers.keySet()) {
+			boolean started = false;
+			LongIterator iter = buffers.keySet().iterator();
+			while (iter.hasNext()) {
+				long pos = iter.nextLong();
 				Box box = boundingBoxes.get(pos);
-				if (box != null && wrc.frustum().isVisible(box) && wrc.worldRenderer().isChunkBuilt(pos.getMinPos())) {
+				if (box != null && wrc.frustum().isVisible(box) && wrc.worldRenderer().isChunkBuilt(ChunkSectionPos.from(pos).getMinPos())) {
 					matrices.push();
-						matrices.translate(pos.getMinX(), pos.getMinY(), pos.getMinZ());
+						matrices.translate(minX(pos), minY(pos), minZ(pos));
 						VertexBuffer buf = buffers.get(pos);
 						buf.bind();
-						WaypointRenderLayers.getHalo().startDrawing();
+						if (!started) {
+							WaypointRenderLayers.getHalo().startDrawing();
+							started = true;
+						}
 						buf.draw(matrices.peek().getModel(), RenderSystem.getProjectionMatrix(), GameRenderer.getPositionTexColorNormalShader());
-						WaypointRenderLayers.getHalo().endDrawing();
 						VertexBuffer.unbind();
 					matrices.pop();
-					if (mc.getEntityRenderDispatcher().shouldRenderHitboxes() && !mc.hasReducedDebugInfo()) {
-						VertexConsumerProvider.Immediate vcp = mc.getBufferBuilders().getEntityVertexConsumers();
-						WorldRenderer.drawBox(matrices, vcp.getBuffer(RenderLayer.getLines()), box, 1, 1, 0, 1);
-						vcp.draw(RenderLayer.getLines());
-					}
 				}
 			}
+			if (started) WaypointRenderLayers.getHalo().endDrawing();
 			matrices.pop();
 			wrc.profiler().pop();
 		}
 		wrc.profiler().swap("particles");
 	}
 	
+	private static int minX(long csp) {
+		return ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackX(csp));
+	}
+	
+	private static int minY(long csp) {
+		return ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackY(csp));
+	}
+	
+	private static int minZ(long csp) {
+		return ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackZ(csp));
+	}
+
 	public static <T extends BlockEntity & HaloBlockEntity> void notifyCreated(T be) {
-		ChunkSectionPos cs = ChunkSectionPos.from(be.getPos());
+		long cs = ChunkSectionPos.toLong(be.getPos());
 		if (!lampsBySection.containsEntry(cs, be)) {
-			if (lampsByBlock.containsKey(be.getPos())) {
-				BlockEntity other = lampsByBlock.remove(be.getPos());
-				lampsBySection.remove(ChunkSectionPos.from(be.getPos()), other);
+			long bp = be.getPos().asLong();
+			if (lampsByBlock.containsKey(bp)) {
+				BlockEntity other = lampsByBlock.remove(bp);
+				lampsBySection.remove(cs, other);
 			}
-			lampsByBlock.put(be.getPos(), be);
+			lampsByBlock.put(bp, be);
 			lampsBySection.put(cs, be);
 		}
 	}
@@ -262,11 +281,11 @@ public class HaloRenderer {
 			while (iter.hasNext()) {
 				BlockEntity be = iter.next();
 				if (be.isRemoved() || be.getWorld() != mc.world) {
-					ChunkSectionPos cs = ChunkSectionPos.from(be.getPos());
+					long cs = ChunkSectionPos.toLong(be.getPos());
 					if (buffers.containsKey(cs)) {
 						buffers.remove(cs).close();
 					}
-					lampsByBlock.remove(be.getPos(), be);
+					lampsByBlock.remove(be.getPos().asLong(), be);
 					iter.remove();
 				}
 			}
