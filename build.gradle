@@ -4,14 +4,13 @@ buildscript {
 		gradlePluginPortal()
 	}
 	dependencies {
-		classpath 'com.google.code.gson:gson:2.8.7'
-		classpath 'com.modrinth.minotaur:Minotaur:2.4.3'
+		classpath 'com.google.code.gson:gson:2.10.1'
+		classpath 'com.modrinth.minotaur:Minotaur:2.8.4'
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.4.0'
 	}
 }
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
-	id 'io.github.juuxel.loom-vineflower' version '1.11.0'
+	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
 	id 'eclipse'
 }
@@ -23,8 +22,8 @@ if (System.getenv("CURSE_TOKEN")) {
 	apply plugin: "com.matthewprenger.cursegradle"
 }
 
-sourceCompatibility = JavaVersion.toVersion(16)
-targetCompatibility = JavaVersion.toVersion(16)
+sourceCompatibility = JavaVersion.toVersion(17)
+targetCompatibility = JavaVersion.toVersion(17)
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -75,6 +74,12 @@ repositories {
 			includeGroup 'mezz.jei'
 		}
 	}
+	maven {
+		url "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 
@@ -83,11 +88,10 @@ dependencies {
 	mappings "org.quiltmc:quilt-mappings:${mappings_version}:intermediary-v2"
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
-	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.20.1"
-	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:9.1.520"
+	modCompileOnly "dev.emi:emi-fabric:1.1.2+1.20.1"
+	modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:12.0.684"
 	// the API jar doesn't get remapped by Loom because it doesn't have a fabric.mod.json
-	modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.2.0.23") { transitive = false }
-	modCompileOnly "dev.emi:emi-fabric:1.0.4+1.20.1"
+	modCompileOnly("mezz.jei:jei-1.20.1-fabric:15.3.0.4") { transitive = false }
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
@@ -102,7 +106,7 @@ java {
 }
 
 compileJava {
-	options.release = 16
+	options.release = 17
 }
 
 tasks.validateAccessWidener {
@@ -121,17 +125,17 @@ processResources {
 
 tasks.jar {
 	destinationDirectory.set(file('build/tmp'))
-	classifier 'all'
+	archiveClassifier.set 'all'
 }
 
 tasks.remapJar {
 	destinationDirectory.set(file('build/tmp'))
-	classifier 'all-remapped'
+	archiveClassifier.set 'all-remapped'
 }
 
 tasks.remapSourcesJar {
 	destinationDirectory.set(file('build/tmp'))
-	classifier 'all-sources-remapped'
+	archiveClassifier.set 'all-sources-remapped'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -179,8 +183,8 @@ rootProject.build.dependsOn(rootProject.tasks.create("fatJar", Jar) {
 		rootProject.file("build/tmp/fatjar/").mkdirs()
 		rootProject.file("build/tmp/fatjar/fabric.mod.json").text = gson.toJson(fatJarFmj)
 	}
-	classifier 'all'
-	version "${rootProject.version}+${minecraft_version}"
+	archiveClassifier.set 'all'
+	archiveVersion.set "${rootProject.version}+${minecraft_version}"
 	from 'src/main/resources/lib39.png'
 	from "build/tmp/fatjar/fabric.mod.json"
 })
@@ -196,8 +200,8 @@ def defineModule = { name, depModules ->
 	def t = rootProject.tasks.create("${name}Jar", Jar) {
 		dependsOn rootProject.remapJar
 		destinationDirectory.set(rootProject.file("build/libs/modules"))
-		baseName "lib39-${name}"
-		version "${rootProject.version}+${minecraft_version}"
+		archiveBaseName.set "lib39-${name}"
+		archiveVersion.set "${rootProject.version}+${minecraft_version}"
 		from(zipTree(rootProject.remapJar.archivePath)) {
 			include 'META-INF/**'
 			include 'com/unascribed/lib39/'+name+'/**'
@@ -235,10 +239,10 @@ def defineModule = { name, depModules ->
 
 	def srcT = rootProject.tasks.create("${name}SourcesJar", Jar) {
 		dependsOn rootProject.remapSourcesJar
-		baseName "lib39-${name}"
-		classifier 'sources'
+		archiveBaseName.set "lib39-${name}"
+		archiveClassifier.set 'sources'
 		destinationDirectory.set(rootProject.file("build/libs/sources"))
-		version "${rootProject.version}+${minecraft_version}"
+		archiveVersion.set "${rootProject.version}+${minecraft_version}"
 		from(zipTree(rootProject.remapSourcesJar.archivePath)) {
 			include 'META-INF/**'
 			include 'com/unascribed/lib39/'+name+'/**'
