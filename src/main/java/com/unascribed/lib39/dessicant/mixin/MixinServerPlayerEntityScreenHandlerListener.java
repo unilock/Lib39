@@ -19,7 +19,7 @@ import net.minecraft.util.Identifier;
 
 @Mixin(targets={
 		"net/minecraft/class_3222$2",
-		"net/minecraft/unmapped/C_mxrobsgg$C_wdomexrk",
+		"net/minecraft/server/network/ServerPlayerEntity$C_wdomexrk",
 		"net/minecraft/server/network/ServerPlayerEntity$2"
 })
 @Pseudo

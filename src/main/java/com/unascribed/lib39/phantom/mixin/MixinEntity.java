@@ -1,11 +1,11 @@
 package com.unascribed.lib39.phantom.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -50,8 +50,8 @@ public abstract class MixinEntity {
 		lib39Phantom$currentlyCollidingPos = null;
 	}
 	
-	@ModifyVariable(at=@At(value="INVOKE_ASSIGN", target="net/minecraft/world/World.getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"),
-			ordinal=0, method="checkBlockCollision")
+	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/world/World.getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", ordinal=0),
+			method="checkBlockCollision")
 	public BlockState lib39Phantom$replaceBlockState(BlockState in) {
 		if (lib39Phantom$currentlyCollidingPos == null) return in;
 		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(lib39Phantom$currentlyCollidingPos)) {
@@ -60,8 +60,8 @@ public abstract class MixinEntity {
 		return in;
 	}
 	
-	@ModifyVariable(at=@At(value="INVOKE_ASSIGN", target="net/minecraft/world/World.getFluidState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;"),
-			ordinal=0, method="updateSubmergedInWaterState")
+	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/world/World.getFluidState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;", ordinal=0),
+			method="updateSubmergedInWaterState")
 	public FluidState lib39Phantom$replaceFluidStateForSubmerge(FluidState in) {
 		if (in.isEmpty()) return in;
 		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(BlockPos.create(getX(), getEyeY() - 0.1111111119389534, getZ()))) {
@@ -70,8 +70,8 @@ public abstract class MixinEntity {
 		return in;
 	}
 	
-	@ModifyVariable(at=@At(value="INVOKE", target="net/minecraft/util/math/BlockPos$Mutable.set(III)Lnet/minecraft/util/math/BlockPos$Mutable;"),
-			method="updateMovementInFluid", ordinal=0)
+	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/util/math/BlockPos$Mutable.set(III)Lnet/minecraft/util/math/BlockPos$Mutable;", ordinal=0),
+			method="updateMovementInFluid")
 	public BlockPos.Mutable lib39Phantom$storeMutableForFluid(BlockPos.Mutable mut) {
 		lib39Phantom$currentlyCollidingPos = mut;
 		return mut;
@@ -82,8 +82,8 @@ public abstract class MixinEntity {
 		lib39Phantom$currentlyCollidingPos = null;
 	}
 	
-	@ModifyVariable(at=@At(value="INVOKE_ASSIGN", target="net/minecraft/world/World.getFluidState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;"),
-			ordinal=0, method="updateMovementInFluid")
+	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/world/World.getFluidState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;", ordinal=0),
+			method="updateMovementInFluid")
 	public FluidState lib39Phantom$replaceFluidStateForTouch(FluidState in) {
 		if (in.isEmpty()) return in;
 		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(lib39Phantom$currentlyCollidingPos)) {
@@ -93,9 +93,9 @@ public abstract class MixinEntity {
 	}
 	
 	// isInsideWall lambda
-	@ModifyVariable(at=@At(value="INVOKE_ASSIGN", target="net/minecraft/world/World.getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;"),
-			ordinal=0, method={
-					"m_ziqjvkiq(Lnet/minecraft/util/math/Box;Lnet/minecraft/util/math/BlockPos;)Z",
+	@ModifyExpressionValue(at =@At(value="INVOKE", target="net/minecraft/world/World.getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", ordinal=0),
+			method={
+					"m_htzprnzn(Lnet/minecraft/util/math/Box;Lnet/minecraft/util/math/BlockPos;)Z",
 					"method_30022(Lnet/minecraft/util/math/Box;Lnet/minecraft/util/math/BlockPos;)Z"
 			})
 	public BlockState lib39Phantom$replaceBlockStateForSuffocation(BlockState in, Box box, BlockPos pos) {

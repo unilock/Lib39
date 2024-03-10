@@ -35,7 +35,6 @@ public abstract class MixinGlassBottleDispenserBehavior extends FallibleItemDisp
 	
 	@Inject(at=@At("HEAD"), method={
 			"method_10135(Lnet/minecraft/class_2342;Lnet/minecraft/class_1799;)Lnet/minecraft/class_1799;", // intermediary
-			"m_clhynwvb(Lnet/minecraft/C_wzdnszcs;Lnet/minecraft/C_sddaxwyk;)Lnet/minecraft/C_sddaxwyk;", // hashed
 			"dispenseSilently(Lnet/minecraft/util/math/BlockPointer;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;", // quilt mappings
 	}, cancellable=true, remap=false)
 	public void lib39Machination$collectSmashCloud(BlockPointer ptr, ItemStack stack, CallbackInfoReturnable<ItemStack> ci) {
