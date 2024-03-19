@@ -117,7 +117,7 @@ public class EmiPistonSmashingRecipe implements EmiRecipe {
 			Object[] args = {};
 			widgets.addSlot(cloudOutput, x, 0)
 				.recipeContext(this)
-				.appendTooltip(Text.translatable("emi.category.lib39-machination.piston_smashing.cloud_output_hint", args));
+				.appendTooltip(Text.translatable("emi.category.lib39.piston_smashing.cloud_output_hint", args));
 			x += 20;
 		}
 	}
