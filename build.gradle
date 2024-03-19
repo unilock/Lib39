@@ -74,12 +74,6 @@ repositories {
 			includeGroup 'mezz.jei'
 		}
 	}
-	maven {
-		url "https://api.modrinth.com/maven"
-		content {
-			includeGroup "maven.modrinth"
-		}
-	}
 }
 
 
@@ -95,8 +89,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-
-	modCompileOnly "maven.modrinth:sodium:mc1.20.1-0.5.8"
 }
 
 loom {

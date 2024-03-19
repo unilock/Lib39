@@ -9,13 +9,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.unascribed.lib39.phantom.quack.PhantomWorld;
-import me.jellysquid.mods.sodium.client.world.WorldSlice;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.world.ClientWorld;
 
-@Mixin(WorldSlice.class)
+@Mixin(targets = "me.jellysquid.mods.sodium.client.world.WorldSlice")
 @Pseudo
 public class MixinWorldSlice {
 	@Shadow @Final
