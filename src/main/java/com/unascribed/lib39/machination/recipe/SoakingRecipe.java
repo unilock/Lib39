@@ -86,7 +86,7 @@ public class SoakingRecipe implements Recipe<Inventory> {
 	
 	@Override
 	public ItemStack getResult(DynamicRegistryManager mgr) {
-		return getResult(mgr);
+		return result.map(is -> is, bs -> new ItemStack(bs.getBlock()));
 	}
 
 	@Override
