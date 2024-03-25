@@ -1,14 +1,13 @@
 package com.unascribed.lib39.phantom.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.unascribed.lib39.phantom.quack.PhantomWorld;
 
@@ -36,12 +35,13 @@ public abstract class MixinEntity {
 	public abstract double getEyeY();
 	@Shadow
 	public abstract double getZ();
-	
+
+	@Unique
 	private BlockPos lib39Phantom$currentlyCollidingPos = null;
 	
 	@Inject(at=@At(value="INVOKE", target="net/minecraft/util/math/BlockPos.getX()I"),
-			method="checkBlockCollision", locals=LocalCapture.CAPTURE_FAILHARD)
-	public void lib39Phantom$storeMutableForBlock(CallbackInfo ci, Box box, BlockPos start, BlockPos end, BlockPos.Mutable mut) {
+			method="checkBlockCollision")
+	public void lib39Phantom$storeMutableForBlock(CallbackInfo ci, @Local BlockPos.Mutable mut) {
 		lib39Phantom$currentlyCollidingPos = mut;
 	}
 	
@@ -65,28 +65,6 @@ public abstract class MixinEntity {
 	public FluidState lib39Phantom$replaceFluidStateForSubmerge(FluidState in) {
 		if (in.isEmpty()) return in;
 		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(BlockPos.create(getX(), getEyeY() - 0.1111111119389534, getZ()))) {
-			return Fluids.EMPTY.getDefaultState();
-		}
-		return in;
-	}
-	
-	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/util/math/BlockPos$Mutable.set(III)Lnet/minecraft/util/math/BlockPos$Mutable;", ordinal=0),
-			method="updateMovementInFluid")
-	public BlockPos.Mutable lib39Phantom$storeMutableForFluid(BlockPos.Mutable mut) {
-		lib39Phantom$currentlyCollidingPos = mut;
-		return mut;
-	}
-	
-	@Inject(at=@At("RETURN"), method="updateMovementInFluid")
-	public void lib39Phantom$forgetMutableForFluid(@Coerce Object tag, double d, CallbackInfoReturnable<Boolean> ci) {
-		lib39Phantom$currentlyCollidingPos = null;
-	}
-	
-	@ModifyExpressionValue(at=@At(value="INVOKE", target="net/minecraft/world/World.getFluidState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;", ordinal=0),
-			method="updateMovementInFluid")
-	public FluidState lib39Phantom$replaceFluidStateForTouch(FluidState in) {
-		if (in.isEmpty()) return in;
-		if (world instanceof PhantomWorld && ((PhantomWorld)world).lib39Phantom$isPhased(lib39Phantom$currentlyCollidingPos)) {
 			return Fluids.EMPTY.getDefaultState();
 		}
 		return in;
